@@ -964,6 +964,15 @@
   }
   canvas.addEventListener("pointermove", (e) => {
     if (e.pointerType === "touch") return;
+    // in a room, left-drag manually spins the carousel
+    if (dragTurn.active) {
+      const dx = e.clientX - dragTurn.lastX;
+      dragTurn.lastX = e.clientX;
+      const car = activeCarousel();
+      if (car) { car.rotation.y += dx * 0.006; dragTurn.vel = dx * 0.006; }
+      tooltip.style.display = "none";
+      return;
+    }
     const hit = pickAt(e.clientX, e.clientY);
     if (hit && hit.type === "agent") {
       const a = (ctxAgents || []).find((x) => x.mesh === hit.obj);
@@ -972,14 +981,33 @@
       tooltip.style.display = "block"; document.body.style.cursor = "pointer";
     } else if (hit && (hit.type === "portal" || hit.type === "exit")) {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
-    } else { tooltip.style.display = "none"; document.body.style.cursor = "default"; }
+    } else {
+      tooltip.style.display = "none";
+      document.body.style.cursor = mode === "room" && roomCarousels.length ? "grab" : "default";
+    }
   });
   let downPos = null;
-  canvas.addEventListener("pointerdown", (e) => (downPos = { x: e.clientX, y: e.clientY }));
+  const dragTurn = { active: false, lastX: 0, vel: 0 };
+  function activeCarousel() {
+    // the carousel belonging to the room currently in view
+    for (const rc of roomCarousels) {
+      const wp = new THREE.Vector3(); rc.carousel.getWorldPosition(wp);
+      if (Math.abs(wp.x - camera.position.x) < 60) return rc.carousel;
+    }
+    return null;
+  }
+  canvas.addEventListener("pointerdown", (e) => {
+    downPos = { x: e.clientX, y: e.clientY };
+    if (mode === "room" && e.button === 0) {
+      dragTurn.active = true; dragTurn.lastX = e.clientX; dragTurn.vel = 0;
+      document.body.style.cursor = "grabbing";
+    }
+  });
   canvas.addEventListener("pointerup", (e) => {
+    dragTurn.active = false;
     if (!downPos) return;
     const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y); downPos = null;
-    if (moved > 6) return;
+    if (moved > 6) return; // it was a drag, not a click
     const hit = pickAt(e.clientX, e.clientY);
     // if the camera is outside the building shell (parked exterior, or zoomed way out),
     // a building click should first bring you into the atrium — never teleport into a room
@@ -1074,12 +1102,17 @@
         plazaGroup.userData.glowDisc.lookAt(camPos.x, em.position.y, camPos.z);
       }
     }
-    // room: the whole carousel of cards revolves slowly; the room itself stays fixed
+    // room: the carousel is turned MANUALLY by dragging; here we only apply
+    // gentle floating bob + a little inertial drift after a drag ends.
     if (mode === "room") {
       roomCarousels.forEach(({ carousel, baseY }) => {
-        carousel.rotation.y = t * 0.28;
         carousel.position.y = baseY + Math.sin(t * 0.9) * 0.12;
       });
+      if (!dragTurn.active && Math.abs(dragTurn.vel) > 0.0001) {
+        const car = activeCarousel();
+        if (car) car.rotation.y += dragTurn.vel;
+        dragTurn.vel *= 0.94; // friction
+      }
     }
     renderer.render(scene, camera);
   }
