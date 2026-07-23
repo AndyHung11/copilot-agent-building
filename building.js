@@ -77,6 +77,7 @@
   controls.dampingFactor = 0.08;
   controls.enablePan = true;
   controls.screenSpacePanning = true; // pan moves in screen plane (feels like walking around)
+  controls.enableZoom = false;        // replaced by custom zoom-to-cursor below
   controls.minDistance = 4;
   controls.maxDistance = 160;
   controls.maxPolarAngle = Math.PI * 0.495;
@@ -438,36 +439,18 @@
     trim.rotation.x = Math.PI / 2; trim.position.y = 0.26;
     plazaGroup.add(trim);
 
-    // 3D floating emblem: a glass badge with real thickness that revolves,
-    // logo printed on BOTH faces + a metallic rim → clearly three-dimensional.
+    // 3D floating emblem: clean logo, no frame — two back-to-back logo planes
+    // that revolve, so it reads as a genuine 3D turning logo.
     const emblem = new THREE.Group();
     emblem.position.y = 7;
-    const TH = 0.6, SZ = 5.4;
-    // frosted glass body (gives the badge volume)
-    const body = new THREE.Mesh(new THREE.BoxGeometry(SZ, SZ, TH),
-      new THREE.MeshPhysicalMaterial({
-        color: 0xdfe9ff, metalness: 0.15, roughness: 0.12,
-        transmission: 0.55, transparent: true, opacity: 0.6, side: THREE.DoubleSide,
-      }));
-    emblem.add(body);
-    // metallic rim frame around the edge
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0x2b4b74, metalness: 0.85, roughness: 0.25 });
-    const rimBar = (w, h, x, y) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, TH + 0.08), rimMat);
-      m.position.set(x, y, 0); emblem.add(m);
-    };
-    rimBar(SZ + 0.1, 0.18, 0, SZ / 2);
-    rimBar(SZ + 0.1, 0.18, 0, -SZ / 2);
-    rimBar(0.18, SZ + 0.1, SZ / 2, 0);
-    rimBar(0.18, SZ + 0.1, -SZ / 2, 0);
-    // logo decals on front & back
-    const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ - 0.5, SZ - 0.5),
-      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true }));
-    front.position.z = TH / 2 + 0.02;
+    const SZ = 6;
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ, SZ),
+      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
+    front.position.z = 0.04;
     emblem.add(front);
-    const back = new THREE.Mesh(new THREE.PlaneGeometry(SZ - 0.5, SZ - 0.5),
-      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true }));
-    back.position.z = -TH / 2 - 0.02; back.rotation.y = Math.PI;
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(SZ, SZ),
+      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
+    back.position.z = -0.04; back.rotation.y = Math.PI;
     emblem.add(back);
     plazaGroup.add(emblem);
     plazaGroup.userData.emblem = emblem;
@@ -476,7 +459,7 @@
       const cv = document.createElement("canvas"); cv.width = cv.height = 256;
       const c = cv.getContext("2d");
       const g = c.createRadialGradient(128, 128, 0, 128, 128, 128);
-      g.addColorStop(0, "rgba(140,182,255,0.5)"); g.addColorStop(1, "rgba(140,182,255,0)");
+      g.addColorStop(0, "rgba(140,182,255,0.45)"); g.addColorStop(1, "rgba(140,182,255,0)");
       c.fillStyle = g; c.fillRect(0, 0, 256, 256);
       return canvasTex(cv);
     })();
@@ -1049,7 +1032,30 @@
     else enterRoom((ctxPortals || []).find((x) => x.mesh === hit.obj).zoneId);
   });
 
-  // ---------- Modal ----------
+  // ---------- Custom zoom-to-cursor (wheel dollies toward what you point at) ----------
+  const zoomPlane = new THREE.Plane();
+  const zoomPt = new THREE.Vector3();
+  const zoomNdc = new THREE.Vector2();
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const rect = renderer.domElement.getBoundingClientRect();
+    zoomNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    zoomNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(zoomNdc, camera);
+    // horizontal plane through the current focus height
+    zoomPlane.set(new THREE.Vector3(0, 1, 0), -controls.target.y);
+    const ok = raycaster.ray.intersectPlane(zoomPlane, zoomPt);
+    const zoomIn = e.deltaY < 0;
+    const factor = zoomIn ? 0.86 : 1 / 0.86;
+    const offset = camera.position.clone().sub(controls.target);
+    let dist = offset.length() * factor;
+    dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, dist));
+    // steer the focus toward the point under the cursor when zooming in
+    if (ok && zoomIn) controls.target.lerp(zoomPt, 0.2);
+    offset.setLength(dist);
+    camera.position.copy(controls.target).add(offset);
+    controls.update();
+  }, { passive: false });
   const modalBackdrop = document.getElementById("modalBackdrop");
   const modalEl = document.getElementById("modal");
   const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -1125,8 +1131,8 @@
     if (plazaGroup.userData.emblem) {
       const em = plazaGroup.userData.emblem;
       em.position.y = 7 + Math.sin(t * 0.8) * 0.18;
-      em.rotation.y = t * 0.5;                     // real 3D turntable spin
-      em.rotation.x = Math.sin(t * 0.6) * 0.12;    // subtle tilt so thickness reads
+      em.rotation.y = Math.sin(t * 0.5) * 0.9;   // 3D sway (never fully edge-on)
+      em.rotation.x = Math.sin(t * 0.6) * 0.08;  // subtle tilt
       if (plazaGroup.userData.glowDisc) {
         plazaGroup.userData.glowDisc.position.y = em.position.y;
         plazaGroup.userData.glowDisc.lookAt(camPos.x, em.position.y, camPos.z);
