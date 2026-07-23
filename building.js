@@ -59,21 +59,13 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0f1c);
-  scene.fog = new THREE.Fog(0x0a0f1c, 85, 200);
-
-  // PBR environment map (subtle real reflections on glass/metal) → instant premium feel
-  try {
-    if (THREE.PMREMGenerator && THREE.RoomEnvironment) {
-      const pmrem = new THREE.PMREMGenerator(renderer);
-      scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
-    }
-  } catch (err) { console.warn("env map skipped:", err); }
+  scene.background = new THREE.Color(0x0b1222);
+  scene.fog = new THREE.Fog(0x0b1222, 90, 210);
 
   const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 600);
   const EXTERIOR = { pos: { x: 6, y: 10, z: SHELL_R + 40 }, look: { x: 0, y: 9, z: SHELL_R - 6 } };
@@ -91,49 +83,6 @@
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 5, 0);
   controls.update();
-
-  // ---------- Post-processing (bloom + vignette) for a premium, cinematic finish ----------
-  let composer = null, bloom = null;
-  try {
-    if (THREE.EffectComposer && THREE.UnrealBloomPass) {
-      composer = new THREE.EffectComposer(renderer);
-      composer.addPass(new THREE.RenderPass(scene, camera));
-      bloom = new THREE.UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.7,   // strength — premium glow, not a haze
-        0.6,   // radius
-        0.55   // threshold — only genuinely bright emissive things bloom
-      );
-      composer.addPass(bloom);
-      if (THREE.VignetteShader) {
-        const vignette = new THREE.ShaderPass(THREE.VignetteShader);
-        vignette.uniforms.offset.value = 1.05;
-        vignette.uniforms.darkness.value = 1.15;
-        vignette.renderToScreen = true;
-        composer.addPass(vignette);
-      }
-    }
-  } catch (err) { console.warn("post-processing skipped:", err); composer = null; }
-
-  // ---------- Ambient dust motes (soft depth + atmosphere) ----------
-  (function dust() {
-    const n = 380, pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 90;
-      pos[i * 3 + 1] = Math.random() * 16 + 0.5;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 90;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    const m = new THREE.PointsMaterial({
-      color: 0xcfe0ff, size: 0.09, transparent: true, opacity: 0.5,
-      sizeAttenuation: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    });
-    const pts = new THREE.Points(g, m);
-    pts.userData.dust = true;
-    scene.add(pts);
-    scene.userData.dust = pts;
-  })();
 
   // ---------- Lighting ----------
   scene.add(new THREE.HemisphereLight(0x9dbcff, 0x0a0e1a, 0.5));
@@ -1169,8 +1118,6 @@
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if (composer) composer.setSize(window.innerWidth, window.innerHeight);
-    if (bloom) bloom.setSize(window.innerWidth, window.innerHeight);
   });
 
   // ---------- Animate ----------
@@ -1191,8 +1138,6 @@
         plazaGroup.userData.glowDisc.lookAt(camPos.x, em.position.y, camPos.z);
       }
     }
-    // slowly drift the dust for living atmosphere
-    if (scene.userData.dust) scene.userData.dust.rotation.y = t * 0.01;
     // room: the carousel is turned MANUALLY by dragging; here we only apply
     // gentle floating bob + a little inertial drift after a drag ends.
     if (mode === "room") {
@@ -1205,8 +1150,7 @@
         dragTurn.vel *= 0.94; // friction
       }
     }
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    renderer.render(scene, camera);
   }
 
   // ---------- Boot: exterior → fly through entrance into interior ----------
