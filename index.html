@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>M365 Copilot Agent — 智慧大樓</title>
+<style>
+:root {
+  --ink: #1c2333;
+  --muted: #5c6577;
+  --faint: #8a93a6;
+  --line: rgba(20, 30, 55, 0.10);
+  --line-strong: rgba(20, 30, 55, 0.18);
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-solid: #ffffff;
+  --glass: rgba(255, 255, 255, 0.68);
+  --accent: #0f6cbd;
+  --shadow-lg: 0 20px 50px -18px rgba(28, 45, 90, 0.35);
+  --shadow-sm: 0 2px 10px rgba(28, 45, 90, 0.08);
+  --font: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--font); color: var(--ink); background: #dfeaf6; }
+
+#stage { position: fixed; inset: 0; }
+#three-canvas { position: absolute; inset: 0; display: block; }
+#overlay { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+
+/* ---------- Top bar ---------- */
+#topbar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: 14px; padding: 13px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+  backdrop-filter: blur(16px); border-bottom: 1px solid var(--line);
+}
+#brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+#brand .logo {
+  width: 34px; height: 34px; flex: none; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: conic-gradient(from 205deg, #00b7c3, #0f6cbd, #8378de, #e3008c, #00b7c3);
+  box-shadow: 0 4px 14px rgba(15,108,189,0.35);
+}
+#brand .logo svg { width: 19px; height: 19px; }
+#brand .titles { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+#brand .t1 { font-weight: 700; font-size: 15.5px; letter-spacing: -0.2px; white-space: nowrap; }
+#brand .t2 { font-size: 11px; color: var(--faint); letter-spacing: 0.4px; }
+#hamburger { display: none; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--line-strong);
+  background: #fff; color: var(--ink); font-size: 16px; cursor: pointer; flex: none; }
+#searchWrap { position: relative; flex: 1; max-width: 400px; margin-left: auto; }
+#searchInput {
+  width: 100%; padding: 10px 14px 10px 38px; border-radius: 11px; border: 1px solid var(--line-strong);
+  background: #fff; color: var(--ink); font-size: 13.5px; outline: none; font-family: inherit;
+  box-shadow: var(--shadow-sm);
+}
+#searchInput::placeholder { color: var(--faint); }
+#searchInput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15,108,189,0.12); }
+#searchWrap .sicon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--faint); font-size: 14px; pointer-events: none; }
+#searchResults {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; background: #fff;
+  border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-lg);
+  max-height: 340px; overflow-y: auto; display: none; z-index: 30; padding: 5px;
+}
+#searchResults.show { display: block; }
+.sr-item { padding: 9px 11px; cursor: pointer; border-radius: 8px; font-size: 13.5px; display: flex; align-items: center; gap: 10px; }
+.sr-item:hover { background: #f2f6fb; }
+.sr-item .em { font-size: 17px; flex: none; }
+.sr-item .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sr-item .zn { font-size: 10.5px; padding: 2px 8px; border-radius: 7px; color: #fff; flex: none; }
+#homeBtn, #exteriorBtn {
+  flex: none; padding: 9px 15px; border-radius: 11px; border: 1px solid var(--line-strong);
+  background: #fff; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm);
+}
+#homeBtn:hover, #exteriorBtn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ---------- Sidebar ---------- */
+#sidebar {
+  position: absolute; top: 62px; left: 0; bottom: 0; width: 256px; z-index: 15;
+  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82));
+  backdrop-filter: blur(16px); border-right: 1px solid var(--line);
+  padding: 16px 13px; overflow-y: auto; transition: transform 0.28s ease;
+}
+#sidebar h3 { margin: 4px 6px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.4px; color: var(--faint); }
+.zone-btn {
+  display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 11px; margin-bottom: 7px;
+  border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer;
+  text-align: left; color: var(--ink); font-family: inherit; transition: 0.2s; box-shadow: var(--shadow-sm);
+}
+.zone-btn:hover { transform: translateX(2px); border-color: var(--line-strong); }
+.zone-btn.active { border-color: currentColor; }
+.zone-btn .ic { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex: none; color: #fff; }
+.zone-btn .info { flex: 1; min-width: 0; }
+.zone-btn .n1 { font-size: 13.5px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zone-btn .n2 { font-size: 10.5px; color: var(--faint); }
+.zone-btn .cnt { flex: none; font-size: 11.5px; font-weight: 700; color: var(--muted); background: #eef2f7; padding: 2px 9px; border-radius: 999px; }
+
+#hint {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 15;
+  background: var(--panel); backdrop-filter: blur(12px); border: 1px solid var(--line);
+  border-radius: 12px; padding: 9px 16px; font-size: 12px; color: var(--muted);
+  display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow-sm);
+}
+#hint button { background: none; border: none; color: var(--faint); cursor: pointer; font-size: 14px; }
+
+/* ---------- 3D hover tooltip ---------- */
+#tooltip {
+  position: absolute; z-index: 12; pointer-events: none; transform: translate(-50%, -130%);
+  background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 11px;
+  border-radius: 8px; white-space: nowrap; display: none; box-shadow: var(--shadow-lg);
+}
+#tooltip::after { content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+  border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--ink); }
+
+/* ---------- Modal ---------- */
+#modalBackdrop { position: fixed; inset: 0; background: rgba(20,30,55,0.32); backdrop-filter: blur(3px);
+  z-index: 50; display: none; align-items: center; justify-content: center; padding: 24px; }
+#modalBackdrop.show { display: flex; }
+#modal {
+  width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto; background: #fff;
+  border-radius: 20px; box-shadow: var(--shadow-lg); padding: 26px 28px 30px; position: relative;
+  animation: pop 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pop { from { transform: translateY(14px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
+#modalClose { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 10px;
+  border: 1px solid var(--line); background: #f7f9fc; color: var(--muted); cursor: pointer; font-size: 16px; }
+#modalClose:hover { color: var(--accent); border-color: var(--accent); }
+.m-head { display: flex; align-items: flex-start; gap: 15px; padding-right: 40px; }
+.m-emoji { width: 60px; height: 60px; border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex: none; }
+.m-cname { font-size: 21px; font-weight: 700; letter-spacing: -0.4px; }
+.m-ename { font-size: 12.5px; color: var(--faint); margin-top: 2px; }
+.m-badges { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
+.badge { font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.badge.zone { color: #fff; }
+.badge.free { background: rgba(31,157,99,0.12); color: #178a55; }
+.badge.req { background: rgba(224,150,0,0.14); color: #b3721c; }
+.m-tagline { margin: 16px 0 2px; font-size: 15px; font-weight: 600; }
+.m-section { margin-top: 20px; }
+.m-section h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--faint); margin-bottom: 9px; }
+.m-desc { font-size: 14px; line-height: 1.8; color: var(--muted); white-space: pre-line; }
+.pain-list { display: flex; flex-direction: column; gap: 7px; }
+.pain-item { font-size: 13px; padding: 10px 13px; border-radius: 10px; background: #f7f9fc; border: 1px solid var(--line); color: var(--muted); }
+.step-list { counter-reset: step; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.step-list li { counter-increment: step; position: relative; padding-left: 38px; font-size: 13.5px; line-height: 1.6; }
+.step-list li::before { content: counter(step); position: absolute; left: 0; top: -1px; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; }
+.example-box { background: #f7f9fc; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  font-family: Consolas, "Courier New", monospace; font-size: 13px; white-space: pre-line; line-height: 1.7; position: relative; }
+.copy-btn { position: absolute; top: 10px; right: 10px; font-size: 11px; padding: 5px 11px; border-radius: 8px;
+  border: 1px solid var(--line-strong); background: #fff; color: var(--muted); cursor: pointer; }
+.copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- Loading ---------- */
+#loading { position: fixed; inset: 0; z-index: 100; background: linear-gradient(180deg, #0a0f1c, #111a2e);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #b8c4d8; font-size: 14px; }
+.spinner { width: 38px; height: 38px; border-radius: 50%; border: 3px solid rgba(120,160,220,0.2); border-top-color: #5aa0ff; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Scene-transition fade ---------- */
+#fade { position: fixed; inset: 0; z-index: 60; background: #070b14; opacity: 0; pointer-events: none;
+  transition: opacity 0.42s ease; }
+#fade.show { opacity: 1; }
+
+/* ---------- Back-to-lobby button (only inside a department room) ---------- */
+#backBtn { position: absolute; top: 74px; left: 18px; z-index: 22; display: none;
+  padding: 10px 16px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(16,24,42,0.82); backdrop-filter: blur(10px); color: #eaf2ff; font-size: 13.5px;
+  font-weight: 600; cursor: pointer; font-family: var(--font); box-shadow: var(--shadow-lg); }
+#backBtn:hover { border-color: #5aa0ff; color: #9cc4ff; }
+#backBtn.show { display: block; }
+
+/* ---------- Room card deck (agent selection inside a department) ---------- */
+#roomDeck {
+  position: absolute; z-index: 18; left: 50%; bottom: 0; transform: translate(-50%, 100%);
+  width: min(1080px, calc(100% - 300px)); max-height: 54vh;
+  background: linear-gradient(180deg, rgba(13,20,36,0.7), rgba(9,14,26,0.92));
+  backdrop-filter: blur(18px); border: 1px solid rgba(120,160,220,0.22);
+  border-bottom: none; border-radius: 20px 20px 0 0; box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
+  padding: 18px 22px 22px; overflow: hidden; display: flex; flex-direction: column;
+  transition: transform 0.5s cubic-bezier(0.16,1,0.3,1); pointer-events: auto;
+}
+#roomDeck.show { transform: translate(-50%, 0); }
+.rd-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+.rd-title { display: flex; align-items: center; gap: 13px; }
+.rd-ic { width: 46px; height: 46px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex: none; }
+.rd-name { font-size: 20px; font-weight: 800; color: #eef4ff; letter-spacing: -0.3px; }
+.rd-sub { font-size: 12px; color: #8ea0bd; letter-spacing: 0.5px; margin-top: 2px; }
+.rd-desc { font-size: 13px; color: #aebbd4; line-height: 1.6; max-width: 460px; align-self: center; }
+.rd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; overflow-y: auto; padding: 2px 4px 4px; }
+.rd-card {
+  position: relative; border-radius: 14px; padding: 14px 14px 13px; cursor: pointer;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.09); transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+.rd-card:hover { transform: translateY(-3px); border-color: var(--rc, #5aa0ff); background: rgba(255,255,255,0.08); }
+.rd-card .rc-top { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.rd-card .rc-em { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex: none; }
+.rd-card .rc-nm { font-size: 14.5px; font-weight: 700; color: #eef4ff; line-height: 1.25; }
+.rd-card .rc-tl { font-size: 12px; line-height: 1.55; color: #9fb0cc; min-height: 37px; }
+.rd-card .rc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 11px; }
+.rd-card .rc-pill { font-size: 10.5px; padding: 3px 9px; border-radius: 999px; background: rgba(52,195,143,0.14); color: #67e0ac; }
+.rd-card .rc-pill.req { background: rgba(226,150,47,0.16); color: #f0b465; }
+.rd-card .rc-go { font-size: 11.5px; color: #7f8ba3; }
+.rd-card:hover .rc-go { color: #cfe0ff; }
+
+@media (max-width: 860px) {
+  #sidebar { transform: translateX(-100%); width: 80vw; max-width: 300px; }
+  #sidebar.open { transform: translateX(0); }
+  #hamburger { display: block; }
+  #searchWrap { max-width: none; }
+  #brand .t2 { display: none; }
+  #roomDeck { width: 100%; max-height: 66vh; border-radius: 18px 18px 0 0; }
+  .rd-desc { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><div>正在開啟智慧大樓…</div></div>
+<div id="fade"></div>
+<button id="backBtn">← 返回大廳</button>
+
+<div id="roomDeck">
+  <div class="rd-head">
+    <div class="rd-title"><span class="rd-ic" id="rdIcon"></span>
+      <div><div class="rd-name" id="rdName"></div><div class="rd-sub" id="rdSub"></div></div>
+    </div>
+    <div class="rd-desc" id="rdDesc"></div>
+  </div>
+  <div class="rd-grid" id="rdGrid"></div>
+</div>
+
+<div id="stage">
+  <canvas id="three-canvas"></canvas>
+  <div id="overlay"></div>
+</div>
+
+<div id="topbar">
+  <button id="hamburger" aria-label="選單">☰</button>
+  <div id="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0c0 6.6 2.2 10.8 8.8 12C14.2 13.2 12 17.4 12 24c0-6.6-2.2-10.8-8.8-12C9.8 10.8 12 6.6 12 0Z"/></svg></div>
+    <div class="titles">
+      <div class="t1">M365 Copilot Agent 智慧大樓</div>
+      <div class="t2">Power of Copilot · 8 大部門 · 53 位 AI 助理</div>
+    </div>
+  </div>
+  <div id="searchWrap">
+    <span class="sicon">🔍</span>
+    <input id="searchInput" type="text" placeholder="搜尋 Agent 名稱或關鍵字…" autocomplete="off" />
+    <div id="searchResults"></div>
+  </div>
+  <button id="exteriorBtn">🏙️ 看外觀</button>
+  <button id="homeBtn">🏢 進中庭</button>
+</div>
+
+<div id="sidebar">
+  <h3>樓層導覽 · 8 大部門</h3>
+  <div id="zoneList"></div>
+</div>
+
+<div id="hint">
+  <span>🖱️ 拖曳環顧．滾輪縮放．點體驗館進入．點看板看詳情</span>
+  <button id="hintClose">✕</button>
+</div>
+
+<div id="tooltip"></div>
+
+<div id="modalBackdrop"><div id="modal"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
+<script src="data.js"></script>
+<script src="building.js"></script>
+</body>
+</html>
