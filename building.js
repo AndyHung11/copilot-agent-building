@@ -75,7 +75,9 @@
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.minDistance = 8;
+  controls.enablePan = true;
+  controls.screenSpacePanning = true; // pan moves in screen plane (feels like walking around)
+  controls.minDistance = 4;
   controls.maxDistance = 160;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 5, 0);
@@ -436,13 +438,40 @@
     trim.rotation.x = Math.PI / 2; trim.position.y = 0.26;
     plazaGroup.add(trim);
 
-    // floating holographic emblem (real logo) — billboards to camera, no piercing column
-    const emblem = new THREE.Mesh(new THREE.PlaneGeometry(6, 6),
-      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, side: THREE.DoubleSide, depthWrite: false }));
+    // 3D floating emblem: a glass badge with real thickness that revolves,
+    // logo printed on BOTH faces + a metallic rim → clearly three-dimensional.
+    const emblem = new THREE.Group();
     emblem.position.y = 7;
+    const TH = 0.6, SZ = 5.4;
+    // frosted glass body (gives the badge volume)
+    const body = new THREE.Mesh(new THREE.BoxGeometry(SZ, SZ, TH),
+      new THREE.MeshPhysicalMaterial({
+        color: 0xdfe9ff, metalness: 0.15, roughness: 0.12,
+        transmission: 0.55, transparent: true, opacity: 0.6, side: THREE.DoubleSide,
+      }));
+    emblem.add(body);
+    // metallic rim frame around the edge
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0x2b4b74, metalness: 0.85, roughness: 0.25 });
+    const rimBar = (w, h, x, y) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, TH + 0.08), rimMat);
+      m.position.set(x, y, 0); emblem.add(m);
+    };
+    rimBar(SZ + 0.1, 0.18, 0, SZ / 2);
+    rimBar(SZ + 0.1, 0.18, 0, -SZ / 2);
+    rimBar(0.18, SZ + 0.1, SZ / 2, 0);
+    rimBar(0.18, SZ + 0.1, -SZ / 2, 0);
+    // logo decals on front & back
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ - 0.5, SZ - 0.5),
+      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true }));
+    front.position.z = TH / 2 + 0.02;
+    emblem.add(front);
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(SZ - 0.5, SZ - 0.5),
+      new THREE.MeshBasicMaterial({ map: logoTex, transparent: true }));
+    back.position.z = -TH / 2 - 0.02; back.rotation.y = Math.PI;
+    emblem.add(back);
     plazaGroup.add(emblem);
     plazaGroup.userData.emblem = emblem;
-    // soft radial glow disc behind the emblem (flat, never pierces it)
+    // soft radial glow disc behind the emblem (billboards to camera)
     const glowTex = (function () {
       const cv = document.createElement("canvas"); cv.width = cv.height = 256;
       const c = cv.getContext("2d");
@@ -451,7 +480,7 @@
       c.fillStyle = g; c.fillRect(0, 0, 256, 256);
       return canvasTex(cv);
     })();
-    const glowDisc = new THREE.Mesh(new THREE.PlaneGeometry(11, 11),
+    const glowDisc = new THREE.Mesh(new THREE.PlaneGeometry(12, 12),
       new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
     glowDisc.position.y = 7;
     plazaGroup.add(glowDisc);
@@ -879,7 +908,7 @@
     transition(() => {
       camera.position.set(INTERIOR.pos.x, INTERIOR.pos.y, INTERIOR.pos.z);
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
-      controls.minDistance = 8; controls.maxDistance = 160;
+      controls.minDistance = 4; controls.maxDistance = 160;
       controls.enableRotate = true; // restore free orbit in the lobby
       controls.update();
       mode = "lobby";
@@ -1095,8 +1124,9 @@
     camera.getWorldPosition(camPos);
     if (plazaGroup.userData.emblem) {
       const em = plazaGroup.userData.emblem;
-      em.position.y = 7 + Math.sin(t * 0.8) * 0.15;
-      em.lookAt(camPos.x, em.position.y, camPos.z); // billboard: always face viewer, never edge-on
+      em.position.y = 7 + Math.sin(t * 0.8) * 0.18;
+      em.rotation.y = t * 0.5;                     // real 3D turntable spin
+      em.rotation.x = Math.sin(t * 0.6) * 0.12;    // subtle tilt so thickness reads
       if (plazaGroup.userData.glowDisc) {
         plazaGroup.userData.glowDisc.position.y = em.position.y;
         plazaGroup.userData.glowDisc.lookAt(camPos.x, em.position.y, camPos.z);
