@@ -294,6 +294,8 @@
   const ENTRANCE_HALF = 0.28; // radians of the entrance gap half-width (around +Z)
   const shellGroup = new THREE.Group();
   scene.add(shellGroup);
+  const wallStruct = new THREE.Group(); // mullions etc. — hidden while camera is inside the atrium
+  shellGroup.add(wallStruct);
   function shellAdd(o) { shellGroup.add(o); }
   buildShellReal();
 
@@ -303,7 +305,7 @@
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: 0x18324f, metalness: 0.2, roughness: 0.08,
       transmission: 0.6, transparent: true, opacity: 0.5,
-      thickness: 0.5, ior: 1.35, side: THREE.DoubleSide,
+      thickness: 0.5, ior: 1.35, side: THREE.BackSide,
     });
     const mullionMat = new THREE.MeshStandardMaterial({ color: 0x2b3b55, metalness: 0.7, roughness: 0.35 });
     const glowMat = new THREE.MeshBasicMaterial({ color: 0x5aa0ff });
@@ -323,12 +325,12 @@
       const ma = a - segAng / 2;
       mull.position.set(Math.cos(ma) * SHELL_R, WALL_H / 2, Math.sin(ma) * SHELL_R);
       mull.lookAt(0, WALL_H / 2, 0);
-      shellAdd(mull);
+      wallStruct.add(mull);
       // horizontal glow band mid-height
       const band = new THREE.Mesh(new THREE.PlaneGeometry(SHELL_R * segAng * 1.02, 0.12), glowMat);
       band.position.set(x, WALL_H * 0.62, z);
       band.lookAt(0, WALL_H * 0.62, 0);
-      band.material = new THREE.MeshBasicMaterial({ color: 0x5aa0ff, transparent: true, opacity: 0.5 });
+      band.material = new THREE.MeshBasicMaterial({ color: 0x5aa0ff, transparent: true, opacity: 0.5, side: THREE.BackSide });
       shellAdd(band);
     }
 
@@ -1169,6 +1171,9 @@
         dragTurn.vel *= 0.94; // friction
       }
     }
+    // hide the vertical wall structure (mullions) whenever the camera is inside the
+    // atrium shell, so the curtain wall never blocks the view of the pavilions
+    wallStruct.visible = Math.hypot(camera.position.x, camera.position.z) > SHELL_R - 2;
     renderer.render(scene, camera);
   }
 
