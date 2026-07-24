@@ -878,6 +878,7 @@
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
       controls.minDistance = 4; controls.maxDistance = 22;
       controls.enableRotate = false; // room stays put; only the cards spin
+      controls.enabled = false;      // fully hand touch/mouse to the carousel drag logic
       controls.update();
       mode = "room";
       ctxAgents = room.clickAgents; ctxPortals = []; ctxExit = room.exit;
@@ -893,6 +894,7 @@
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
       controls.minDistance = 4; controls.maxDistance = 160;
       controls.enableRotate = true; // restore free orbit in the lobby
+      controls.enabled = true;
       controls.update();
       mode = "lobby";
       ctxAgents = clickAgents; ctxPortals = clickPortals; ctxExit = null;
@@ -974,17 +976,28 @@
     if (p) return { type: "portal", obj: p.object };
     return null;
   }
+  const dragTurn = { active: false, lastX: 0, vel: 0, pointerId: null };
+  function activeCarousel() {
+    // the carousel belonging to the room currently in view
+    for (const rc of roomCarousels) {
+      const wp = new THREE.Vector3(); rc.carousel.getWorldPosition(wp);
+      if (Math.abs(wp.x - camera.position.x) < 60) return rc.carousel;
+    }
+    return null;
+  }
+
   canvas.addEventListener("pointermove", (e) => {
-    if (e.pointerType === "touch") return;
-    // in a room, left-drag manually spins the carousel
-    if (dragTurn.active) {
+    // while dragging the carousel (mouse OR touch), spin it — this must run for touch too
+    if (dragTurn.active && (dragTurn.pointerId === null || e.pointerId === dragTurn.pointerId)) {
       const dx = e.clientX - dragTurn.lastX;
       dragTurn.lastX = e.clientX;
       const car = activeCarousel();
       if (car) { car.rotation.y += dx * 0.006; dragTurn.vel = dx * 0.006; }
       tooltip.style.display = "none";
+      e.preventDefault();
       return;
     }
+    if (e.pointerType === "touch") return; // no hover tooltip on touch
     const hit = pickAt(e.clientX, e.clientY);
     if (hit && hit.type === "agent") {
       const a = (ctxAgents || []).find((x) => x.mesh === hit.obj);
@@ -997,29 +1010,33 @@
       tooltip.style.display = "none";
       document.body.style.cursor = mode === "room" && roomCarousels.length ? "grab" : "default";
     }
-  });
+  }, { passive: false });
+
   let downPos = null;
-  const dragTurn = { active: false, lastX: 0, vel: 0 };
-  function activeCarousel() {
-    // the carousel belonging to the room currently in view
-    for (const rc of roomCarousels) {
-      const wp = new THREE.Vector3(); rc.carousel.getWorldPosition(wp);
-      if (Math.abs(wp.x - camera.position.x) < 60) return rc.carousel;
-    }
-    return null;
-  }
   canvas.addEventListener("pointerdown", (e) => {
     downPos = { x: e.clientX, y: e.clientY };
-    if (mode === "room" && e.button === 0) {
-      dragTurn.active = true; dragTurn.lastX = e.clientX; dragTurn.vel = 0;
+    // primary button (mouse-left) or any touch/pen contact starts a carousel drag in a room
+    const primary = e.button === 0 || e.pointerType === "touch" || e.pointerType === "pen";
+    if (mode === "room" && primary) {
+      dragTurn.active = true; dragTurn.lastX = e.clientX; dragTurn.vel = 0; dragTurn.pointerId = e.pointerId;
+      controls.enabled = false; // stop OrbitControls from eating the touch/drag in a room
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
       document.body.style.cursor = "grabbing";
     }
   });
+  function endDrag(e) {
+    if (!dragTurn.active) return;
+    dragTurn.active = false; dragTurn.pointerId = null;
+    controls.enabled = (mode !== "room"); // keep OrbitControls off while inside a room
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    document.body.style.cursor = "default";
+  }
   canvas.addEventListener("pointerup", (e) => {
-    dragTurn.active = false;
+    const wasDragging = dragTurn.active;
+    endDrag(e);
     if (!downPos) return;
     const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y); downPos = null;
-    if (moved > 6) return; // it was a drag, not a click
+    if (moved > 8) return; // it was a drag, not a tap
     const hit = pickAt(e.clientX, e.clientY);
     // if the camera is outside the building shell (parked exterior, or zoomed way out),
     // a building click should first bring you into the atrium — never teleport into a room
@@ -1030,7 +1047,9 @@
     if (hit.type === "agent") openModal((ctxAgents || []).find((x) => x.mesh === hit.obj).agentId);
     else if (hit.type === "exit") exitRoom();
     else enterRoom((ctxPortals || []).find((x) => x.mesh === hit.obj).zoneId);
+    void wasDragging;
   });
+  canvas.addEventListener("pointercancel", endDrag);
 
   // ---------- Custom zoom-to-cursor (wheel dollies toward what you point at) ----------
   const zoomPlane = new THREE.Plane();
