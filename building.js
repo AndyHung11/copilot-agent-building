@@ -342,14 +342,27 @@
     base.position.y = 0.6;
     shellAdd(base);
 
-    // roof ring with central oculus (skylight)
+    // roof ring with central oculus — glass skylight
     const roof = new THREE.Mesh(
       new THREE.RingGeometry(16, SHELL_R + 1, segCount),
-      new THREE.MeshStandardMaterial({ color: 0x101a2e, metalness: 0.5, roughness: 0.5, side: THREE.DoubleSide })
+      new THREE.MeshPhysicalMaterial({
+        color: 0x9ec8ff, metalness: 0.0, roughness: 0.12,
+        transmission: 0.7, transparent: true, opacity: 0.28,
+        thickness: 0.5, ior: 1.3, side: THREE.DoubleSide,
+      })
     );
     roof.rotation.x = -Math.PI / 2; roof.position.y = WALL_H;
     roof.receiveShadow = true;
     shellAdd(roof);
+    // radial skylight mullions across the glass roof
+    for (let i = 0; i < segCount; i += 5) {
+      const a = i * segAng;
+      const mr = new THREE.Mesh(new THREE.BoxGeometry(SHELL_R - 15, 0.12, 0.16),
+        new THREE.MeshStandardMaterial({ color: 0x2b3b55, metalness: 0.7, roughness: 0.35 }));
+      mr.position.set(Math.cos(a) * (16 + (SHELL_R - 15) / 2), WALL_H, Math.sin(a) * (16 + (SHELL_R - 15) / 2));
+      mr.rotation.y = -a;
+      shellAdd(mr);
+    }
     // glowing oculus rim
     const oc = new THREE.Mesh(new THREE.TorusGeometry(16, 0.18, 10, 80), new THREE.MeshBasicMaterial({ color: 0x5aa0ff }));
     oc.rotation.x = Math.PI / 2; oc.position.y = WALL_H;
@@ -626,6 +639,12 @@
       color: new THREE.Color(zone.color), metalness: 0.1, roughness: 0.1,
       transmission: 0.5, transparent: true, opacity: 0.22, side: THREE.DoubleSide,
     });
+    // glass curtain-wall material for the pavilion shell (back/side walls + roof)
+    const glassWallMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(zone.color), metalness: 0.0, roughness: 0.12,
+      transmission: 0.72, transparent: true, opacity: 0.34,
+      thickness: 0.4, ior: 1.3, side: THREE.DoubleSide,
+    });
 
     // floor pad
     const pad = new THREE.Mesh(new THREE.BoxGeometry(PAV_W, 0.2, PAV_D), wallMat);
@@ -637,19 +656,19 @@
     inlay.rotation.x = -Math.PI / 2; inlay.position.y = 0.21;
     g.add(inlay);
 
-    // back + side walls
-    const back = new THREE.Mesh(new THREE.BoxGeometry(PAV_W, 5.6, 0.3), wallMat);
-    back.position.set(0, 2.9, -PAV_D / 2 + 0.15); back.castShadow = true; back.receiveShadow = true;
+    // back + side walls (glass curtain wall)
+    const back = new THREE.Mesh(new THREE.BoxGeometry(PAV_W, 5.6, 0.3), glassWallMat);
+    back.position.set(0, 2.9, -PAV_D / 2 + 0.15); back.castShadow = false; back.receiveShadow = true;
     g.add(back);
+    // thin metal mullions framing the back glass so it still reads as a wall
+    [-0.5, 0, 0.5].forEach((f) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.14, 5.6, 0.34), wallMat);
+      m.position.set(f * (PAV_W - 1), 2.9, -PAV_D / 2 + 0.16); g.add(m);
+    });
     [-1, 1].forEach((s) => {
-      const side = new THREE.Mesh(new THREE.BoxGeometry(0.3, 5.6, PAV_D), wallMat);
-      side.position.set(s * (PAV_W / 2 - 0.15), 2.9, 0); side.castShadow = true;
+      const side = new THREE.Mesh(new THREE.BoxGeometry(0.24, 5.6, PAV_D), glassWallMat);
+      side.position.set(s * (PAV_W / 2 - 0.12), 2.9, 0);
       g.add(side);
-      // glass panel on the side (storefront glazing)
-      const gp = new THREE.Mesh(new THREE.PlaneGeometry(PAV_D - 1, 5), glassMat);
-      gp.position.set(s * (PAV_W / 2 - 0.32), 2.9, 0);
-      gp.rotation.y = s * Math.PI / 2;
-      g.add(gp);
     });
     // back wall glowing accent band
     const band = new THREE.Mesh(new THREE.PlaneGeometry(PAV_W - 0.6, 0.7),
@@ -657,10 +676,20 @@
     band.position.set(0, 4.5, -PAV_D / 2 + 0.32);
     g.add(band);
 
-    // roof canopy
-    const roof = new THREE.Mesh(new THREE.BoxGeometry(PAV_W + 0.8, 0.32, PAV_D + 0.5), wallMat);
-    roof.position.set(0, 5.75, -0.2); roof.castShadow = true;
+    // roof canopy (glass skylight with a thin metal perimeter frame)
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(PAV_W, 0.12, PAV_D), glassWallMat);
+    roof.position.set(0, 5.75, -0.2); roof.castShadow = false;
     g.add(roof);
+    const edgeMat = new THREE.MeshStandardMaterial({ color: 0x22314c, metalness: 0.7, roughness: 0.3 });
+    const RW2 = PAV_W + 0.5, RD2 = PAV_D + 0.5, ry = 5.72;
+    [[0, -RD2 / 2, RW2, 0.22], [0, RD2 / 2 - 0.4, RW2, 0.22]].forEach(([px, pz, w, d]) => {
+      const e = new THREE.Mesh(new THREE.BoxGeometry(w, 0.22, d), edgeMat);
+      e.position.set(px, ry, pz - 0.2); g.add(e);
+    });
+    [-1, 1].forEach((s) => {
+      const e = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, RD2), edgeMat);
+      e.position.set(s * RW2 / 2, ry, -0.2); g.add(e);
+    });
 
     // portal frame (colored, glowing)
     const frameMat = new THREE.MeshStandardMaterial({ color: zone.color, metalness: 0.4, roughness: 0.3,
