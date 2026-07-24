@@ -52,6 +52,8 @@
   let mode = "lobby";
   let ctxAgents = null;   // set to clickAgents after they exist
   let ctxPortals = null;
+  const roomLook = new THREE.Vector3();     // locked focus point while inside a room
+  let roomMaxDist = 21;                     // max camera distance while inside a room
 
   // ---------- Renderer / scene / camera ----------
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
@@ -761,6 +763,36 @@
     const RW = 46, RD = 40, RH = 10;
     const roomClickAgents = [];
 
+    // ---------- Outdoor context so the glass walls actually read as glass ----------
+    // (the room floats in dark space; without something visible outside, transparent
+    //  glass over black just looks like a dark solid wall)
+    // 1) gradient backdrop dome around the room — dept-color glow at the horizon
+    const domeCan = document.createElement("canvas"); domeCan.width = 16; domeCan.height = 256;
+    const dctx = domeCan.getContext("2d");
+    const grad = dctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0.0, "#05070d");
+    grad.addColorStop(0.62, "#080d18");
+    grad.addColorStop(0.86, hexToRgba(zone.color, 0.28));
+    grad.addColorStop(1.0, hexToRgba(zone.color, 0.06));
+    dctx.fillStyle = grad; dctx.fillRect(0, 0, 16, 256);
+    const domeTex = new THREE.CanvasTexture(domeCan);
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(150, 32, 20),
+      new THREE.MeshBasicMaterial({ map: domeTex, side: THREE.BackSide, fog: false, depthWrite: false })
+    );
+    dome.position.set(0, 0, 0);
+    grp.add(dome);
+    // 2) wide ground grid extending far beyond the room (seen through the glass)
+    const gridOut = new THREE.GridHelper(280, 70, new THREE.Color(zone.color), 0x1b2740);
+    gridOut.material.transparent = true; gridOut.material.opacity = 0.32; gridOut.material.depthWrite = false;
+    gridOut.position.y = -0.16;
+    grp.add(gridOut);
+    // 3) a soft dark pad directly under the room to ground it
+    const outPad = new THREE.Mesh(new THREE.CircleGeometry(58, 64),
+      new THREE.MeshBasicMaterial({ color: 0x0a1120, transparent: true, opacity: 0.9, fog: false }));
+    outPad.rotation.x = -Math.PI / 2; outPad.position.y = -0.14;
+    grp.add(outPad);
+
     // floor (glossy dark) + center runway + edge glow lines
     const floor = new THREE.Mesh(new THREE.BoxGeometry(RW, 0.3, RD),
       new THREE.MeshStandardMaterial({ color: 0x0e1626, roughness: 0.28, metalness: 0.55 }));
@@ -807,6 +839,25 @@
     const front = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), glassWallMat);
     front.position.set(0, RH / 2, RD / 2);
     grp.add(front);
+    // curtain-wall mullion frames (thin metal grid) so the glass reads clearly as glass
+    const mulMat = new THREE.MeshStandardMaterial({ color: 0x2b3b55, metalness: 0.75, roughness: 0.3 });
+    const addMullions = (w, cx, cz, along) => {
+      // verticals
+      for (let x = -w / 2; x <= w / 2 + 0.01; x += w / 6) {
+        const v = new THREE.Mesh(new THREE.BoxGeometry(0.12, RH, 0.12), mulMat);
+        if (along === "x") v.position.set(cx + x, RH / 2, cz); else v.position.set(cx, RH / 2, cz + x);
+        grp.add(v);
+      }
+      // horizontals (2 bands)
+      [RH * 0.34, RH * 0.68].forEach((y) => {
+        const h = new THREE.Mesh(new THREE.BoxGeometry(along === "x" ? w : 0.12, 0.1, along === "x" ? 0.12 : w), mulMat);
+        h.position.set(cx, y, cz); grp.add(h);
+      });
+    };
+    addMullions(RW, 0, -RD / 2, "x");   // back
+    addMullions(RW, 0, RD / 2, "x");    // front
+    addMullions(RD, -RW / 2, 0, "z");   // left
+    addMullions(RD, RW / 2, 0, "z");    // right
     const ceilGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.4, RD - 4),
       new THREE.MeshBasicMaterial({ color: 0xbcd4ff, transparent: true, opacity: 0.5 }));
     ceilGlow.rotation.x = Math.PI / 2; ceilGlow.position.set(0, RH - 0.16, 0);
@@ -911,7 +962,8 @@
       const room = rooms[id] || buildRoom(zone);
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
-      controls.minDistance = 4; controls.maxDistance = 21;
+      roomLook.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
+      controls.minDistance = 4; controls.maxDistance = roomMaxDist;
       controls.enableRotate = false; // room stays put; only the cards spin
       controls.enabled = false;      // fully hand touch/mouse to the carousel drag logic
       controls.update();
@@ -1196,6 +1248,16 @@
     // room: the carousel is turned MANUALLY by dragging; here we only apply
     // gentle floating bob + a little inertial drift after a drag ends.
     if (mode === "room") {
+      // BULLETPROOF recovery: keep the focus pinned to the room center and the camera
+      // distance clamped every frame, so no amount of zooming can ever get you lost.
+      controls.target.copy(roomLook);
+      const off = camera.position.clone().sub(roomLook);
+      const d = off.length();
+      const cd = Math.max(4, Math.min(roomMaxDist, d));
+      if (Math.abs(cd - d) > 1e-4 || d < 1e-4) {
+        if (d < 1e-4) off.set(0, 0, 1);
+        camera.position.copy(roomLook).add(off.setLength(cd));
+      }
       roomCarousels.forEach(({ carousel, baseY }) => {
         carousel.position.y = baseY + Math.sin(t * 0.9) * 0.12;
       });
