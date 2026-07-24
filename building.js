@@ -304,10 +304,9 @@
   function buildShellReal() {
     const segCount = 60;
     const segAng = (Math.PI * 2) / segCount;
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0x18324f, metalness: 0.2, roughness: 0.08,
-      transmission: 0.6, transparent: true, opacity: 0.5,
-      thickness: 0.5, ior: 1.35, side: THREE.BackSide,
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x2a4d78, metalness: 0.45, roughness: 0.16,
+      transparent: true, opacity: 0.34, side: THREE.BackSide,
     });
     const mullionMat = new THREE.MeshStandardMaterial({ color: 0x2b3b55, metalness: 0.7, roughness: 0.35 });
     const glowMat = new THREE.MeshBasicMaterial({ color: 0x5aa0ff });
@@ -347,10 +346,9 @@
     // roof ring with central oculus — glass skylight
     const roof = new THREE.Mesh(
       new THREE.RingGeometry(16, SHELL_R + 1, segCount),
-      new THREE.MeshPhysicalMaterial({
-        color: 0x9ec8ff, metalness: 0.0, roughness: 0.12,
-        transmission: 0.7, transparent: true, opacity: 0.28,
-        thickness: 0.5, ior: 1.3, side: THREE.DoubleSide,
+      new THREE.MeshStandardMaterial({
+        color: 0x9ec8ff, metalness: 0.35, roughness: 0.16,
+        transparent: true, opacity: 0.2, side: THREE.DoubleSide,
       })
     );
     roof.rotation.x = -Math.PI / 2; roof.position.y = WALL_H;
@@ -532,9 +530,9 @@
     grp.add(spinner);
 
     const glass = new THREE.Mesh(new THREE.PlaneGeometry(CW, CH),
-      new THREE.MeshPhysicalMaterial({
-        color: 0x0e1830, metalness: 0.2, roughness: 0.15,
-        transmission: 0.35, transparent: true, opacity: 0.62, side: THREE.DoubleSide,
+      new THREE.MeshStandardMaterial({
+        color: 0x14223e, metalness: 0.3, roughness: 0.28,
+        transparent: true, opacity: 0.72, side: THREE.DoubleSide,
       }));
     spinner.add(glass);
     // printed face on BOTH sides so it's readable while spinning
@@ -550,7 +548,7 @@
     const fMat = new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
     const bar = (w, h, x, y) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), fMat);
-      m.position.set(x, y, 0); spinner.add(m);
+      m.position.set(x, y, 0.04); spinner.add(m);
     };
     bar(CW, 0.06, 0, CH / 2 - 0.03);
     bar(CW, 0.06, 0, -CH / 2 + 0.03);
@@ -637,15 +635,10 @@
     zoneGroups.push({ zone, group: g });
 
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x16203a, roughness: 0.6, metalness: 0.35 });
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(zone.color), metalness: 0.1, roughness: 0.1,
-      transmission: 0.5, transparent: true, opacity: 0.22, side: THREE.DoubleSide,
-    });
     // glass curtain-wall material for the pavilion shell (back/side walls + roof)
-    const glassWallMat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(zone.color), metalness: 0.0, roughness: 0.12,
-      transmission: 0.72, transparent: true, opacity: 0.34,
-      thickness: 0.4, ior: 1.3, side: THREE.DoubleSide,
+    const glassWallMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(zone.color), metalness: 0.4, roughness: 0.18,
+      transparent: true, opacity: 0.24, side: THREE.DoubleSide,
     });
 
     // floor pad
@@ -787,11 +780,6 @@
     gridOut.material.transparent = true; gridOut.material.opacity = 0.32; gridOut.material.depthWrite = false;
     gridOut.position.y = -0.16;
     grp.add(gridOut);
-    // 3) a soft dark pad directly under the room to ground it
-    const outPad = new THREE.Mesh(new THREE.CircleGeometry(58, 64),
-      new THREE.MeshBasicMaterial({ color: 0x0a1120, transparent: true, opacity: 0.9, fog: false }));
-    outPad.rotation.x = -Math.PI / 2; outPad.position.y = -0.14;
-    grp.add(outPad);
 
     // floor (glossy dark) + center runway + edge glow lines
     const floor = new THREE.Mesh(new THREE.BoxGeometry(RW, 0.3, RD),
@@ -811,10 +799,9 @@
 
     // walls (back + sides) — glass curtain wall, tinted with the department color
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x111a2e, roughness: 0.65, metalness: 0.3 });
-    const glassWallMat = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(zone.color), metalness: 0.0, roughness: 0.12,
-      transmission: 0.5, transparent: true, opacity: 0.4,
-      thickness: 0.5, ior: 1.3, side: THREE.DoubleSide,
+    const glassWallMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(zone.color), metalness: 0.4, roughness: 0.2,
+      transparent: true, opacity: 0.28, side: THREE.DoubleSide,
     });
     const back = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), glassWallMat);
     back.position.set(0, RH / 2, -RD / 2); back.receiveShadow = true;
