@@ -777,13 +777,18 @@
       grp.add(line);
     });
 
-    // walls (back + sides)
+    // walls (back + sides) — glass curtain wall, tinted with the department color
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x111a2e, roughness: 0.65, metalness: 0.3 });
-    const back = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), wallMat);
+    const glassWallMat = new THREE.MeshPhysicalMaterial({
+      color: new THREE.Color(zone.color), metalness: 0.0, roughness: 0.12,
+      transmission: 0.5, transparent: true, opacity: 0.4,
+      thickness: 0.5, ior: 1.3, side: THREE.DoubleSide,
+    });
+    const back = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), glassWallMat);
     back.position.set(0, RH / 2, -RD / 2); back.receiveShadow = true;
     grp.add(back);
     [-1, 1].forEach((s) => {
-      const side = new THREE.Mesh(new THREE.BoxGeometry(0.4, RH, RD), wallMat);
+      const side = new THREE.Mesh(new THREE.BoxGeometry(0.4, RH, RD), glassWallMat);
       side.position.set(s * RW / 2, RH / 2, 0);
       grp.add(side);
       for (let i = -1; i <= 1; i++) {
@@ -794,13 +799,12 @@
         grp.add(strip);
       }
     });
-    // ceiling + linear glow
-    const ceil = new THREE.Mesh(new THREE.BoxGeometry(RW, 0.3, RD),
-      new THREE.MeshStandardMaterial({ color: 0x0c1424, roughness: 0.7, metalness: 0.3 }));
+    // ceiling — glass skylight
+    const ceil = new THREE.Mesh(new THREE.BoxGeometry(RW, 0.2, RD), glassWallMat);
     ceil.position.y = RH;
     grp.add(ceil);
     // front wall (encloses the room so no void shows when orbiting)
-    const front = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), wallMat);
+    const front = new THREE.Mesh(new THREE.BoxGeometry(RW, RH, 0.4), glassWallMat);
     front.position.set(0, RH / 2, RD / 2);
     grp.add(front);
     const ceilGlow = new THREE.Mesh(new THREE.PlaneGeometry(2.4, RD - 4),
@@ -907,7 +911,7 @@
       const room = rooms[id] || buildRoom(zone);
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
-      controls.minDistance = 4; controls.maxDistance = 22;
+      controls.minDistance = 4; controls.maxDistance = 21;
       controls.enableRotate = false; // room stays put; only the cards spin
       controls.enabled = false;      // fully hand touch/mouse to the carousel drag logic
       controls.update();
@@ -1100,8 +1104,9 @@
     const offset = camera.position.clone().sub(controls.target);
     let dist = offset.length() * factor;
     dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, dist));
-    // steer the focus toward the point under the cursor when zooming in
-    if (ok && zoomIn) controls.target.lerp(zoomPt, 0.2);
+    // steer the focus toward the point under the cursor when zooming in — but NOT in a
+    // room, where the target must stay locked to the room center so you can never lose it
+    if (ok && zoomIn && mode !== "room") controls.target.lerp(zoomPt, 0.2);
     offset.setLength(dist);
     camera.position.copy(controls.target).add(offset);
     controls.update();
