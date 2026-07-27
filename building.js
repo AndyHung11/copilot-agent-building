@@ -14,7 +14,7 @@
   const PLAZA_R = 11;
   const PAV_W = 13;
   const PAV_D = 11;
-  const PAV_H_SCALE = 1.5;   // make each department pavilion taller (height only, not wider)
+  const PAV_H_SCALE = 1.9;   // make each department pavilion taller (height only, not wider)
   const SHELL_R = 48;
   const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
@@ -164,17 +164,21 @@
   }
   function wrapText(ctx, text, x, y, maxW, lh, maxLines) {
     const chars = (text || "").split("");
-    let line = "", lines = [];
-    for (const ch of chars) {
-      if (ctx.measureText(line + ch).width > maxW && line) { lines.push(line); line = ch; }
-      else line += ch;
-      if (lines.length >= maxLines) break;
+    const lines = [];
+    let line = "", truncated = false;
+    for (let i = 0; i < chars.length; i++) {
+      const ch = chars[i];
+      if (line && ctx.measureText(line + ch).width > maxW) {
+        lines.push(line);
+        line = ch;
+        if (lines.length === maxLines) { truncated = true; line = ""; break; }
+      } else line += ch;
     }
-    if (line && lines.length < maxLines) lines.push(line);
-    if (lines.length === maxLines) {
-      let last = lines[maxLines - 1];
+    if (line) lines.push(line);
+    if (truncated && lines.length) {
+      let last = lines[lines.length - 1];
       while (ctx.measureText(last + "…").width > maxW && last.length) last = last.slice(0, -1);
-      lines[maxLines - 1] = last + "…";
+      lines[lines.length - 1] = last + "…";
     }
     lines.forEach((l, i) => ctx.fillText(l, x, y + i * lh));
     return lines.length;
@@ -183,69 +187,86 @@
   function canvasTex(cv) { const t = new THREE.CanvasTexture(cv); t.anisotropy = maxAniso; t.encoding = THREE.sRGBEncoding; return t; }
 
   function signTexture(zone) {
-    const W = 760, H = 180, cv = document.createElement("canvas");
+    const W = 1280, H = 300, cv = document.createElement("canvas");
     cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d");
     // dark glass plate with glowing color edge
-    ctx.fillStyle = "rgba(10,16,30,0.92)";
-    roundRect(ctx, 6, 6, W - 12, H - 12, 26); ctx.fill();
-    ctx.lineWidth = 3; ctx.strokeStyle = zone.color; ctx.stroke();
-    // color icon tile
+    ctx.fillStyle = "rgba(9,14,26,0.94)";
+    roundRect(ctx, 8, 8, W - 16, H - 16, 40); ctx.fill();
+    ctx.lineWidth = 4; ctx.strokeStyle = zone.color; ctx.stroke();
+    // color accent bar down the left edge
     ctx.fillStyle = zone.color;
-    roundRect(ctx, 22, 30, 120, H - 60, 20); ctx.fill();
-    ctx.font = "62px 'Segoe UI Emoji', sans-serif";
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(zone.icon, 82, H / 2 + 2);
+    roundRect(ctx, 30, 52, 14, H - 104, 7); ctx.fill();
     // texts
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#eef4ff";
-    ctx.font = "700 42px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.name, 168, 74);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillStyle = "#f2f7ff";
+    ctx.font = "800 92px 'Segoe UI', sans-serif";
+    ctx.fillText(zone.name, 72, 118);
     ctx.fillStyle = hexToRgba(zone.color, 1);
-    ctx.font = "600 21px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.nameEn.toUpperCase(), 170, 118);
+    ctx.font = "600 40px 'Segoe UI', sans-serif";
+    ctx.fillText(zone.nameEn.toUpperCase(), 76, 208);
     // count badge
     ctx.fillStyle = zone.color;
-    roundRect(ctx, W - 150, 56, 120, 66, 18); ctx.fill();
+    roundRect(ctx, W - 250, H / 2 - 55, 190, 110, 30); ctx.fill();
     ctx.fillStyle = "#08101e";
-    ctx.font = "800 34px 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(zone.count + " 位", W - 90, H / 2 + 1);
+    ctx.font = "800 62px 'Segoe UI', sans-serif";
+    ctx.fillText(String(zone.count), W - 178, H / 2 - 4);
+    ctx.font = "700 26px 'Segoe UI', sans-serif";
+    ctx.fillText("AGENTS", W - 178, H / 2 + 40);
     return canvasTex(cv);
   }
 
   function kioskTexture(agent, zone) {
-    const W = 300, H = 384, cv = document.createElement("canvas");
+    const W = 620, H = 800, cv = document.createElement("canvas");
     cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d");
+    // card body
     ctx.fillStyle = "#ffffff";
-    roundRect(ctx, 5, 5, W - 10, H - 10, 22); ctx.fill();
+    roundRect(ctx, 8, 8, W - 16, H - 16, 40); ctx.fill();
+    // top color band with the department name
     ctx.fillStyle = zone.color;
-    roundRect(ctx, 5, 5, W - 10, 48, 22); ctx.fill();
-    ctx.fillRect(5, 36, W - 10, 17);
-    ctx.fillStyle = "#fff";
-    ctx.font = "600 17px 'Segoe UI', sans-serif";
+    roundRect(ctx, 8, 8, W - 16, 104, 40); ctx.fill();
+    ctx.fillRect(8, 72, W - 16, 40);
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.font = "700 30px 'Segoe UI', sans-serif";
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText(zone.icon + "  " + zone.name, 20, 30);
-    ctx.fillStyle = hexToRgba(zone.color, 0.13);
-    ctx.beginPath(); ctx.arc(W / 2, 112, 43, 0, Math.PI * 2); ctx.fill();
-    ctx.font = "46px 'Segoe UI Emoji', sans-serif";
+    ctx.fillText(zone.name, 40, 62);
+    // license pill, right side of the band
+    const licTxt = agent.license === "required" ? "需授權" : "免授權";
+    ctx.font = "700 22px 'Segoe UI', sans-serif";
+    const lw = ctx.measureText(licTxt).width + 40;
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    roundRect(ctx, W - 40 - lw, 40, lw, 44, 22); ctx.fill();
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(agent.emoji || "🤖", W / 2, 118);
-    ctx.fillStyle = "#141b2c";
-    ctx.font = "700 23px 'Segoe UI', sans-serif";
-    wrapText(ctx, agent.cname, W / 2, 182, W - 44, 27, 2);
-    ctx.fillStyle = "#8a93a6";
-    ctx.font = "13px 'Segoe UI', sans-serif";
-    ctx.fillText(agent.ename || "", W / 2, 240);
-    ctx.fillStyle = "#5c6577";
-    ctx.font = "14px 'Segoe UI', sans-serif";
-    wrapText(ctx, (agent.tagline || "").replace(/^✨\s*/, ""), W / 2, 270, W - 48, 20, 3);
-    ctx.fillStyle = hexToRgba(zone.color, 0.13);
-    roundRect(ctx, W / 2 - 70, H - 54, 140, 34, 17); ctx.fill();
+    ctx.fillText(licTxt, W - 40 - lw / 2, 63);
+
+    // agent name — the hero element, generous size and line spacing
+    ctx.fillStyle = "#12192b";
+    ctx.font = "800 46px 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    const nameLines = wrapText(ctx, agent.cname, W / 2, 196, W - 90, 58, 2);
+    // english name
+    const enY = 196 + (nameLines > 1 ? 58 : 0) + 52;
+    ctx.fillStyle = "#7b869c";
+    ctx.font = "600 24px 'Segoe UI', sans-serif";
+    ctx.fillText(agent.ename || "", W / 2, enY);
+    // divider
+    ctx.strokeStyle = hexToRgba(zone.color, 0.35);
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 70, enY + 42); ctx.lineTo(W / 2 + 70, enY + 42); ctx.stroke();
+    // tagline / what it does
+    ctx.fillStyle = "#49536a";
+    ctx.font = "400 27px 'Segoe UI', sans-serif";
+    wrapText(ctx, (agent.tagline || "").replace(/^✨\s*/, ""), W / 2, enY + 96, W - 96, 40, 3);
+
+    // call-to-action
+    ctx.fillStyle = hexToRgba(zone.color, 0.14);
+    roundRect(ctx, W / 2 - 132, H - 110, 264, 66, 33); ctx.fill();
     ctx.fillStyle = zone.color;
-    ctx.font = "600 14px 'Segoe UI', sans-serif";
-    ctx.fillText("▶  開始體驗", W / 2, H - 35);
+    ctx.font = "700 27px 'Segoe UI', sans-serif";
+    ctx.fillText("▶  查看詳細", W / 2, H - 75);
     return canvasTex(cv);
   }
 
@@ -523,7 +544,7 @@
   // ---------- Floating glass card (3D agent display inside a room) ----------
   function buildFloatingCard(agent, zone) {
     const grp = new THREE.Group();
-    const CW = 2.7, CH = 3.4;
+    const CW = 3.9, CH = 5.03;   // matches the 620x800 texture aspect
     const tex = kioskTexture(agent, zone);
 
     // spinner: the part that rotates (glass + both faces + frame + hit box)
@@ -537,11 +558,11 @@
       }));
     spinner.add(glass);
     // printed face on BOTH sides so it's readable while spinning
-    const faceFront = new THREE.Mesh(new THREE.PlaneGeometry(CW - 0.24, CH - 0.24),
+    const faceFront = new THREE.Mesh(new THREE.PlaneGeometry(CW - 0.3, CH - 0.3),
       new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
     faceFront.position.z = 0.03;
     spinner.add(faceFront);
-    const faceBack = new THREE.Mesh(new THREE.PlaneGeometry(CW - 0.24, CH - 0.24),
+    const faceBack = new THREE.Mesh(new THREE.PlaneGeometry(CW - 0.3, CH - 0.3),
       new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
     faceBack.position.z = -0.03; faceBack.rotation.y = Math.PI;
     spinner.add(faceBack);
@@ -551,29 +572,29 @@
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), fMat);
       m.position.set(x, y, 0.04); spinner.add(m);
     };
-    bar(CW, 0.06, 0, CH / 2 - 0.03);
-    bar(CW, 0.06, 0, -CH / 2 + 0.03);
-    bar(0.06, CH, -CW / 2 + 0.03, 0);
-    bar(0.06, CH, CW / 2 - 0.03, 0);
+    bar(CW, 0.075, 0, CH / 2 - 0.038);
+    bar(CW, 0.075, 0, -CH / 2 + 0.038);
+    bar(0.075, CH, -CW / 2 + 0.038, 0);
+    bar(0.075, CH, CW / 2 - 0.038, 0);
     // invisible hit box (has volume → clickable at any spin angle)
     const hit = new THREE.Mesh(new THREE.BoxGeometry(CW, CH, 0.5),
       new THREE.MeshBasicMaterial({ visible: false }));
     spinner.add(hit);
 
     // fixed (non-spinning) ambience: halo, tether, floor spot
-    const halo = new THREE.Mesh(new THREE.PlaneGeometry(CW + 1.2, CH + 1.2),
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(CW + 1.5, CH + 1.5),
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.12,
         blending: THREE.AdditiveBlending, depthWrite: false }));
     halo.position.z = -0.3;
     grp.add(halo);
     grp.userData.halo = halo;
-    const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 3.4, 6),
+    const tether = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 2.2, 6),
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.25 }));
-    tether.position.y = -CH / 2 - 1.7;
+    tether.position.y = -CH / 2 - 1.1;
     grp.add(tether);
-    const spot = new THREE.Mesh(new THREE.RingGeometry(0.5, 0.72, 28),
+    const spot = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.8, 28),
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
-    spot.rotation.x = -Math.PI / 2; spot.position.y = -CH / 2 - 3.4;
+    spot.rotation.x = -Math.PI / 2; spot.position.y = -CH / 2 - 2.17;
     grp.add(spot);
 
     grp.userData.hit = hit;
@@ -636,6 +657,11 @@
     g.scale.set(1, PAV_H_SCALE, 1);
     scene.add(g);
     zoneGroups.push({ zone, group: g });
+    // un-stretched child layer: anything with text goes here so the pavilion's vertical
+    // scale never distorts type. Inside gUp, y values are real world units.
+    const gUp = new THREE.Group();
+    gUp.scale.set(1, 1 / PAV_H_SCALE, 1);
+    g.add(gUp);
 
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x16203a, roughness: 0.6, metalness: 0.35 });
     // glass curtain-wall material for the pavilion shell (back/side walls + roof)
@@ -701,11 +727,18 @@
     beam.position.set(0, 5.6, PAV_D / 2 - 0.22);
     g.add(beam);
 
-    // illuminated signboard above the portal
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 1.8),
+    // illuminated marquee sign above the portal (in gUp → never vertically stretched)
+    const SIGN_Y = 5.6 * PAV_H_SCALE + 1.9;   // just above the portal beam
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(12.4, 2.9),
       new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true }));
-    sign.position.set(0, 4.55, PAV_D / 2 - 0.02);
-    g.add(sign);
+    sign.position.set(0, SIGN_Y, PAV_D / 2 - 0.02);
+    gUp.add(sign);
+    // soft backlight glow behind the sign so it pops from across the atrium
+    const signGlow = new THREE.Mesh(new THREE.PlaneGeometry(13.6, 4.1),
+      new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.16,
+        blending: THREE.AdditiveBlending, depthWrite: false }));
+    signGlow.position.set(0, SIGN_Y, PAV_D / 2 - 0.12);
+    gUp.add(signGlow);
 
     // interior accent light
     const pl = new THREE.PointLight(zone.color, 0.6, 20); pl.position.set(0, 4, 0); g.add(pl);
@@ -732,12 +765,12 @@
     dash.rotation.copy(walk.rotation); dash.position.copy(mid); dash.position.y = 0.06;
     scene.add(dash);
 
-    // storefront "進入體驗" hint inside the pavilion
+    // storefront "進入體驗" hint inside the pavilion (un-stretched layer)
     const hintTex = textTexture("點此進入 " + zone.name + " ▸", 640, 96, "600 40px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
     const hint = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.96),
       new THREE.MeshBasicMaterial({ map: hintTex, transparent: true }));
-    hint.position.set(0, 2.5, -PAV_D / 2 + 0.5);
-    g.add(hint);
+    hint.position.set(0, 4.2, -PAV_D / 2 + 0.5);
+    gUp.add(hint);
     // glowing interior floor glow to signal it's enterable
     const glowPad = new THREE.Mesh(new THREE.CircleGeometry(3.2, 32),
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.14 }));
@@ -750,11 +783,12 @@
     hiRing.rotation.x = -Math.PI / 2; hiRing.position.y = 0.24;
     g.add(hiRing);
     // a soft vertical beam of light that appears over the hovered pavilion
-    const hiBeam = new THREE.Mesh(new THREE.CylinderGeometry(PAV_W * 0.5, PAV_W * 0.66, WALL_H - 4, 24, 1, true),
+    // (in gUp so the pavilion's vertical scale doesn't push it through the roof)
+    const hiBeam = new THREE.Mesh(new THREE.CylinderGeometry(PAV_W * 0.5, PAV_W * 0.66, WALL_H - 5, 24, 1, true),
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0,
         side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
-    hiBeam.position.y = (WALL_H - 4) / 2 + 0.3;
-    g.add(hiBeam);
+    hiBeam.position.y = (WALL_H - 5) / 2 + 0.3;
+    gUp.add(hiBeam);
     pavHi.push({ zoneId: zone.id, group: g, frameMat, ring: hiRing, beam: hiBeam, baseEmissive: 0.35, k: 0 });
   });
 
@@ -769,7 +803,7 @@
     const grp = new THREE.Group();
     grp.position.copy(o);
     scene.add(grp);
-    const RW = 46, RD = 40, RH = 10;
+    const RW = 54, RD = 58, RH = 12;
     const roomClickAgents = [];
 
     // ---------- Outdoor context so the glass walls actually read as glass ----------
@@ -884,9 +918,11 @@
     // ---------- Carousel of floating glass cards (whole ring revolves) ----------
     const list = agentsByZone[zone.id] || [];
     const carousel = new THREE.Group();
-    carousel.position.set(0, 3.7, -3);   // ring center, mid-room
+    const RING_Y = 4.7;
+    carousel.position.set(0, RING_Y, -3);   // ring center, mid-room
     grp.add(carousel);
-    const ringR = Math.max(5.5, list.length * 0.95);
+    // radius derived from card width so cards never crowd each other
+    const ringR = Math.max(7, list.length * 0.86);
     list.forEach((agent, idx) => {
       const a = (idx / list.length) * Math.PI * 2;
       const card = buildFloatingCard(agent, zone);
@@ -900,17 +936,21 @@
 
     // ---------- Exit gateway (return to lobby), front-left, angled toward the viewer ----------
     const exitGate = buildExitGate();
-    exitGate.position.set(-15, 0, 7);
+    exitGate.position.set(-(ringR + 6), 0, 8);
     exitGate.rotation.y = 0.5;
     grp.add(exitGate);
     const exitAgentless = { mesh: exitGate.userData.hit };
 
-    // camera sits INSIDE the room, in front of the carousel, looking at the ring center
+    // camera sits INSIDE the room, in front of the carousel, looking at the ring center.
+    // its distance scales with the ring so every department frames up the same way.
+    const camGap = 9.5;
     const stance = {
-      pos: { x: o.x, y: 5.2, z: o.z + RD / 2 - 3 },
-      look: { x: o.x, y: 3.7, z: o.z - 3 },
+      pos: { x: o.x, y: RING_Y + 1.3, z: o.z - 3 + ringR + camGap },
+      look: { x: o.x, y: RING_Y, z: o.z - 3 },
     };
-    const room = { group: grp, clickAgents: roomClickAgents, exit: exitAgentless, stance, zoneId: zone.id };
+    // keep the camera inside the front wall no matter how far out you zoom
+    const maxDist = Math.min(ringR + camGap + 7, RD / 2 - 3 - 2);
+    const room = { group: grp, clickAgents: roomClickAgents, exit: exitAgentless, stance, maxDist, zoneId: zone.id };
     rooms[zone.id] = room;
     return room;
   }
@@ -967,6 +1007,7 @@
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
       roomLook.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
+      roomMaxDist = room.maxDist;
       controls.minDistance = 4; controls.maxDistance = roomMaxDist;
       controls.enableRotate = false; // room stays put; only the cards spin
       controls.enabled = false;      // fully hand touch/mouse to the carousel drag logic
@@ -1083,27 +1124,32 @@
   function showZoneHover(zone, cx, cy) {
     if (hoveredZoneId !== zone.id) {
       const list = (agentsByZone[zone.id] || []);
+      const twoCol = list.length > 6;
       const items = list.map((a) =>
-        `<div class="zh-item"><span class="em">${a.emoji || "🤖"}</span><span>${a.cname || a.ename || ""}</span></div>`
+        `<li>${esc(a.cname || a.ename || "")}</li>`
       ).join("");
       zoneHoverEl.innerHTML =
         `<div class="zh-head">
-           <div class="zh-ic" style="background:${hexToRgba(zone.color, 0.9)}">${zone.icon || "🏛️"}</div>
-           <div><div class="zh-name" style="color:${zone.color}">${zone.name}</div>
-           <div class="zh-en">${zone.nameEn || ""}</div></div>
-           <div class="zh-cnt">${list.length} Agents</div>
+           <div class="zh-bar" style="background:${zone.color}"></div>
+           <div class="zh-title">
+             <div class="zh-name">${esc(zone.name)}</div>
+             <div class="zh-en">${esc(zone.nameEn || "")}</div>
+           </div>
+           <div class="zh-cnt" style="color:${zone.color};border-color:${hexToRgba(zone.color, 0.45)}">${list.length}</div>
          </div>
-         <div class="zh-list">${items}</div>
-         <div class="zh-tip">點擊進入體驗館 ▸</div>`;
+         <div class="zh-desc">${esc(ZONE_DESC[zone.id] || "")}</div>
+         <ol class="zh-list${twoCol ? " two" : ""}" style="--zc:${zone.color}">${items}</ol>
+         <div class="zh-tip">點擊進入體驗館</div>`;
       zoneHoverEl.style.borderLeftColor = zone.color;
       zoneHoverEl.style.display = "block";
       hoveredZoneId = zone.id;
     }
     // position the panel near the cursor, clamped to the viewport
-    const pw = zoneHoverEl.offsetWidth || 280, ph = zoneHoverEl.offsetHeight || 240;
-    let x = cx + 20, y = cy + 18;
-    if (x + pw > window.innerWidth - 12) x = cx - pw - 20;
-    if (y + ph > window.innerHeight - 12) y = Math.max(12, window.innerHeight - ph - 12);
+    const pw = zoneHoverEl.offsetWidth || 320, ph = zoneHoverEl.offsetHeight || 260;
+    let x = cx + 24, y = cy + 20;
+    if (x + pw > window.innerWidth - 14) x = cx - pw - 24;
+    if (x < 14) x = 14;
+    if (y + ph > window.innerHeight - 14) y = Math.max(14, window.innerHeight - ph - 14);
     zoneHoverEl.style.left = x + "px"; zoneHoverEl.style.top = y + "px";
   }
   function hideZoneHover() {
@@ -1254,7 +1300,7 @@
     const m = AGENTS.filter((a) => `${a.cname} ${a.ename} ${a.tagline}`.toLowerCase().includes(q)).slice(0, 10);
     searchResults.innerHTML = m.length
       ? m.map((a) => { const z = zoneById[a.zone];
-          return `<div class="sr-item" data-id="${a.id}"><span class="em">${a.emoji || "🤖"}</span><span class="nm">${esc(a.cname)}</span><span class="zn" style="background:${z.color}">${z.name}</span></div>`; }).join("")
+          return `<div class="sr-item" data-id="${a.id}"><span class="nm">${esc(a.cname)}</span><span class="zn" style="background:${z.color}">${z.name}</span></div>`; }).join("")
       : `<div class="sr-item" style="cursor:default;color:#8a93a6">沒有符合的 Agent</div>`;
     searchResults.classList.add("show");
     searchResults.querySelectorAll(".sr-item[data-id]").forEach((it) => it.addEventListener("click", () => {
