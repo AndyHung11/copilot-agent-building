@@ -14,6 +14,7 @@
   const PLAZA_R = 11;
   const PAV_W = 13;
   const PAV_D = 11;
+  const PAV_SCALE = 1.32;   // enlarge each department pavilion so it reads more clearly
   const SHELL_R = 48;
   const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
@@ -400,10 +401,10 @@
     logo.position.set(ex, 19.5, ez + 0.4);
     shellAdd(logo);
     // building name
-    const nameTex = textTexture("COPILOT AGENT 智慧大樓", 900, 130, "700 60px 'Segoe UI'", "#eaf2ff", "#4f7cff");
-    const nameP = new THREE.Mesh(new THREE.PlaneGeometry(16, 2.3),
+    const nameTex = textTexture("COPILOT AGENT 智慧大樓", 1120, 150, "800 76px 'Segoe UI'", "#eaf2ff", "#4f7cff");
+    const nameP = new THREE.Mesh(new THREE.PlaneGeometry(21, 2.8),
       new THREE.MeshBasicMaterial({ map: nameTex, transparent: true }));
-    nameP.position.set(ex, 13.2, ez + 0.35);
+    nameP.position.set(ex, 11.3, ez + 0.35);
     shellAdd(nameP);
     // entrance uplights
     const eL = new THREE.PointLight(0x5aa0ff, 0.8, 46); eL.position.set(ex, 14, ez + 6); shellAdd(eL);
@@ -458,7 +459,7 @@
     // that revolve, so it reads as a genuine 3D turning logo.
     const emblem = new THREE.Group();
     emblem.position.y = 7;
-    const SZ = 6;
+    const SZ = 8.4;
     const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ, SZ),
       new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
     front.position.z = 0.04;
@@ -478,15 +479,15 @@
       c.fillStyle = g; c.fillRect(0, 0, 256, 256);
       return canvasTex(cv);
     })();
-    const glowDisc = new THREE.Mesh(new THREE.PlaneGeometry(12, 12),
+    const glowDisc = new THREE.Mesh(new THREE.PlaneGeometry(16, 16),
       new THREE.MeshBasicMaterial({ map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
     glowDisc.position.y = 7;
     plazaGroup.add(glowDisc);
     plazaGroup.userData.glowDisc = glowDisc;
     const eLight = new THREE.PointLight(0x8ab6ff, 1.2, 40); eLight.position.y = 7; plazaGroup.add(eLight);
 
-    const titleTex = textTexture("歡迎進入 Copilot Agent 智慧大樓", 820, 96, "700 44px 'Segoe UI'", "#dbe8ff", "#3a6ea5");
-    const title = new THREE.Mesh(new THREE.PlaneGeometry(8, 0.94), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
+    const titleTex = textTexture("歡迎進入 Copilot Agent 智慧大樓", 980, 112, "800 56px 'Segoe UI'", "#dbe8ff", "#3a6ea5");
+    const title = new THREE.Mesh(new THREE.PlaneGeometry(11, 1.26), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
     title.rotation.x = -Math.PI / 2; title.position.set(0, 0.28, PLAZA_R - 2.4);
     plazaGroup.add(title);
   }
@@ -632,6 +633,7 @@
     const g = new THREE.Group();
     g.position.set(zone.center.x, 0, zone.center.z);
     g.rotation.y = Math.atan2(-zone.dir.x, -zone.dir.z);
+    g.scale.setScalar(PAV_SCALE);
     scene.add(g);
     zoneGroups.push({ zone, group: g });
 
@@ -717,7 +719,7 @@
     // walkway from plaza to pavilion (glowing strip)
     const d = zone.dir;
     const s0 = new THREE.Vector3(d.x * (PLAZA_R + 0.2), 0.05, d.z * (PLAZA_R + 0.2));
-    const s1 = new THREE.Vector3(zone.center.x - d.x * (PAV_D / 2 + 0.3), 0.05, zone.center.z - d.z * (PAV_D / 2 + 0.3));
+    const s1 = new THREE.Vector3(zone.center.x - d.x * (PAV_D / 2 * PAV_SCALE + 0.3), 0.05, zone.center.z - d.z * (PAV_D / 2 * PAV_SCALE + 0.3));
     const mid = new THREE.Vector3().lerpVectors(s0, s1, 0.5);
     const len = s0.distanceTo(s1);
     const rot = -Math.atan2(d.z, d.x) + Math.PI / 2;
@@ -1138,9 +1140,15 @@
     } else {
       tooltip.style.display = "none";
       document.body.style.cursor = mode === "room" && roomCarousels.length ? "grab" : "default";
-      hideZoneHover();
+      // in the lobby, keep the last hovered pavilion "latched" (focus stays on it) until
+      // another pavilion is hovered or the pointer leaves the canvas — avoids jitter
+      if (mode !== "lobby") hideZoneHover();
     }
   }, { passive: false });
+  canvas.addEventListener("pointerleave", hideZoneHover);
+  // once the user grabs to navigate the lobby, release the hover-focus latch so we
+  // never fight their manual orbit/pan
+  controls.addEventListener("start", () => { if (mode === "lobby") hideZoneHover(); });
 
   let downPos = null;
   canvas.addEventListener("pointerdown", (e) => {
@@ -1272,6 +1280,7 @@
 
   // ---------- Animate ----------
   const camPos = new THREE.Vector3();
+  const focusPt = new THREE.Vector3();
   let t = 0;
   function animate() {
     requestAnimationFrame(animate);
@@ -1318,9 +1327,15 @@
       ph.frameMat.emissiveIntensity = ph.baseEmissive + ph.k * 1.1;
       ph.ring.material.opacity = ph.k * 0.8;
       ph.beam.material.opacity = ph.k * 0.14;
-      const s = 1 + ph.k * 0.06;
+      const s = PAV_SCALE * (1 + ph.k * 0.06);
       ph.group.scale.set(s, s, s);
-      ph.group.position.y = ph.k * 0.35;
+      ph.group.position.y = ph.k * 0.4;
+    }
+    // glide the camera focus toward the hovered pavilion so the whole view shifts to it
+    if (mode === "lobby" && hoveredZoneId && !dragTurn.active) {
+      const z = zoneById[hoveredZoneId];
+      focusPt.set(z.center.x, 5, z.center.z);
+      controls.target.lerp(focusPt, 0.06);
     }
     // hide the vertical wall structure (mullions) whenever the camera is inside the
     // atrium shell, so the curtain wall never blocks the view of the pavilions
