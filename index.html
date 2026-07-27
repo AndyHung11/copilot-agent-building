@@ -110,6 +110,29 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 #tooltip::after { content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
   border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--ink); }
 
+/* ---------- Pavilion hover panel (agent name list) ---------- */
+#zoneHover {
+  position: fixed; z-index: 14; pointer-events: none; display: none;
+  min-width: 240px; max-width: 320px;
+  background: rgba(12,18,34,0.92); backdrop-filter: blur(10px);
+  border: 1px solid rgba(120,160,255,0.25); border-left: 4px solid #4f7cff;
+  border-radius: 14px; padding: 13px 15px 15px; box-shadow: 0 18px 46px rgba(0,0,0,0.5);
+  color: #eaf2ff;
+}
+#zoneHover .zh-head { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+#zoneHover .zh-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+  font-size: 17px; flex: 0 0 auto; }
+#zoneHover .zh-name { font-size: 15px; font-weight: 800; line-height: 1.15; }
+#zoneHover .zh-en { font-size: 11px; color: #9fb3d6; font-weight: 600; margin-top: 1px; }
+#zoneHover .zh-cnt { margin-left: auto; font-size: 11px; font-weight: 700; color: #cdd9f2;
+  background: rgba(120,160,255,0.16); padding: 2px 9px; border-radius: 20px; flex: 0 0 auto; }
+#zoneHover .zh-list { margin-top: 9px; display: flex; flex-direction: column; gap: 5px; }
+#zoneHover .zh-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600;
+  color: #dce6fb; line-height: 1.25; }
+#zoneHover .zh-item .em { font-size: 13px; flex: 0 0 auto; }
+#zoneHover .zh-tip { margin-top: 10px; font-size: 10.5px; color: #8aa0c8; font-weight: 600;
+  border-top: 1px solid rgba(120,160,255,0.15); padding-top: 8px; }
+
 /* ---------- Modal ---------- */
 #modalBackdrop { position: fixed; inset: 0; background: rgba(20,30,55,0.32); backdrop-filter: blur(3px);
   z-index: 50; display: none; align-items: center; justify-content: center; padding: 24px; }
@@ -262,6 +285,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 </div>
 
 <div id="tooltip"></div>
+<div id="zoneHover"></div>
 
 <div id="modalBackdrop"><div id="modal"></div></div>
 

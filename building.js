@@ -15,7 +15,7 @@
   const PAV_W = 13;
   const PAV_D = 11;
   const SHELL_R = 48;
-  const WALL_H = 18;
+  const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
 
   const step = (Math.PI * 2) / ZONES.length;
@@ -70,8 +70,8 @@
   scene.fog = new THREE.Fog(0x0b1222, 90, 210);
 
   const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 600);
-  const EXTERIOR = { pos: { x: 6, y: 10, z: SHELL_R + 40 }, look: { x: 0, y: 9, z: SHELL_R - 6 } };
-  const INTERIOR = { pos: { x: 0, y: 16, z: 31 }, look: { x: 0, y: 2.5, z: 0 } };
+  const EXTERIOR = { pos: { x: 6, y: 13, z: SHELL_R + 40 }, look: { x: 0, y: 13, z: SHELL_R - 6 } };
+  const INTERIOR = { pos: { x: 0, y: 18, z: 31 }, look: { x: 0, y: 3, z: 0 } };
   camera.position.set(10, 14, SHELL_R + 82);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -377,36 +377,36 @@
     const ex = 0, ez = SHELL_R; // entrance faces +Z
     const frameMat = new THREE.MeshStandardMaterial({ color: 0x2a3b58, metalness: 0.6, roughness: 0.35 });
     // canopy
-    const canopy = new THREE.Mesh(new THREE.BoxGeometry(20, 0.6, 7), frameMat);
-    canopy.position.set(ex, 9.2, ez + 2.6);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(22, 0.7, 7.5), frameMat);
+    canopy.position.set(ex, 14.2, ez + 2.6);
     canopy.castShadow = true;
     shellAdd(canopy);
     // two pillars
-    [-8.5, 8.5].forEach((px) => {
-      const p = new THREE.Mesh(new THREE.BoxGeometry(0.8, 9.2, 0.8), frameMat);
-      p.position.set(ex + px, 4.6, ez + 5.8);
+    [-9.5, 9.5].forEach((px) => {
+      const p = new THREE.Mesh(new THREE.BoxGeometry(0.9, 14.2, 0.9), frameMat);
+      p.position.set(ex + px, 7.1, ez + 5.8);
       p.castShadow = true;
       shellAdd(p);
     });
     // entrance floor mat (glowing)
-    const mat = new THREE.Mesh(new THREE.PlaneGeometry(16, 10),
+    const mat = new THREE.Mesh(new THREE.PlaneGeometry(18, 11),
       new THREE.MeshBasicMaterial({ color: 0x0f6cbd, transparent: true, opacity: 0.25 }));
     mat.rotation.x = -Math.PI / 2; mat.position.set(ex, 0.02, ez + 3.5);
     shellAdd(mat);
 
     // big Copilot logo above the entrance (real PNG)
-    const logo = new THREE.Mesh(new THREE.PlaneGeometry(7.5, 7.5),
+    const logo = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 8.4),
       new THREE.MeshBasicMaterial({ map: logoTex, transparent: true }));
-    logo.position.set(ex, 12.6, ez + 0.4);
+    logo.position.set(ex, 19.5, ez + 0.4);
     shellAdd(logo);
     // building name
     const nameTex = textTexture("COPILOT AGENT 智慧大樓", 900, 130, "700 60px 'Segoe UI'", "#eaf2ff", "#4f7cff");
-    const nameP = new THREE.Mesh(new THREE.PlaneGeometry(15, 2.15),
+    const nameP = new THREE.Mesh(new THREE.PlaneGeometry(16, 2.3),
       new THREE.MeshBasicMaterial({ map: nameTex, transparent: true }));
-    nameP.position.set(ex, 8.4, ez + 0.35);
+    nameP.position.set(ex, 13.2, ez + 0.35);
     shellAdd(nameP);
     // entrance uplights
-    const eL = new THREE.PointLight(0x5aa0ff, 0.8, 40); eL.position.set(ex, 10, ez + 6); shellAdd(eL);
+    const eL = new THREE.PointLight(0x5aa0ff, 0.8, 46); eL.position.set(ex, 14, ez + 6); shellAdd(eL);
   }
 
   // ---------- Interior reflective floor ----------
@@ -627,6 +627,7 @@
 
   // ---------- Department体驗館 (glass storefront pavilions) ----------
   const zoneGroups = [];
+  const pavHi = [];   // per-pavilion hover-highlight references
   ZONES.forEach((zone) => {
     const g = new THREE.Group();
     g.position.set(zone.center.x, 0, zone.center.z);
@@ -740,6 +741,19 @@
       new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.14 }));
     glowPad.rotation.x = -Math.PI / 2; glowPad.position.y = 0.22;
     g.add(glowPad);
+
+    // hover-highlight ring on the ground (hidden until the pavilion is hovered)
+    const hiRing = new THREE.Mesh(new THREE.RingGeometry(PAV_W * 0.62, PAV_W * 0.74, 56),
+      new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+    hiRing.rotation.x = -Math.PI / 2; hiRing.position.y = 0.24;
+    g.add(hiRing);
+    // a soft vertical beam of light that appears over the hovered pavilion
+    const hiBeam = new THREE.Mesh(new THREE.CylinderGeometry(PAV_W * 0.5, PAV_W * 0.66, WALL_H - 4, 24, 1, true),
+      new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0,
+        side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
+    hiBeam.position.y = (WALL_H - 4) / 2 + 0.3;
+    g.add(hiBeam);
+    pavHi.push({ zoneId: zone.id, group: g, frameMat, ring: hiRing, beam: hiBeam, baseEmissive: 0.35, k: 0 });
   });
 
   // ---------- Department rooms (each a dedicated interior space, built lazily) ----------
@@ -945,6 +959,7 @@
     const zone = zoneById[id];
     if (!zone) return;
     atExterior = false;
+    hideZoneHover();
     transition(() => {
       const room = rooms[id] || buildRoom(zone);
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
@@ -1060,6 +1075,39 @@
     return null;
   }
 
+  // ---------- Pavilion hover: focus highlight + list of all Agent names ----------
+  const zoneHoverEl = document.getElementById("zoneHover");
+  let hoveredZoneId = null;
+  function showZoneHover(zone, cx, cy) {
+    if (hoveredZoneId !== zone.id) {
+      const list = (agentsByZone[zone.id] || []);
+      const items = list.map((a) =>
+        `<div class="zh-item"><span class="em">${a.emoji || "🤖"}</span><span>${a.cname || a.ename || ""}</span></div>`
+      ).join("");
+      zoneHoverEl.innerHTML =
+        `<div class="zh-head">
+           <div class="zh-ic" style="background:${hexToRgba(zone.color, 0.9)}">${zone.icon || "🏛️"}</div>
+           <div><div class="zh-name" style="color:${zone.color}">${zone.name}</div>
+           <div class="zh-en">${zone.nameEn || ""}</div></div>
+           <div class="zh-cnt">${list.length} Agents</div>
+         </div>
+         <div class="zh-list">${items}</div>
+         <div class="zh-tip">點擊進入體驗館 ▸</div>`;
+      zoneHoverEl.style.borderLeftColor = zone.color;
+      zoneHoverEl.style.display = "block";
+      hoveredZoneId = zone.id;
+    }
+    // position the panel near the cursor, clamped to the viewport
+    const pw = zoneHoverEl.offsetWidth || 280, ph = zoneHoverEl.offsetHeight || 240;
+    let x = cx + 20, y = cy + 18;
+    if (x + pw > window.innerWidth - 12) x = cx - pw - 20;
+    if (y + ph > window.innerHeight - 12) y = Math.max(12, window.innerHeight - ph - 12);
+    zoneHoverEl.style.left = x + "px"; zoneHoverEl.style.top = y + "px";
+  }
+  function hideZoneHover() {
+    if (hoveredZoneId !== null) { zoneHoverEl.style.display = "none"; hoveredZoneId = null; }
+  }
+
   canvas.addEventListener("pointermove", (e) => {
     // while dragging the carousel (mouse OR touch), spin it — this must run for touch too
     if (dragTurn.active && (dragTurn.pointerId === null || e.pointerId === dragTurn.pointerId)) {
@@ -1078,11 +1126,19 @@
       tooltip.textContent = agentById[a.agentId].cname;
       tooltip.style.left = e.clientX + "px"; tooltip.style.top = e.clientY + "px";
       tooltip.style.display = "block"; document.body.style.cursor = "pointer";
-    } else if (hit && (hit.type === "portal" || hit.type === "exit")) {
+      hideZoneHover();
+    } else if (hit && hit.type === "portal") {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
+      const pz = (ctxPortals || []).find((x) => x.mesh === hit.obj);
+      if (pz && mode === "lobby") showZoneHover(zoneById[pz.zoneId], e.clientX, e.clientY);
+      else hideZoneHover();
+    } else if (hit && hit.type === "exit") {
+      tooltip.style.display = "none"; document.body.style.cursor = "pointer";
+      hideZoneHover();
     } else {
       tooltip.style.display = "none";
       document.body.style.cursor = mode === "room" && roomCarousels.length ? "grab" : "default";
+      hideZoneHover();
     }
   }, { passive: false });
 
@@ -1253,6 +1309,18 @@
         if (car) car.rotation.y += dragTurn.vel;
         dragTurn.vel *= 0.94; // friction
       }
+    }
+    // pavilion hover highlight: smoothly focus the hovered department
+    for (const ph of pavHi) {
+      const target = (ph.zoneId === hoveredZoneId && mode === "lobby") ? 1 : 0;
+      ph.k += (target - ph.k) * 0.16;
+      if (Math.abs(ph.k) < 0.002 && target === 0) ph.k = 0;
+      ph.frameMat.emissiveIntensity = ph.baseEmissive + ph.k * 1.1;
+      ph.ring.material.opacity = ph.k * 0.8;
+      ph.beam.material.opacity = ph.k * 0.14;
+      const s = 1 + ph.k * 0.06;
+      ph.group.scale.set(s, s, s);
+      ph.group.position.y = ph.k * 0.35;
     }
     // hide the vertical wall structure (mullions) whenever the camera is inside the
     // atrium shell, so the curtain wall never blocks the view of the pavilions
