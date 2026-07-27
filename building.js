@@ -197,22 +197,22 @@
     ctx.shadowColor = hexToRgba(zone.color, 0.85);
     ctx.shadowBlur = 34;
     ctx.fillStyle = "#ffffff";
-    ctx.font = "300 132px 'Segoe UI Light', 'Segoe UI', sans-serif";
-    ctx.fillText(zone.name, W / 2, 150);
+    ctx.font = "300 150px 'Segoe UI Light', 'Segoe UI', sans-serif";
+    ctx.fillText(zone.name, W / 2, 148);
     ctx.shadowBlur = 0;
     // thin rule in the department color
     ctx.strokeStyle = hexToRgba(zone.color, 0.75);
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(W / 2 - 150, 236); ctx.lineTo(W / 2 + 150, 236); ctx.stroke();
-    // english name — wide letter spacing, quiet
-    ctx.fillStyle = hexToRgba(zone.color, 0.95);
-    ctx.font = "600 36px 'Segoe UI', sans-serif";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 175, 244); ctx.lineTo(W / 2 + 175, 244); ctx.stroke();
+    // english name — wide letter spacing
+    ctx.fillStyle = hexToRgba(zone.color, 1);
+    ctx.font = "600 50px 'Segoe UI', sans-serif";
     const en = (zone.nameEn || "").toUpperCase().split("").join("\u2009");
-    ctx.fillText(en, W / 2, 288);
-    // agent count — small, unobtrusive
-    ctx.fillStyle = "rgba(215,228,255,0.62)";
-    ctx.font = "500 30px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.count + " AGENTS", W / 2, 350);
+    ctx.fillText(en, W / 2, 306);
+    // agent count
+    ctx.fillStyle = "rgba(224,234,255,0.88)";
+    ctx.font = "600 42px 'Segoe UI', sans-serif";
+    ctx.fillText(zone.count + " AGENTS", W / 2, 380);
     return canvasTex(cv);
   }
 
@@ -726,20 +726,21 @@
     beam.position.set(0, 5.6, PAV_D / 2 - 0.22);
     g.add(beam);
 
-    // department name: clean lettering floating in the CENTRE of the pavilion.
-    // depthTest off + high renderOrder → always drawn in front of the glass/structure
+    // department name: clean lettering floating at the FRONT of the pavilion (in front of
+    // the glass, at the entrance edge). depthTest off + high renderOrder → never occluded.
     const NAME_Y = 5.4;
-    const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
+    const NAME_Z = PAV_D / 2 + 1.6;
+    const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(13.4, 5.5),
       new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
         depthWrite: false, depthTest: false }));
-    nameMesh.position.set(0, NAME_Y, 0);
+    nameMesh.position.set(0, NAME_Y, NAME_Z);
     nameMesh.renderOrder = 20;
     gUp.add(nameMesh);
     // a second copy facing the back, so the name reads from either side of the pavilion
-    const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
+    const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(13.4, 5.5),
       new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
         depthWrite: false, depthTest: false }));
-    nameBack.position.set(0, NAME_Y, -0.06); nameBack.rotation.y = Math.PI;
+    nameBack.position.set(0, NAME_Y, NAME_Z - 0.06); nameBack.rotation.y = Math.PI;
     nameBack.renderOrder = 20;
     gUp.add(nameBack);
 
@@ -769,11 +770,11 @@
     scene.add(dash);
 
     // subtle enter affordance below the department name
-    const hintTex = textTexture("點擊進入 ▸", 512, 96, "600 38px 'Segoe UI'", hexToRgba(zone.color, 0.95), zone.color);
-    const hint = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 0.81),
+    const hintTex = textTexture("點擊進入 ▸", 512, 96, "700 46px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
+    const hint = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 0.98),
       new THREE.MeshBasicMaterial({ map: hintTex, transparent: true,
         depthWrite: false, depthTest: false }));
-    hint.position.set(0, 2.45, 0);
+    hint.position.set(0, 2.2, PAV_D / 2 + 1.6);
     hint.renderOrder = 20;
     gUp.add(hint);
     // glowing interior floor glow to signal it's enterable
