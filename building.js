@@ -14,7 +14,7 @@
   const PLAZA_R = 11;
   const PAV_W = 13;
   const PAV_D = 11;
-  const PAV_SCALE = 1.32;   // enlarge each department pavilion so it reads more clearly
+  const PAV_H_SCALE = 1.5;   // make each department pavilion taller (height only, not wider)
   const SHELL_R = 48;
   const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
@@ -633,7 +633,7 @@
     const g = new THREE.Group();
     g.position.set(zone.center.x, 0, zone.center.z);
     g.rotation.y = Math.atan2(-zone.dir.x, -zone.dir.z);
-    g.scale.setScalar(PAV_SCALE);
+    g.scale.set(1, PAV_H_SCALE, 1);
     scene.add(g);
     zoneGroups.push({ zone, group: g });
 
@@ -719,7 +719,7 @@
     // walkway from plaza to pavilion (glowing strip)
     const d = zone.dir;
     const s0 = new THREE.Vector3(d.x * (PLAZA_R + 0.2), 0.05, d.z * (PLAZA_R + 0.2));
-    const s1 = new THREE.Vector3(zone.center.x - d.x * (PAV_D / 2 * PAV_SCALE + 0.3), 0.05, zone.center.z - d.z * (PAV_D / 2 * PAV_SCALE + 0.3));
+    const s1 = new THREE.Vector3(zone.center.x - d.x * (PAV_D / 2 + 0.3), 0.05, zone.center.z - d.z * (PAV_D / 2 + 0.3));
     const mid = new THREE.Vector3().lerpVectors(s0, s1, 0.5);
     const len = s0.distanceTo(s1);
     const rot = -Math.atan2(d.z, d.x) + Math.PI / 2;
@@ -1327,8 +1327,8 @@
       ph.frameMat.emissiveIntensity = ph.baseEmissive + ph.k * 1.1;
       ph.ring.material.opacity = ph.k * 0.8;
       ph.beam.material.opacity = ph.k * 0.14;
-      const s = PAV_SCALE * (1 + ph.k * 0.06);
-      ph.group.scale.set(s, s, s);
+      const pop = 1 + ph.k * 0.05;
+      ph.group.scale.set(pop, PAV_H_SCALE * pop, pop);
       ph.group.position.y = ph.k * 0.4;
     }
     // glide the camera focus toward the hovered pavilion so the whole view shifts to it
