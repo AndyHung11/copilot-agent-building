@@ -726,17 +726,21 @@
     beam.position.set(0, 5.6, PAV_D / 2 - 0.22);
     g.add(beam);
 
-    // department name: clean lettering floating in the CENTRE of the pavilion,
-    // at eye level and always readable from the atrium (no plate, no frame)
+    // department name: clean lettering floating in the CENTRE of the pavilion.
+    // depthTest off + high renderOrder → always drawn in front of the glass/structure
     const NAME_Y = 5.4;
     const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
-      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true, depthWrite: false }));
+      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
+        depthWrite: false, depthTest: false }));
     nameMesh.position.set(0, NAME_Y, 0);
+    nameMesh.renderOrder = 20;
     gUp.add(nameMesh);
     // a second copy facing the back, so the name reads from either side of the pavilion
     const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
-      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true, depthWrite: false }));
+      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
+        depthWrite: false, depthTest: false }));
     nameBack.position.set(0, NAME_Y, -0.06); nameBack.rotation.y = Math.PI;
+    nameBack.renderOrder = 20;
     gUp.add(nameBack);
 
     // interior accent light
@@ -767,8 +771,10 @@
     // subtle enter affordance below the department name
     const hintTex = textTexture("點擊進入 ▸", 512, 96, "600 38px 'Segoe UI'", hexToRgba(zone.color, 0.95), zone.color);
     const hint = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 0.81),
-      new THREE.MeshBasicMaterial({ map: hintTex, transparent: true, depthWrite: false }));
+      new THREE.MeshBasicMaterial({ map: hintTex, transparent: true,
+        depthWrite: false, depthTest: false }));
     hint.position.set(0, 2.45, 0);
+    hint.renderOrder = 20;
     gUp.add(hint);
     // glowing interior floor glow to signal it's enterable
     const glowPad = new THREE.Mesh(new THREE.CircleGeometry(3.2, 32),
