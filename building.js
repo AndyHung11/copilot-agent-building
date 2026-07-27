@@ -186,34 +186,33 @@
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
   function canvasTex(cv) { const t = new THREE.CanvasTexture(cv); t.anisotropy = maxAniso; t.encoding = THREE.sRGBEncoding; return t; }
 
+  // Clean centered department typography — no plate, no frame, no badge.
+  // Reads like architectural signage lettering floating in the pavilion.
   function signTexture(zone) {
-    const W = 1280, H = 300, cv = document.createElement("canvas");
+    const W = 1024, H = 420, cv = document.createElement("canvas");
     cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d");
-    // dark glass plate with glowing color edge
-    ctx.fillStyle = "rgba(9,14,26,0.94)";
-    roundRect(ctx, 8, 8, W - 16, H - 16, 40); ctx.fill();
-    ctx.lineWidth = 4; ctx.strokeStyle = zone.color; ctx.stroke();
-    // color accent bar down the left edge
-    ctx.fillStyle = zone.color;
-    roundRect(ctx, 30, 52, 14, H - 104, 7); ctx.fill();
-    // texts
-    ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillStyle = "#f2f7ff";
-    ctx.font = "800 92px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.name, 72, 118);
-    ctx.fillStyle = hexToRgba(zone.color, 1);
-    ctx.font = "600 40px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.nameEn.toUpperCase(), 76, 208);
-    // count badge
-    ctx.fillStyle = zone.color;
-    roundRect(ctx, W - 250, H / 2 - 55, 190, 110, 30); ctx.fill();
-    ctx.fillStyle = "#08101e";
-    ctx.textAlign = "center";
-    ctx.font = "800 62px 'Segoe UI', sans-serif";
-    ctx.fillText(String(zone.count), W - 178, H / 2 - 4);
-    ctx.font = "700 26px 'Segoe UI', sans-serif";
-    ctx.fillText("AGENTS", W - 178, H / 2 + 40);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    // department name — large, luminous, softly haloed so it reads over any background
+    ctx.shadowColor = hexToRgba(zone.color, 0.85);
+    ctx.shadowBlur = 34;
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "300 132px 'Segoe UI Light', 'Segoe UI', sans-serif";
+    ctx.fillText(zone.name, W / 2, 150);
+    ctx.shadowBlur = 0;
+    // thin rule in the department color
+    ctx.strokeStyle = hexToRgba(zone.color, 0.75);
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(W / 2 - 150, 236); ctx.lineTo(W / 2 + 150, 236); ctx.stroke();
+    // english name — wide letter spacing, quiet
+    ctx.fillStyle = hexToRgba(zone.color, 0.95);
+    ctx.font = "600 36px 'Segoe UI', sans-serif";
+    const en = (zone.nameEn || "").toUpperCase().split("").join("\u2009");
+    ctx.fillText(en, W / 2, 288);
+    // agent count — small, unobtrusive
+    ctx.fillStyle = "rgba(215,228,255,0.62)";
+    ctx.font = "500 30px 'Segoe UI', sans-serif";
+    ctx.fillText(zone.count + " AGENTS", W / 2, 350);
     return canvasTex(cv);
   }
 
@@ -727,18 +726,18 @@
     beam.position.set(0, 5.6, PAV_D / 2 - 0.22);
     g.add(beam);
 
-    // illuminated marquee sign above the portal (in gUp → never vertically stretched)
-    const SIGN_Y = 5.6 * PAV_H_SCALE + 1.9;   // just above the portal beam
-    const sign = new THREE.Mesh(new THREE.PlaneGeometry(12.4, 2.9),
-      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true }));
-    sign.position.set(0, SIGN_Y, PAV_D / 2 - 0.02);
-    gUp.add(sign);
-    // soft backlight glow behind the sign so it pops from across the atrium
-    const signGlow = new THREE.Mesh(new THREE.PlaneGeometry(13.6, 4.1),
-      new THREE.MeshBasicMaterial({ color: zone.color, transparent: true, opacity: 0.16,
-        blending: THREE.AdditiveBlending, depthWrite: false }));
-    signGlow.position.set(0, SIGN_Y, PAV_D / 2 - 0.12);
-    gUp.add(signGlow);
+    // department name: clean lettering floating in the CENTRE of the pavilion,
+    // at eye level and always readable from the atrium (no plate, no frame)
+    const NAME_Y = 5.4;
+    const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
+      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true, depthWrite: false }));
+    nameMesh.position.set(0, NAME_Y, 0);
+    gUp.add(nameMesh);
+    // a second copy facing the back, so the name reads from either side of the pavilion
+    const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.59),
+      new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true, depthWrite: false }));
+    nameBack.position.set(0, NAME_Y, -0.06); nameBack.rotation.y = Math.PI;
+    gUp.add(nameBack);
 
     // interior accent light
     const pl = new THREE.PointLight(zone.color, 0.6, 20); pl.position.set(0, 4, 0); g.add(pl);
@@ -765,11 +764,11 @@
     dash.rotation.copy(walk.rotation); dash.position.copy(mid); dash.position.y = 0.06;
     scene.add(dash);
 
-    // storefront "進入體驗" hint inside the pavilion (un-stretched layer)
-    const hintTex = textTexture("點此進入 " + zone.name + " ▸", 640, 96, "600 40px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
-    const hint = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 0.96),
-      new THREE.MeshBasicMaterial({ map: hintTex, transparent: true }));
-    hint.position.set(0, 4.2, -PAV_D / 2 + 0.5);
+    // subtle enter affordance below the department name
+    const hintTex = textTexture("點擊進入 ▸", 512, 96, "600 38px 'Segoe UI'", hexToRgba(zone.color, 0.95), zone.color);
+    const hint = new THREE.Mesh(new THREE.PlaneGeometry(4.3, 0.81),
+      new THREE.MeshBasicMaterial({ map: hintTex, transparent: true, depthWrite: false }));
+    hint.position.set(0, 2.45, 0);
     gUp.add(hint);
     // glowing interior floor glow to signal it's enterable
     const glowPad = new THREE.Mesh(new THREE.CircleGeometry(3.2, 32),
@@ -1143,14 +1142,15 @@
       zoneHoverEl.style.borderLeftColor = zone.color;
       zoneHoverEl.style.display = "block";
       hoveredZoneId = zone.id;
+      // anchor the panel once, where the pointer entered — it must NOT chase the cursor,
+      // otherwise it jitters while you move over the pavilion
+      const pw = zoneHoverEl.offsetWidth || 320, ph = zoneHoverEl.offsetHeight || 260;
+      let x = cx + 26, y = cy + 22;
+      if (x + pw > window.innerWidth - 14) x = cx - pw - 26;
+      if (x < 14) x = 14;
+      if (y + ph > window.innerHeight - 14) y = Math.max(14, window.innerHeight - ph - 14);
+      zoneHoverEl.style.left = x + "px"; zoneHoverEl.style.top = y + "px";
     }
-    // position the panel near the cursor, clamped to the viewport
-    const pw = zoneHoverEl.offsetWidth || 320, ph = zoneHoverEl.offsetHeight || 260;
-    let x = cx + 24, y = cy + 20;
-    if (x + pw > window.innerWidth - 14) x = cx - pw - 24;
-    if (x < 14) x = 14;
-    if (y + ph > window.innerHeight - 14) y = Math.max(14, window.innerHeight - ph - 14);
-    zoneHoverEl.style.left = x + "px"; zoneHoverEl.style.top = y + "px";
   }
   function hideZoneHover() {
     if (hoveredZoneId !== null) { zoneHoverEl.style.display = "none"; hoveredZoneId = null; }
@@ -1365,10 +1365,10 @@
         dragTurn.vel *= 0.94; // friction
       }
     }
-    // pavilion hover highlight: smoothly focus the hovered department
+    // pavilion hover highlight: slow, calm focus on the hovered department
     for (const ph of pavHi) {
       const target = (ph.zoneId === hoveredZoneId && mode === "lobby") ? 1 : 0;
-      ph.k += (target - ph.k) * 0.16;
+      ph.k += (target - ph.k) * 0.05;
       if (Math.abs(ph.k) < 0.002 && target === 0) ph.k = 0;
       ph.frameMat.emissiveIntensity = ph.baseEmissive + ph.k * 1.1;
       ph.ring.material.opacity = ph.k * 0.8;
@@ -1381,7 +1381,7 @@
     if (mode === "lobby" && hoveredZoneId && !dragTurn.active) {
       const z = zoneById[hoveredZoneId];
       focusPt.set(z.center.x, 5, z.center.z);
-      controls.target.lerp(focusPt, 0.06);
+      controls.target.lerp(focusPt, 0.018);
     }
     // hide the vertical wall structure (mullions) whenever the camera is inside the
     // atrium shell, so the curtain wall never blocks the view of the pavilions
