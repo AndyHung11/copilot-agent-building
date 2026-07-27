@@ -1201,7 +1201,9 @@
   canvas.addEventListener("pointerleave", hideZoneHover);
   // once the user grabs to navigate the lobby, release the hover-focus latch so we
   // never fight their manual orbit/pan
-  controls.addEventListener("start", () => { if (mode === "lobby") hideZoneHover(); });
+  let orbiting = false;
+  controls.addEventListener("start", () => { orbiting = true; if (mode === "lobby") hideZoneHover(); });
+  controls.addEventListener("end", () => { orbiting = false; });
 
   let downPos = null;
   canvas.addEventListener("pointerdown", (e) => {
@@ -1384,11 +1386,32 @@
       ph.group.scale.set(pop, PAV_H_SCALE * pop, pop);
       ph.group.position.y = ph.k * 0.4;
     }
-    // glide the camera focus toward the hovered pavilion so the whole view shifts to it
-    if (mode === "lobby" && hoveredZoneId && !dragTurn.active) {
-      const z = zoneById[hoveredZoneId];
-      focusPt.set(z.center.x, 5, z.center.z);
-      controls.target.lerp(focusPt, 0.018);
+    // The atrium focus stays pinned to the centre (so you can never spin off into space).
+    // Hovering a pavilion ORBITS the camera around that centre until the pavilion is
+    // framed dead-centre — the target itself never moves.
+    if (mode === "lobby") {
+      focusPt.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
+      controls.target.lerp(focusPt, 0.05);
+
+      if (hoveredZoneId && !orbiting) {
+        const z = zoneById[hoveredZoneId];
+        // camera must sit on the OPPOSITE side of the centre from the pavilion, so the
+        // pavilion ends up straight ahead in the middle of the screen
+        const cx = camera.position.x - controls.target.x;
+        const cz = camera.position.z - controls.target.z;
+        const cur = Math.atan2(cx, cz);
+        const want = Math.atan2(-(z.center.x - controls.target.x), -(z.center.z - controls.target.z));
+        // shortest angular path
+        let diff = want - cur;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        if (Math.abs(diff) > 0.002) {
+          const a = cur + diff * 0.035;                 // slow, calm rotation
+          const r = Math.hypot(cx, cz);
+          camera.position.x = controls.target.x + Math.sin(a) * r;
+          camera.position.z = controls.target.z + Math.cos(a) * r;
+        }
+      }
     }
     // hide the vertical wall structure (mullions) whenever the camera is inside the
     // atrium shell, so the curtain wall never blocks the view of the pavilions
