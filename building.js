@@ -18,6 +18,9 @@
   const SHELL_R = 48;
   const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
+  // the atrium target is pinned to the centre, so zooming in heads straight for the
+  // central emblem — keep a respectful distance from it
+  const LOBBY_MIN_DIST = 26;
 
   const step = (Math.PI * 2) / ZONES.length;
   ZONES.forEach((z, i) => {
@@ -78,11 +81,10 @@
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.enablePan = true;
-  controls.screenSpacePanning = true; // pan moves in screen plane (feels like walking around)
-  controls.enableZoom = false;        // replaced by custom zoom-to-cursor below
-  controls.minDistance = 4;
-  controls.maxDistance = 160;
+  controls.enablePan = false;         // target is pinned to the atrium centre
+  controls.enableZoom = false;        // replaced by custom zoom below
+  controls.minDistance = LOBBY_MIN_DIST;
+  controls.maxDistance = 90;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 5, 0);
   controls.update();
@@ -189,30 +191,56 @@
   // Clean centered department typography — no plate, no frame, no badge.
   // Reads like architectural signage lettering floating in the pavilion.
   function signTexture(zone) {
-    const W = 1024, H = 420, cv = document.createElement("canvas");
+    const W = 1024, H = 430, cv = document.createElement("canvas");
     cv.width = W; cv.height = H;
     const ctx = cv.getContext("2d");
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    const SAFE = W - 56;
+    // shrink a font until the text fits the available width
+    const fit = (text, weight, size, maxW, family) => {
+      let s = size;
+      const fam = family || "'Segoe UI', sans-serif";
+      ctx.font = `${weight} ${s}px ${fam}`;
+      while (s > 12 && ctx.measureText(text).width > maxW) {
+        s -= 2; ctx.font = `${weight} ${s}px ${fam}`;
+      }
+      return s;
+    };
+    // draw text with letter tracking, auto-reducing tracking (then size) to fit
+    const tracked = (text, weight, size, track, y, maxW) => {
+      let s = size, tr = track;
+      const measure = () => {
+        ctx.font = `${weight} ${s}px 'Segoe UI', sans-serif`;
+        return ctx.measureText(text).width + tr * Math.max(0, text.length - 1);
+      };
+      while (measure() > maxW && tr > 0) tr -= 0.5;
+      while (measure() > maxW && s > 12) s -= 2;
+      const total = measure();
+      let x = W / 2 - total / 2;
+      ctx.textAlign = "left";
+      for (const ch of text) {
+        ctx.fillText(ch, x, y);
+        x += ctx.measureText(ch).width + tr;
+      }
+      ctx.textAlign = "center";
+    };
     // department name — large, luminous, softly haloed so it reads over any background
+    fit(zone.name, 300, 132, SAFE, "'Segoe UI Light', 'Segoe UI', sans-serif");
     ctx.shadowColor = hexToRgba(zone.color, 0.85);
     ctx.shadowBlur = 34;
     ctx.fillStyle = "#ffffff";
-    ctx.font = "300 150px 'Segoe UI Light', 'Segoe UI', sans-serif";
-    ctx.fillText(zone.name, W / 2, 148);
+    ctx.fillText(zone.name, W / 2, 128);
     ctx.shadowBlur = 0;
     // thin rule in the department color
     ctx.strokeStyle = hexToRgba(zone.color, 0.75);
     ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(W / 2 - 175, 244); ctx.lineTo(W / 2 + 175, 244); ctx.stroke();
-    // english name — wide letter spacing
+    ctx.beginPath(); ctx.moveTo(W / 2 - 170, 220); ctx.lineTo(W / 2 + 170, 220); ctx.stroke();
+    // english name — big, with tracking that yields before the type size does
     ctx.fillStyle = hexToRgba(zone.color, 1);
-    ctx.font = "600 50px 'Segoe UI', sans-serif";
-    const en = (zone.nameEn || "").toUpperCase().split("").join("\u2009");
-    ctx.fillText(en, W / 2, 306);
+    tracked((zone.nameEn || "").toUpperCase(), 600, 60, 9, 286, SAFE);
     // agent count
-    ctx.fillStyle = "rgba(224,234,255,0.88)";
-    ctx.font = "600 42px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.count + " AGENTS", W / 2, 380);
+    ctx.fillStyle = "rgba(228,238,255,0.92)";
+    tracked(zone.count + " AGENTS", 700, 56, 5, 370, SAFE);
     return canvasTex(cv);
   }
 
@@ -730,14 +758,14 @@
     // the glass, at the entrance edge). depthTest off + high renderOrder → never occluded.
     const NAME_Y = 5.4;
     const NAME_Z = PAV_D / 2 + 1.6;
-    const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(13.4, 5.5),
+    const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.7),
       new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
         depthWrite: false, depthTest: false }));
     nameMesh.position.set(0, NAME_Y, NAME_Z);
     nameMesh.renderOrder = 20;
     gUp.add(nameMesh);
     // a second copy facing the back, so the name reads from either side of the pavilion
-    const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(13.4, 5.5),
+    const nameBack = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.7),
       new THREE.MeshBasicMaterial({ map: signTexture(zone), transparent: true,
         depthWrite: false, depthTest: false }));
     nameBack.position.set(0, NAME_Y, NAME_Z - 0.06); nameBack.rotation.y = Math.PI;
@@ -770,8 +798,8 @@
     scene.add(dash);
 
     // subtle enter affordance below the department name
-    const hintTex = textTexture("點擊進入 ▸", 512, 96, "700 46px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
-    const hint = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 0.98),
+    const hintTex = textTexture("點擊進入 ▸", 512, 100, "700 54px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
+    const hint = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 1.02),
       new THREE.MeshBasicMaterial({ map: hintTex, transparent: true,
         depthWrite: false, depthTest: false }));
     hint.position.set(0, 2.2, PAV_D / 2 + 1.6);
@@ -1030,7 +1058,7 @@
     transition(() => {
       camera.position.set(INTERIOR.pos.x, INTERIOR.pos.y, INTERIOR.pos.z);
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
-      controls.minDistance = 4; controls.maxDistance = 160;
+      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 90;
       controls.enableRotate = true; // restore free orbit in the lobby
       controls.enabled = true;
       controls.update();
@@ -1244,27 +1272,16 @@
   });
   canvas.addEventListener("pointercancel", endDrag);
 
-  // ---------- Custom zoom-to-cursor (wheel dollies toward what you point at) ----------
-  const zoomPlane = new THREE.Plane();
-  const zoomPt = new THREE.Vector3();
-  const zoomNdc = new THREE.Vector2();
+  // ---------- Zoom (pure dolly toward the pinned target) ----------
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
-    const rect = renderer.domElement.getBoundingClientRect();
-    zoomNdc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    zoomNdc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(zoomNdc, camera);
-    // horizontal plane through the current focus height
-    zoomPlane.set(new THREE.Vector3(0, 1, 0), -controls.target.y);
-    const ok = raycaster.ray.intersectPlane(zoomPlane, zoomPt);
     const zoomIn = e.deltaY < 0;
     const factor = zoomIn ? 0.86 : 1 / 0.86;
     const offset = camera.position.clone().sub(controls.target);
     let dist = offset.length() * factor;
     dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, dist));
-    // steer the focus toward the point under the cursor when zooming in — but NOT in a
-    // room, where the target must stay locked to the room center so you can never lose it
-    if (ok && zoomIn && mode !== "room") controls.target.lerp(zoomPt, 0.2);
+    // the target is pinned (atrium centre / room centre), so zoom is a pure dolly —
+    // you can never lose the scene or fly through the middle of it
     offset.setLength(dist);
     camera.position.copy(controls.target).add(offset);
     controls.update();
@@ -1392,6 +1409,30 @@
     if (mode === "lobby") {
       focusPt.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
       controls.target.lerp(focusPt, 0.05);
+
+      // Keep a comfortable downward viewing angle at every zoom level, and never let
+      // the camera punch out through the curtain wall.
+      const off = camera.position.clone().sub(controls.target);
+      const d = off.length();
+      // 1) minimum elevation — stops the plaza disc filling the screen when zoomed in
+      const MIN_ELEV = 0.46;                       // sin(elevation) ≈ 27°
+      if (off.y / d < MIN_ELEV) {
+        const horiz = Math.hypot(off.x, off.z) || 0.001;
+        const ny = d * MIN_ELEV;
+        const nh = Math.sqrt(Math.max(0.001, d * d - ny * ny)) / horiz;
+        off.x *= nh; off.z *= nh; off.y = ny;
+        camera.position.copy(controls.target).add(off);
+      }
+      // 2) stay inside the glass shell and under the roof
+      const hr = Math.hypot(camera.position.x - controls.target.x,
+                            camera.position.z - controls.target.z);
+      const maxHr = SHELL_R - 12;
+      if (hr > maxHr) {
+        const k = maxHr / hr;
+        camera.position.x = controls.target.x + (camera.position.x - controls.target.x) * k;
+        camera.position.z = controls.target.z + (camera.position.z - controls.target.z) * k;
+      }
+      if (camera.position.y > WALL_H - 3) camera.position.y = WALL_H - 3;
 
       if (hoveredZoneId && !orbiting) {
         const z = zoneById[hoveredZoneId];
