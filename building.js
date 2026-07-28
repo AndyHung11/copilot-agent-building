@@ -8,6 +8,87 @@
 
   const canvas = document.getElementById("three-canvas");
   const tooltip = document.getElementById("tooltip");
+  const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  // ---------- Language ----------
+  // default follows the browser: any zh-* locale gets Chinese, everything else English
+  const LANG_KEY = "copilotBuildingLang";
+  function detectLang() {
+    const saved = localStorage.getItem(LANG_KEY);
+    if (saved === "zh" || saved === "en") return saved;
+    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+    return /^zh\b/i.test(nav) ? "zh" : "en";
+  }
+  let LANG = detectLang();
+  const isEN = () => LANG === "en";
+  const EN = (typeof AGENTS_EN !== "undefined") ? AGENTS_EN : {};
+
+  // localized accessors — fall back to the Chinese source when English is missing
+  const aName = (a) => (isEN() ? (a.ename || a.cname) : a.cname);
+  const aSub = (a) => (isEN() ? a.cname : a.ename);
+  const aTag = (a) => (isEN() && EN[a.id] && EN[a.id].tagline) ? EN[a.id].tagline : a.tagline;
+  const aDesc = (a) => (isEN() && EN[a.id] && EN[a.id].description) ? EN[a.id].description : a.description;
+  const aPains = (a) => (isEN() && EN[a.id] && EN[a.id].painPoints && EN[a.id].painPoints.length)
+    ? EN[a.id].painPoints : (a.painPoints || []);
+  const aSteps = (a) => (isEN() && EN[a.id] && EN[a.id].quickStart && EN[a.id].quickStart.length)
+    ? EN[a.id].quickStart : (a.quickStart || []);
+  const aExample = (a) => (isEN() && EN[a.id] && EN[a.id].example) ? EN[a.id].example : a.example;
+  const zName = (z) => (isEN() ? (z.nameEn || z.name) : z.name);
+  const zSub = (z) => (isEN() ? z.name : (z.nameEn || ""));
+
+  const UI = {
+    zh: {
+      brandT1: "M365 Copilot Agent 智慧大樓",
+      brandT2: "Power of Copilot · 8 大部門 · 53 位 AI 助理",
+      btnExterior: "看外觀", btnAtrium: "進中庭", btnBack: "返回大廳",
+      sideTitle: "樓層導覽 · 8 大部門",
+      hintText: "🖱️ 大廳：拖曳環顧·點體驗館進入　·　房間內：拖曳轉動卡片·點卡看詳情",
+      searchPh: "搜尋 Agent 名稱或關鍵字…",
+      noMatch: "沒有符合的 Agent",
+      licReq: "需 M365 Copilot 授權", licFree: "免授權即可使用",
+      licReqShort: "需授權", licFreeShort: "免授權",
+      tabRun: "▶ 模擬試跑", tabInfo: "痛點 · 上手 · 提示詞",
+      simBadge: "⚠ 模擬示意 · 非真實執行結果", replay: "↻ 重播",
+      you: "你", secWhat: "這個 Agent 能幫你做什麼", secPain: "你可能正在經歷",
+      secStart: "快速上手", secExample: "範例提示詞", copy: "複製", copied: "已複製 ✓",
+      outLabel: "產出", structLabel: "產出結構", structTitle: "這個 Agent 的工作流程",
+      structNote: "依官方 Agent 指示整理,實際產出內容依你的輸入而定。",
+      footSim: "以上為<b>模擬示意</b>,用於說明這個 Agent 的對話方式與產出型態,非真實執行結果。內容不指涉特定真實企業,不含捏造的具體數據。",
+      footStruct: "以上為依官方指示整理的<b>產出結構示意</b>,呈現這個 Agent 的工作流程與產出骨架,不含模擬內容。",
+      swotS: "優勢 STRENGTHS", swotW: "劣勢 WEAKNESSES",
+      swotO: "機會 OPPORTUNITIES", swotT: "威脅 THREATS",
+      rkH: "高", rkM: "中", rkL: "低",
+      cardSolves: "解決這些問題", cardSteps: (n) => n + " 步驟即可上手", cardCta: "▶  查看詳細",
+      pavEnter: "點擊進入 ▸", agentsSuffix: "AGENTS",
+      deckSub: (n) => n + " 位 AI 助理", enterExp: "點此進入",
+    },
+    en: {
+      brandT1: "M365 Copilot Agent Building",
+      brandT2: "Power of Copilot · 8 departments · 53 AI assistants",
+      btnExterior: "Exterior", btnAtrium: "Atrium", btnBack: "Back to lobby",
+      sideTitle: "Directory · 8 departments",
+      hintText: "🖱️ Lobby: drag to look around · click a pavilion to enter　·　Inside: drag to spin cards · click a card for details",
+      searchPh: "Search agents by name or keyword…",
+      noMatch: "No matching agent",
+      licReq: "Requires M365 Copilot license", licFree: "No add-on license needed",
+      licReqShort: "License", licFreeShort: "Free",
+      tabRun: "▶ Simulated run", tabInfo: "Pain points · Getting started · Prompts",
+      simBadge: "⚠ Illustrative simulation · not a real execution", replay: "↻ Replay",
+      you: "You", secWhat: "What this agent does for you", secPain: "You might be experiencing",
+      secStart: "Getting started", secExample: "Example prompts", copy: "Copy", copied: "Copied ✓",
+      outLabel: "OUTPUT", structLabel: "STRUCTURE", structTitle: "How this agent works",
+      structNote: "Compiled from the official agent instructions. Actual output depends on your input.",
+      footSim: "The above is an <b>illustrative simulation</b> showing how this agent converses and what it produces. It is not a real execution, references no specific real company, and contains no fabricated figures.",
+      footStruct: "The above is a <b>structural outline</b> compiled from the official instructions, showing the agent's workflow and output skeleton. It contains no simulated content.",
+      swotS: "STRENGTHS", swotW: "WEAKNESSES",
+      swotO: "OPPORTUNITIES", swotT: "THREATS",
+      rkH: "HIGH", rkM: "MED", rkL: "LOW",
+      cardSolves: "Solves these problems", cardSteps: (n) => n + " steps to get started", cardCta: "▶  View details",
+      pavEnter: "Click to enter ▸", agentsSuffix: "AGENTS",
+      deckSub: (n) => n + " AI assistants", enterExp: "Enter",
+    },
+  };
+  const T = (k) => UI[LANG][k];
 
   // ---------- Layout ----------
   const RADIUS = 30;
@@ -46,6 +127,17 @@
     Z7: "從需求到產品，加速你的每一段創新旅程。",
     Z8: "學會用 AI、打造你專屬的 Agent 與提示詞。",
   };
+  const ZONE_DESC_EN = {
+    Z1: "Insight, analysis, decisions — think each step through and say it clearly.",
+    Z2: "From spark to post: content, creative and brand voice in one place.",
+    Z3: "Build teams that are healthy, aligned, human and highly effective.",
+    Z4: "Compliance, review and guardrails — leave no document risk hidden.",
+    Z5: "From pre-read to recap: communication and records in one flow.",
+    Z6: "Turn ideas into executable, measurable operations and project plans.",
+    Z7: "From requirement to product — accelerate every leg of the journey.",
+    Z8: "Learn to work with AI and craft your own agents and prompts.",
+  };
+  const zDesc = (z) => (isEN() ? (ZONE_DESC_EN[z.id] || ZONE_DESC[z.id]) : ZONE_DESC[z.id]);
 
   const hexToRgba = (hex, al) => {
     const c = new THREE.Color(hex);
@@ -233,22 +325,22 @@
       ctx.textAlign = "center";
     };
     // department name — large, luminous, softly haloed so it reads over any background
-    fit(zone.name, 300, 132, SAFE, "'Segoe UI Light', 'Segoe UI', sans-serif");
+    fit(zName(zone), 300, 132, SAFE, "'Segoe UI Light', 'Segoe UI', sans-serif");
     ctx.shadowColor = hexToRgba(zone.color, 0.85);
     ctx.shadowBlur = 34;
     ctx.fillStyle = "#ffffff";
-    ctx.fillText(zone.name, W / 2, 128);
+    ctx.fillText(zName(zone), W / 2, 128);
     ctx.shadowBlur = 0;
     // thin rule in the department color
     ctx.strokeStyle = hexToRgba(zone.color, 0.75);
     ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.moveTo(W / 2 - 170, 220); ctx.lineTo(W / 2 + 170, 220); ctx.stroke();
-    // english name — big, with tracking that yields before the type size does
+    // secondary name — big, with tracking that yields before the type size does
     ctx.fillStyle = hexToRgba(zone.color, 1);
-    tracked((zone.nameEn || "").toUpperCase(), 600, 60, 9, 286, SAFE);
+    tracked((zSub(zone) || "").toUpperCase(), 600, 60, 9, 286, SAFE);
     // agent count
     ctx.fillStyle = "rgba(228,238,255,0.92)";
-    tracked(zone.count + " AGENTS", 700, 56, 5, 370, SAFE);
+    tracked(zone.count + " " + T("agentsSuffix"), 700, 56, 5, 370, SAFE);
     return canvasTex(cv);
   }
 
@@ -268,9 +360,9 @@
     ctx.fillStyle = "rgba(255,255,255,0.95)";
     ctx.font = "700 30px 'Segoe UI', sans-serif";
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
-    ctx.fillText(zone.name, 40, 62);
+    ctx.fillText(zName(zone), 40, 62);
     // license pill, right side of the band
-    const licTxt = agent.license === "required" ? "需授權" : "免授權";
+    const licTxt = agent.license === "required" ? T("licReqShort") : T("licFreeShort");
     ctx.font = "700 22px 'Segoe UI', sans-serif";
     const lw = ctx.measureText(licTxt).width + 40;
     ctx.fillStyle = "rgba(255,255,255,0.22)";
@@ -283,12 +375,12 @@
     ctx.fillStyle = "#12192b";
     ctx.font = "800 46px 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
-    const nameLines = wrapText(ctx, agent.cname, W / 2, 182, W - 90, 56, 2);
-    // english name
+    const nameLines = wrapText(ctx, aName(agent), W / 2, 182, W - 90, 56, 2);
+    // secondary name
     const enY = 182 + (nameLines > 1 ? 56 : 0) + 48;
     ctx.fillStyle = "#7b869c";
     ctx.font = "600 24px 'Segoe UI', sans-serif";
-    ctx.fillText(agent.ename || "", W / 2, enY);
+    ctx.fillText(aSub(agent) || "", W / 2, enY);
     // divider
     ctx.strokeStyle = hexToRgba(zone.color, 0.35);
     ctx.lineWidth = 3;
@@ -297,17 +389,17 @@
     ctx.fillStyle = "#3c465c";
     ctx.font = "500 28px 'Segoe UI', sans-serif";
     const tagY = enY + 86;
-    const tagLines = wrapText(ctx, (agent.tagline || "").replace(/^✨\s*/, ""), W / 2, tagY, W - 96, 40, 3);
+    const tagLines = wrapText(ctx, (aTag(agent) || "").replace(/^✨\s*/, ""), W / 2, tagY, W - 96, 40, 3);
 
     // ---- pain points: fills the empty middle and shows what it solves ----
     let y = tagY + tagLines * 40 + 30;
     const roomLeft = (H - 128) - y;                  // vertical space before the CTA
     const maxPains = Math.max(0, Math.min(3, Math.floor((roomLeft - 34) / 70)));
-    const pains = (agent.painPoints || []).slice(0, maxPains);
+    const pains = aPains(agent).slice(0, maxPains);
     if (pains.length) {
       ctx.fillStyle = "#8c97ab";
       ctx.font = "800 21px 'Segoe UI', sans-serif";
-      ctx.fillText("解決這些問題", W / 2, y);
+      ctx.fillText(T("cardSolves"), W / 2, y);
       y += 34;
       ctx.textAlign = "left";
       pains.forEach((p) => {
@@ -329,9 +421,9 @@
     }
 
     // ---- step count chip (only if it fits above the CTA) ----
-    const nSteps = (agent.quickStart || []).length;
+    const nSteps = aSteps(agent).length;
     if (nSteps && y + 48 < H - 128) {
-      const chip = nSteps + " 步驟即可上手";
+      const chip = T("cardSteps")(nSteps);
       ctx.font = "700 23px 'Segoe UI', sans-serif";
       const cw = ctx.measureText(chip).width + 48;
       ctx.fillStyle = "#eef1f6";
@@ -345,7 +437,7 @@
     roundRect(ctx, W / 2 - 132, H - 110, 264, 66, 33); ctx.fill();
     ctx.fillStyle = zone.color;
     ctx.font = "700 27px 'Segoe UI', sans-serif";
-    ctx.fillText("▶  查看詳細", W / 2, H - 75);
+    ctx.fillText(T("cardCta"), W / 2, H - 75);
     return canvasTex(cv);
   }
 
@@ -380,15 +472,15 @@
     ctx.save(); ctx.shadowColor = zone.color; ctx.shadowBlur = 24;
     ctx.fillStyle = "#f2f7ff";
     ctx.font = "800 92px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.name, 290, 118);
+    ctx.fillText(zName(zone), 290, 118);
     ctx.restore();
     ctx.fillStyle = hexToRgba(zone.color, 1);
     ctx.font = "600 40px 'Segoe UI', sans-serif";
-    ctx.fillText(zone.nameEn.toUpperCase() + "  ·  " + zone.count + " 位 AI 助理", 294, 188);
+    ctx.fillText((zSub(zone) || "").toUpperCase() + "  ·  " + T("deckSub")(zone.count), 294, 188);
     // scenario description
     ctx.fillStyle = "#aebbd4";
     ctx.font = "40px 'Segoe UI', sans-serif";
-    wrapText(ctx, ZONE_DESC[zone.id] || "", 290 + 0, 280, W - 340, 54, 2);
+    wrapText(ctx, zDesc(zone) || "", 290 + 0, 280, W - 340, 54, 2);
     // realign wrapText used center; fix by manual left-draw
     return canvasTex(cv);
   }
@@ -850,7 +942,7 @@
     scene.add(dash);
 
     // subtle enter affordance below the department name
-    const hintTex = textTexture("點擊進入 ▸", 512, 100, "700 54px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
+    const hintTex = textTexture(T("pavEnter"), 512, 100, "700 54px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
     const hint = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 1.02),
       new THREE.MeshBasicMaterial({ map: hintTex, transparent: true,
         depthWrite: false, depthTest: false }));
@@ -875,7 +967,8 @@
         side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }));
     hiBeam.position.y = (WALL_H - 5) / 2 + 0.3;
     gUp.add(hiBeam);
-    pavHi.push({ zoneId: zone.id, group: g, frameMat, ring: hiRing, beam: hiBeam, baseEmissive: 0.35, k: 0 });
+    pavHi.push({ zoneId: zone.id, group: g, frameMat, ring: hiRing, beam: hiBeam, baseEmissive: 0.35, k: 0,
+                 zone, signMeshes: [nameMesh, nameBack], hintMesh: hint });
   });
 
   // ---------- Department rooms (each a dedicated interior space, built lazily) ----------
@@ -889,7 +982,7 @@
     const grp = new THREE.Group();
     grp.position.copy(o);
     scene.add(grp);
-    const RW = 54, RD = 58, RH = 12;
+    const RW = 54, RD = 68, RH = 12;
     const roomClickAgents = [];
 
     // ---------- Outdoor context so the glass walls actually read as glass ----------
@@ -1029,7 +1122,7 @@
 
     // camera sits INSIDE the room, in front of the carousel, looking at the ring center.
     // its distance scales with the ring so every department frames up the same way.
-    const camGap = 9.5;
+    const camGap = 13.5;
     const stance = {
       pos: { x: o.x, y: RING_Y + 1.3, z: o.z - 3 + ringR + camGap },
       look: { x: o.x, y: RING_Y, z: o.z - 3 },
@@ -1059,22 +1152,22 @@
   function populateDeck(zone) {
     document.getElementById("rdIcon").textContent = zone.icon;
     document.getElementById("rdIcon").style.background = hexToRgba(zone.color, 0.2);
-    document.getElementById("rdName").textContent = zone.name;
-    document.getElementById("rdSub").textContent = zone.nameEn.toUpperCase() + " · " + zone.count + " 位 AI 助理";
-    document.getElementById("rdDesc").textContent = ZONE_DESC[zone.id] || "";
+    document.getElementById("rdName").textContent = zName(zone);
+    document.getElementById("rdSub").textContent = (zSub(zone) || "").toUpperCase() + " · " + T("deckSub")(zone.count);
+    document.getElementById("rdDesc").textContent = zDesc(zone) || "";
     const grid = document.getElementById("rdGrid");
     grid.innerHTML = "";
     (agentsByZone[zone.id] || []).forEach((agent) => {
       const lic = agent.license === "required"
-        ? `<span class="rc-pill req">需授權</span>` : `<span class="rc-pill">免授權</span>`;
+        ? `<span class="rc-pill req">${T("licReqShort")}</span>` : `<span class="rc-pill">${T("licFreeShort")}</span>`;
       const card = document.createElement("div");
       card.className = "rd-card";
       card.style.setProperty("--rc", zone.color);
       card.innerHTML =
         `<div class="rc-top"><div class="rc-em" style="background:${hexToRgba(zone.color, 0.16)}">${agent.emoji || "🤖"}</div>
-         <div class="rc-nm">${esc(agent.cname)}</div></div>
-         <div class="rc-tl">${esc((agent.tagline || "").replace(/^✨\s*/, ""))}</div>
-         <div class="rc-foot">${lic}<span class="rc-go">看詳情 ▸</span></div>`;
+         <div class="rc-nm">${esc(aName(agent))}</div></div>
+         <div class="rc-tl">${esc((aTag(agent) || "").replace(/^✨\s*/, ""))}</div>
+         <div class="rc-foot">${lic}<span class="rc-go">${T("cardCta").replace("▶  ", "")} ▸</span></div>`;
       card.addEventListener("click", () => openModal(agent.id));
       grid.appendChild(card);
     });
@@ -1082,6 +1175,7 @@
 
   let ctxExit = null;      // { mesh } for the in-room exit gateway
   let atExterior = false;  // true when camera is parked outside the building
+  let curZoneId = null;    // department currently being viewed (room mode)
 
   function enterRoom(id, after) {
     const zone = zoneById[id];
@@ -1099,6 +1193,7 @@
       controls.enabled = false;      // fully hand touch/mouse to the carousel drag logic
       controls.update();
       mode = "room";
+      curZoneId = id;
       ctxAgents = room.clickAgents; ctxPortals = []; ctxExit = room.exit;
       setActiveZoneBtn(id);
       backBtn.classList.add("show");
@@ -1115,6 +1210,7 @@
       controls.enabled = true;
       controls.update();
       mode = "lobby";
+      curZoneId = null;
       ctxAgents = clickAgents; ctxPortals = clickPortals; ctxExit = null;
       setActiveZoneBtn(null);
       backBtn.classList.remove("show");
@@ -1124,15 +1220,19 @@
 
   // ---------- Sidebar ----------
   const zoneListRoot = document.getElementById("zoneList");
-  ZONES.forEach((zone) => {
-    const btn = document.createElement("button");
-    btn.className = "zone-btn"; btn.dataset.zone = zone.id; btn.style.color = zone.color;
-    btn.innerHTML = `<div class="ic" style="background:${zone.color}">${zone.icon}</div>
-      <div class="info"><div class="n1" style="color:#1c2333">${zone.name}</div>
-      <div class="n2">${zone.nameEn}</div></div><div class="cnt">${zone.count}</div>`;
-    btn.addEventListener("click", () => { enterRoom(zone.id); if (window.innerWidth <= 860) sidebar.classList.remove("open"); });
-    zoneListRoot.appendChild(btn);
-  });
+  function renderSidebar() {
+    zoneListRoot.innerHTML = "";
+    ZONES.forEach((zone) => {
+      const btn = document.createElement("button");
+      btn.className = "zone-btn"; btn.dataset.zone = zone.id; btn.style.color = zone.color;
+      btn.innerHTML = `<div class="ic" style="background:${zone.color}">${zone.icon}</div>
+        <div class="info"><div class="n1" style="color:#1c2333">${esc(zName(zone))}</div>
+        <div class="n2">${esc(zSub(zone))}</div></div><div class="cnt">${zone.count}</div>`;
+      btn.addEventListener("click", () => { enterRoom(zone.id); if (window.innerWidth <= 860) sidebar.classList.remove("open"); });
+      zoneListRoot.appendChild(btn);
+    });
+  }
+  renderSidebar();
   function setActiveZoneBtn(id) {
     document.querySelectorAll(".zone-btn").forEach((b) => b.classList.toggle("active", b.dataset.zone === id));
   }
@@ -1225,21 +1325,19 @@
     if (hoveredZoneId !== zone.id) {
       const list = (agentsByZone[zone.id] || []);
       const twoCol = list.length > 6;
-      const items = list.map((a) =>
-        `<li>${esc(a.cname || a.ename || "")}</li>`
-      ).join("");
+      const items = list.map((a) => `<li>${esc(aName(a))}</li>`).join("");
       zoneHoverEl.innerHTML =
         `<div class="zh-head">
            <div class="zh-bar" style="background:${zone.color}"></div>
            <div class="zh-title">
-             <div class="zh-name">${esc(zone.name)}</div>
-             <div class="zh-en">${esc(zone.nameEn || "")}</div>
+             <div class="zh-name">${esc(zName(zone))}</div>
+             <div class="zh-en">${esc(zSub(zone) || "")}</div>
            </div>
            <div class="zh-cnt" style="color:${zone.color};border-color:${hexToRgba(zone.color, 0.45)}">${list.length}</div>
          </div>
-         <div class="zh-desc">${esc(ZONE_DESC[zone.id] || "")}</div>
+         <div class="zh-desc">${esc(zDesc(zone) || "")}</div>
          <ol class="zh-list${twoCol ? " two" : ""}" style="--zc:${zone.color}">${items}</ol>
-         <div class="zh-tip">點擊進入體驗館</div>`;
+         <div class="zh-tip">${T("enterExp")}</div>`;
       zoneHoverEl.style.borderLeftColor = zone.color;
       zoneHoverEl.style.display = "block";
       hoveredZoneId = zone.id;
@@ -1272,7 +1370,7 @@
     const hit = pickAt(e.clientX, e.clientY);
     if (hit && hit.type === "agent") {
       const a = (ctxAgents || []).find((x) => x.mesh === hit.obj);
-      tooltip.textContent = agentById[a.agentId].cname;
+      tooltip.textContent = aName(agentById[a.agentId]);
       tooltip.style.left = e.clientX + "px"; tooltip.style.top = e.clientY + "px";
       tooltip.style.display = "block"; document.body.style.cursor = "pointer";
       hideZoneHover();
@@ -1354,54 +1452,52 @@
   }, { passive: false });
   const modalBackdrop = document.getElementById("modalBackdrop");
   const modalEl = document.getElementById("modal");
-  const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function openModal(id) {
     const agent = agentById[id]; if (!agent) return;
     const zone = zoneById[agent.zone];
     const lic = agent.license === "required"
-      ? `<span class="badge req">需 M365 Copilot 授權</span>` : `<span class="badge free">免授權即可使用</span>`;
-    const pains = (agent.painPoints || []).map((p) => `<div class="pain-item">😵 ${esc(p)}</div>`).join("");
-    const steps = (agent.quickStart || []).map((s) => `<li>${esc(s)}</li>`).join("");
+      ? `<span class="badge req">${T("licReq")}</span>` : `<span class="badge free">${T("licFree")}</span>`;
+    const pains = aPains(agent).map((p) => `<div class="pain-item">😵 ${esc(p)}</div>`).join("");
+    const steps = aSteps(agent).map((s) => `<li>${esc(s)}</li>`).join("");
     const sim = (typeof SIM !== "undefined") ? SIM[id] : null;
-    const painCount = (agent.painPoints || []).length;
-    const stepCount = (agent.quickStart || []).length;
-    const metaBits = [];
-    if (painCount) metaBits.push(`<span class="m-meta-i">😵 ${painCount} 個常見痛點</span>`);
-    if (stepCount) metaBits.push(`<span class="m-meta-i">📋 ${stepCount} 步驟上手</span>`);
-    if (sim && sim.turns) metaBits.push(`<span class="m-meta-i">💬 ${sim.turns.zh.length} 輪對話示範</span>`);
+    const ex = aExample(agent);
     modalEl.innerHTML = `
       <button id="modalClose">✕</button>
       <div class="m-head">
         <div class="m-emoji" style="background:${hexToRgba(zone.color, 0.12)}">${agent.emoji || "🤖"}</div>
-        <div><div class="m-cname">${esc(agent.cname)}</div><div class="m-ename">${esc(agent.ename)}</div>
-        <div class="m-badges"><span class="badge zone" style="background:${zone.color}">${zone.icon} ${zone.name}</span>${lic}</div></div>
+        <div><div class="m-cname">${esc(aName(agent))}</div><div class="m-ename">${esc(aSub(agent))}</div>
+        <div class="m-badges"><span class="badge zone" style="background:${zone.color}">${zone.icon} ${esc(zName(zone))}</span>${lic}</div></div>
       </div>
-      <div class="m-tagline" style="color:${zone.color}">${esc(agent.tagline)}</div>
+      <div class="m-tagline" style="color:${zone.color}">${esc(aTag(agent))}</div>
 
       <div class="m-tabs">
-        <button class="m-tab on" data-pane="run">▶ 模擬試跑</button>
-        <button class="m-tab" data-pane="info">痛點 · 上手 · 提示詞</button>
+        <button class="m-tab on" data-pane="run">${T("tabRun")}</button>
+        <button class="m-tab" data-pane="info">${T("tabInfo")}</button>
       </div>
 
       <div class="m-pane on" id="paneRun">
         <div class="run-head">
-          <span class="sim-badge">⚠ 模擬示意 · 非真實執行結果</span>
-          <button class="run-btn" id="replayBtn">↻ 重播</button>
+          <span class="sim-badge">${T("simBadge")}</span>
+          <button class="run-btn" id="replayBtn">${T("replay")}</button>
         </div>
         <div class="stage" id="simStage"></div>
         <div class="sim-foot" id="simFoot"></div>
       </div>
 
       <div class="m-pane" id="paneInfo">
-        <div class="m-section"><h4>這個 Agent 能幫你做什麼</h4><div class="m-desc">${esc(agent.description)}</div></div>
-        ${pains ? `<div class="m-section"><h4>你可能正在經歷</h4><div class="pain-list">${pains}</div></div>` : ""}
-        ${steps ? `<div class="m-section"><h4>快速上手</h4><ol class="step-list">${steps}</ol></div>` : ""}
-        ${agent.example ? `<div class="m-section"><h4>範例提示詞</h4><div class="example-box">${esc(agent.example)}<button class="copy-btn">複製</button></div></div>` : ""}
+        <div class="m-section"><h4>${T("secWhat")}</h4><div class="m-desc">${esc(aDesc(agent))}</div></div>
+        ${pains ? `<div class="m-section"><h4>${T("secPain")}</h4><div class="pain-list">${pains}</div></div>` : ""}
+        ${steps ? `<div class="m-section"><h4>${T("secStart")}</h4><ol class="step-list">${steps}</ol></div>` : ""}
+        ${ex ? `<div class="m-section"><h4>${T("secExample")}</h4><div class="example-box">${esc(ex)}<button class="copy-btn">${T("copy")}</button></div></div>` : ""}
       </div>`;
 
     modalEl.querySelector("#modalClose").addEventListener("click", closeModal);
     const cp = modalEl.querySelector(".copy-btn");
-    if (cp) cp.addEventListener("click", () => { navigator.clipboard.writeText(agent.example); cp.textContent = "已複製 ✓"; setTimeout(() => (cp.textContent = "複製"), 1500); });
+    if (cp) cp.addEventListener("click", () => {
+      navigator.clipboard.writeText(ex);
+      cp.textContent = T("copied");
+      setTimeout(() => (cp.textContent = T("copy")), 1500);
+    });
     modalEl.querySelectorAll(".m-tab").forEach((t) => t.addEventListener("click", () => {
       modalEl.querySelectorAll(".m-tab").forEach((x) => x.classList.toggle("on", x === t));
       modalEl.querySelectorAll(".m-pane").forEach((p) => p.classList.remove("on"));
@@ -1425,18 +1521,19 @@
     const authored = !!(sim && sim.turns);
     const push = (html) => { stage.insertAdjacentHTML("beforeend", html); stage.scrollTop = stage.scrollHeight; };
     const askBubble = (txt) =>
-      `<div class="s-msg u"><div class="s-av u">你</div><div class="s-bub">${esc(txt).replace(/\n/g, "<br>")}</div></div>`;
+      `<div class="s-msg u"><div class="s-av u">${T("you")}</div><div class="s-bub">${esc(txt).replace(/\n/g, "<br>")}</div></div>`;
     const sayBubble = (html) =>
       `<div class="s-msg"><div class="s-av a">C</div><div class="s-bub">${html}</div></div>`;
     const stepLine = (s) =>
       `<div class="s-step"><span class="s-dot"></span>${esc(s)}</div>`;
     const settleSteps = () => stage.querySelectorAll(".s-step").forEach((e) => e.classList.add("done"));
 
-    let t = 0;
+    // hold for a beat so the user can read the card before the run starts
+    let t = 1000;
     const at = (fn, gap) => { simTimers.push(setTimeout(fn, t)); t += gap; };
 
     if (authored) {
-      const turns = sim.turns.zh;
+      const turns = sim.turns[LANG] || sim.turns.zh;
       turns.forEach((turn, ti) => {
         at(() => { settleSteps(); push(askBubble(turn.ask)); }, ti === 0 ? 320 : 900);
         if (turn.say) {
@@ -1452,8 +1549,8 @@
         push(`<div class="s-msg"><div class="s-av a">C</div><div style="flex:1">${simArtifact(sim, zone)}</div></div>`);
       }, 0);
     } else {
-      const prompt = (agent.example || "").split("\n").filter((s) => s.trim())[0] || agent.cname;
-      const steps = (agent.quickStart || []).slice(0, 4).map((s) => s.replace(/^\d+[.、)]\s*/, ""));
+      const prompt = (aExample(agent) || "").split("\n").filter((s) => s.trim())[0] || aName(agent);
+      const steps = aSteps(agent).slice(0, 4).map((s) => s.replace(/^\d+[.、)]\s*/, ""));
       at(() => push(askBubble(prompt)), 480);
       steps.forEach((s) => at(() => { settleSteps(); push(stepLine(s)); }, 640));
       at(() => {
@@ -1462,39 +1559,38 @@
       }, 0);
     }
 
-    foot.innerHTML = authored
-      ? "以上為<b>模擬示意</b>,用於說明這個 Agent 的對話方式與產出型態,非真實執行結果。內容不指涉特定真實企業,不含捏造的具體數據。"
-      : "以上為依官方指示整理的<b>產出結構示意</b>,呈現這個 Agent 的工作流程與產出骨架,不含模擬內容。";
+    foot.innerHTML = authored ? T("footSim") : T("footStruct");
   }
 
   function simArtifact(sim, zone) {
+    const L = (o) => (o && o[LANG]) ? o[LANG] : (o && o.zh);
     let body = "";
     if (sim.art === "swot") {
-      const d = sim.data.zh;
+      const d = L(sim.data);
       const q = (cls, label, arr) =>
         `<div class="swq ${cls}"><div class="qt">${label}</div><ul>${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
-      body = `<div class="swot">${q("s", "優勢 STRENGTHS", d.S)}${q("w", "劣勢 WEAKNESSES", d.W)}${q("o", "機會 OPPORTUNITIES", d.O)}${q("t", "威脅 THREATS", d.T)}</div>`;
+      body = `<div class="swot">${q("s", T("swotS"), d.S)}${q("w", T("swotW"), d.W)}${q("o", T("swotO"), d.O)}${q("t", T("swotT"), d.T)}</div>`;
     } else if (sim.art === "brief") {
-      body = sim.data.zh.map((n) =>
+      body = L(sim.data).map((n) =>
         `<div class="nb"><div class="cat">${esc(n.cat)}</div>
          <div class="tx"><span class="lv ${n.lv}">${n.lv === "m" ? "MUST-KNOW" : "NICE-TO-KNOW"}</span>${esc(n.tx)}</div></div>`).join("");
     } else {
-      const d = sim.data.zh, rl = { h: "高", m: "中", l: "低" };
+      const d = L(sim.data), rl = { h: T("rkH"), m: T("rkM"), l: T("rkL") };
       body = `<table><thead><tr>${d.head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
         ${d.rows.map((r) => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td>
           <td><span class="rk ${r[3]}">${rl[r[3]]}</span></td></tr>`).join("")}</tbody></table>`;
     }
-    return `<div class="art"><h5><span class="k">產出</span>${esc(sim.title.zh)}</h5>${body}
-            <div class="art-rec">${sim.rec.zh}</div></div>`;
+    return `<div class="art"><h5><span class="k">${T("outLabel")}</span>${esc(L(sim.title))}</h5>${body}
+            <div class="art-rec">${L(sim.rec)}</div></div>`;
   }
 
   function simSkeleton(agent, zone) {
-    const rows = (agent.quickStart || []).map((s, i) =>
+    const rows = aSteps(agent).map((s, i) =>
       `<div class="skrow"><div class="skn">${i + 1}</div>
        <div class="skb"><div class="d">${esc(s.replace(/^\d+[.、)]\s*/, ""))}</div></div></div>`).join("");
-    return `<div class="art"><h5><span class="k">產出結構</span>這個 Agent 的工作流程</h5>
-            ${rows || `<div class="skb"><div class="d">${esc(agent.description || "")}</div></div>`}
-            <div class="art-rec">依官方 Agent 指示整理,實際產出內容依你的輸入而定。</div></div>`;
+    return `<div class="art"><h5><span class="k">${T("structLabel")}</span>${T("structTitle")}</h5>
+            ${rows || `<div class="skb"><div class="d">${esc(aDesc(agent) || "")}</div></div>`}
+            <div class="art-rec">${T("structNote")}</div></div>`;
   }
   function closeModal() {
     simTimers.forEach(clearTimeout); simTimers = [];
@@ -1509,11 +1605,13 @@
   function runSearch(q) {
     q = q.trim().toLowerCase();
     if (!q) { searchResults.classList.remove("show"); return; }
-    const m = AGENTS.filter((a) => `${a.cname} ${a.ename} ${a.tagline}`.toLowerCase().includes(q)).slice(0, 10);
+    const m = AGENTS.filter((a) =>
+      `${a.cname} ${a.ename} ${a.tagline} ${(EN[a.id] && EN[a.id].tagline) || ""}`.toLowerCase().includes(q)
+    ).slice(0, 10);
     searchResults.innerHTML = m.length
       ? m.map((a) => { const z = zoneById[a.zone];
-          return `<div class="sr-item" data-id="${a.id}"><span class="nm">${esc(a.cname)}</span><span class="zn" style="background:${z.color}">${z.name}</span></div>`; }).join("")
-      : `<div class="sr-item" style="cursor:default;color:#8a93a6">沒有符合的 Agent</div>`;
+          return `<div class="sr-item" data-id="${a.id}"><span class="nm">${esc(aName(a))}</span><span class="zn" style="background:${z.color}">${esc(zName(z))}</span></div>`; }).join("")
+      : `<div class="sr-item" style="cursor:default;color:#8a93a6">${T("noMatch")}</div>`;
     searchResults.classList.add("show");
     searchResults.querySelectorAll(".sr-item[data-id]").forEach((it) => it.addEventListener("click", () => {
       const agent = agentById[it.dataset.id];
@@ -1529,12 +1627,95 @@
   document.getElementById("hamburger").addEventListener("click", () => sidebar.classList.toggle("open"));
   document.getElementById("hintClose").addEventListener("click", () => (document.getElementById("hint").style.display = "none"));
 
-  // ---------- Resize ----------
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+  // ---------- Viewport: shift the 3D framing right so the scene centers in the
+  // visible stage (the 256px sidebar overlays the canvas on desktop) ----------
+  function applyViewOffset() {
+    const W = window.innerWidth, H = window.innerHeight;
+    const side = W > 860 ? 256 : 0;   // sidebar is off-canvas on mobile
+    camera.aspect = W / H;
+    if (side) {
+      // Render a virtual frame that is `side` wider and take the LEFT portion, so the
+      // scene's centre lands to the right of the sidebar (in the visible stage).
+      camera.setViewOffset(W + side, H, 0, 0, W, H);
+    } else {
+      camera.clearViewOffset();
+    }
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(W, H);
+  }
+
+  // ---------- Resize ----------
+  window.addEventListener("resize", applyViewOffset);
+  applyViewOffset();
+
+  // ---------- Language switching ----------
+  function applyStaticText() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const v = UI[LANG][el.dataset.i18n];
+      if (typeof v === "string") el.innerHTML = v;
+    });
+    searchInput.placeholder = T("searchPh");
+    document.documentElement.lang = isEN() ? "en" : "zh-Hant";
+    document.title = isEN()
+      ? "M365 Copilot Agent — Building"
+      : "M365 Copilot Agent — 智慧大樓";
+  }
+
+  function retextureScene() {
+    // pavilion signage + enter hint
+    pavHi.forEach((ph) => {
+      const tex = signTexture(ph.zone);
+      ph.signMeshes.forEach((m) => { m.material.map.dispose(); m.material.map = tex; m.material.needsUpdate = true; });
+      if (ph.hintMesh) {
+        ph.hintMesh.material.map.dispose();
+        ph.hintMesh.material.map = textTexture(T("pavEnter"), 512, 100, "700 54px 'Segoe UI'",
+          hexToRgba(ph.zone.color, 1), ph.zone.color);
+        ph.hintMesh.material.needsUpdate = true;
+      }
+    });
+    // department rooms are built lazily — drop them so they rebuild in the new language
+    Object.keys(rooms).forEach((id) => {
+      const r = rooms[id];
+      scene.remove(r.group);
+      r.group.traverse((o) => {
+        if (o.geometry) o.geometry.dispose();
+        if (o.material) {
+          const mats = Array.isArray(o.material) ? o.material : [o.material];
+          mats.forEach((m) => { if (m.map) m.map.dispose(); m.dispose(); });
+        }
+      });
+      delete rooms[id];
+    });
+    roomCarousels.length = 0;
+  }
+
+  function setLang(next) {
+    if (next === LANG) return;
+    LANG = next;
+    localStorage.setItem(LANG_KEY, LANG);
+    document.querySelectorAll("#langSeg button").forEach((b) =>
+      b.classList.toggle("on", b.dataset.lang === LANG));
+    applyStaticText();
+    renderSidebar();
+    hideZoneHover();
+    const wasRoom = mode === "room";
+    const roomZone = curZoneId;
+    closeModal();
+    retextureScene();
+    if (wasRoom && roomZone) {
+      // rebuild and re-enter the same room in the new language
+      enterRoom(roomZone);
+    }
+  }
+
+  document.getElementById("langSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-lang]");
+    if (b) setLang(b.dataset.lang);
   });
+  // reflect the detected language on first paint
+  document.querySelectorAll("#langSeg button").forEach((b) =>
+    b.classList.toggle("on", b.dataset.lang === LANG));
+  applyStaticText();
 
   // ---------- Animate ----------
   const camPos = new THREE.Vector3();
