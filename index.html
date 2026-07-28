@@ -193,12 +193,25 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ---------- Modal tabs: 說明 / 模擬試跑 ---------- */
-.m-tabs { display: flex; gap: 6px; margin: 18px 0 4px; border-bottom: 1px solid var(--line); }
-.m-tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 9px 14px;
-  font-size: 13.5px; font-weight: 700; color: var(--faint); cursor: pointer; transition: .15s; }
+.m-tabs { display: flex; gap: 6px; margin: 18px 0 4px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.m-tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 9px 13px;
+  font-size: 13px; font-weight: 700; color: var(--faint); cursor: pointer; transition: .15s;
+  white-space: nowrap; }
 .m-tab:hover { color: var(--ink); }
 .m-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
 .m-pane { display: none; } .m-pane.on { display: block; }
+
+/* newsletter (EDM) pane */
+.edm-bar { display: flex; align-items: center; gap: 12px; margin: 14px 0 10px; }
+.edm-note { font-size: 12px; color: var(--faint); }
+.edm-open { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--accent);
+  text-decoration: none; border: 1px solid var(--line-strong); border-radius: 9px;
+  padding: 6px 12px; white-space: nowrap; }
+.edm-open:hover { border-color: var(--accent); background: rgba(79,124,255,.06); }
+.edm-frame { width: 100%; height: 66vh; min-height: 380px; border: 1px solid var(--line);
+  border-radius: 13px; background: #fff; display: block; }
+/* the newsletter is a fixed 728px email layout — widen the shell so it never clips */
+#modal.wide { max-width: 840px; }
 
 /* rich card content on the run pane */
 .m-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; }
@@ -428,6 +441,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 <script src="data.js"></script>
 <script src="data-en.js"></script>
 <script src="sim-data.js"></script>
+<script src="edm/index.js"></script>
 <script src="building.js"></script>
 </body>
 </html>

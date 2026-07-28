@@ -55,7 +55,8 @@
       noMatch: "沒有符合的 Agent",
       licReq: "需 M365 Copilot 授權", licFree: "免授權即可使用",
       licReqShort: "需授權", licFreeShort: "免授權",
-      tabRun: "▶ 模擬試跑", tabInfo: "痛點 · 上手 · 提示詞",
+      tabRun: "▶ 模擬試跑", tabInfo: "痛點 · 上手 · 提示詞", tabEdm: "電子報原文",
+      edmNote: "本 Agent 的「一分鐘小教室」電子報原文", edmOpen: "在新分頁開啟 ↗",
       simBadge: "⚠ 模擬示意 · 非真實執行結果", replay: "↻ 重播",
       you: "你", secWhat: "這個 Agent 能幫你做什麼", secPain: "你可能正在經歷",
       secStart: "快速上手", secExample: "範例提示詞", copy: "複製", copied: "已複製 ✓",
@@ -80,7 +81,8 @@
       noMatch: "No matching agent",
       licReq: "Requires M365 Copilot license", licFree: "No add-on license needed",
       licReqShort: "License", licFreeShort: "Free",
-      tabRun: "▶ Simulated run", tabInfo: "Pain points · Getting started · Prompts",
+      tabRun: "▶ Simulated run", tabInfo: "Pain points · Getting started · Prompts", tabEdm: "Newsletter",
+      edmNote: "The original newsletter issue for this agent", edmOpen: "Open in new tab ↗",
       simBadge: "⚠ Illustrative simulation · not a real execution", replay: "↻ Replay",
       you: "You", secWhat: "What this agent does for you", secPain: "You might be experiencing",
       secStart: "Getting started", secExample: "Example prompts", copy: "Copy", copied: "Copied ✓",
@@ -1469,6 +1471,7 @@
     const steps = aSteps(agent).map((s) => `<li>${esc(s)}</li>`).join("");
     const sim = (typeof SIM !== "undefined") ? SIM[id] : null;
     const ex = aExample(agent);
+    const edmFile = (typeof EDM !== "undefined" && EDM[id]) ? EDM[id][LANG] || EDM[id].zh : null;
     modalEl.innerHTML = `
       <button id="modalClose">✕</button>
       <div class="m-head">
@@ -1481,6 +1484,7 @@
       <div class="m-tabs">
         <button class="m-tab on" data-pane="run">${T("tabRun")}</button>
         <button class="m-tab" data-pane="info">${T("tabInfo")}</button>
+        ${edmFile ? `<button class="m-tab" data-pane="edm">${T("tabEdm")}</button>` : ""}
       </div>
 
       <div class="m-pane on" id="paneRun">
@@ -1497,7 +1501,15 @@
         ${pains ? `<div class="m-section"><h4>${T("secPain")}</h4><div class="pain-list">${pains}</div></div>` : ""}
         ${steps ? `<div class="m-section"><h4>${T("secStart")}</h4><ol class="step-list">${steps}</ol></div>` : ""}
         ${ex ? `<div class="m-section"><h4>${T("secExample")}</h4><div class="example-box">${esc(ex)}<button class="copy-btn">${T("copy")}</button></div></div>` : ""}
-      </div>`;
+      </div>
+
+      ${edmFile ? `<div class="m-pane" id="paneEdm">
+        <div class="edm-bar">
+          <span class="edm-note">${T("edmNote")}</span>
+          <a class="edm-open" href="edm/${LANG}/${edmFile}" target="_blank" rel="noopener">${T("edmOpen")}</a>
+        </div>
+        <iframe class="edm-frame" id="edmFrame" title="newsletter" loading="lazy"></iframe>
+      </div>` : ""}`;
 
     modalEl.querySelector("#modalClose").addEventListener("click", closeModal);
     const cp = modalEl.querySelector(".copy-btn");
@@ -1507,12 +1519,23 @@
       setTimeout(() => (cp.textContent = T("copy")), 1500);
     });
     modalEl.querySelectorAll(".m-tab").forEach((t) => t.addEventListener("click", () => {
+      const pane = t.dataset.pane;
       modalEl.querySelectorAll(".m-tab").forEach((x) => x.classList.toggle("on", x === t));
       modalEl.querySelectorAll(".m-pane").forEach((p) => p.classList.remove("on"));
-      modalEl.querySelector(t.dataset.pane === "run" ? "#paneRun" : "#paneInfo").classList.add("on");
-      if (t.dataset.pane === "run") playSim(agent, zone, sim);
+      const target = modalEl.querySelector(
+        pane === "run" ? "#paneRun" : pane === "edm" ? "#paneEdm" : "#paneInfo");
+      if (target) target.classList.add("on");
+      // the newsletter is a fixed 728px email layout — widen the modal so it never clips
+      modalEl.classList.toggle("wide", pane === "edm");
+      if (pane === "run") playSim(agent, zone, sim);
+      if (pane === "edm") {
+        // load the newsletter only the first time the tab is opened
+        const fr = modalEl.querySelector("#edmFrame");
+        if (fr && !fr.getAttribute("src")) fr.setAttribute("src", `edm/${LANG}/${edmFile}`);
+      }
     }));
     modalEl.querySelector("#replayBtn").addEventListener("click", () => playSim(agent, zone, sim));
+    modalEl.classList.remove("wide");
     modalBackdrop.classList.add("show");
     playSim(agent, zone, sim);
   }
