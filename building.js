@@ -35,6 +35,14 @@
   const aExample = (a) => (isEN() && EN[a.id] && EN[a.id].example) ? EN[a.id].example : a.example;
   const zName = (z) => (isEN() ? (z.nameEn || z.name) : z.name);
   const zSub = (z) => (isEN() ? z.name : (z.nameEn || ""));
+  // some source records pack several emoji into one field — show only the first glyph
+  const oneEmoji = (s) => {
+    const g = [...(s || "")].filter((c) => !/[\uFE0F\u200D\u2640\u2642]/.test(c));
+    return g[0] || "🤖";
+  };
+  const aEmoji = (a) => oneEmoji(a.emoji);
+  // taglines in the source often start with decorative sparkles — strip them
+  const cleanTag = (s) => (s || "").replace(/^[\s✨🌟⭐️*]+/, "").trim();
 
   const UI = {
     zh: {
@@ -389,7 +397,7 @@
     ctx.fillStyle = "#3c465c";
     ctx.font = "500 28px 'Segoe UI', sans-serif";
     const tagY = enY + 86;
-    const tagLines = wrapText(ctx, (aTag(agent) || "").replace(/^✨\s*/, ""), W / 2, tagY, W - 96, 40, 3);
+    const tagLines = wrapText(ctx, cleanTag(aTag(agent)), W / 2, tagY, W - 96, 40, 3);
 
     // ---- pain points: fills the empty middle and shows what it solves ----
     let y = tagY + tagLines * 40 + 30;
@@ -1164,9 +1172,9 @@
       card.className = "rd-card";
       card.style.setProperty("--rc", zone.color);
       card.innerHTML =
-        `<div class="rc-top"><div class="rc-em" style="background:${hexToRgba(zone.color, 0.16)}">${agent.emoji || "🤖"}</div>
+        `<div class="rc-top"><div class="rc-em" style="background:${hexToRgba(zone.color, 0.16)}">${aEmoji(agent)}</div>
          <div class="rc-nm">${esc(aName(agent))}</div></div>
-         <div class="rc-tl">${esc((aTag(agent) || "").replace(/^✨\s*/, ""))}</div>
+         <div class="rc-tl">${esc(cleanTag(aTag(agent)))}</div>
          <div class="rc-foot">${lic}<span class="rc-go">${T("cardCta").replace("▶  ", "")} ▸</span></div>`;
       card.addEventListener("click", () => openModal(agent.id));
       grid.appendChild(card);
@@ -1457,18 +1465,18 @@
     const zone = zoneById[agent.zone];
     const lic = agent.license === "required"
       ? `<span class="badge req">${T("licReq")}</span>` : `<span class="badge free">${T("licFree")}</span>`;
-    const pains = aPains(agent).map((p) => `<div class="pain-item">😵 ${esc(p)}</div>`).join("");
+    const pains = aPains(agent).map((p) => `<div class="pain-item">${esc(p)}</div>`).join("");
     const steps = aSteps(agent).map((s) => `<li>${esc(s)}</li>`).join("");
     const sim = (typeof SIM !== "undefined") ? SIM[id] : null;
     const ex = aExample(agent);
     modalEl.innerHTML = `
       <button id="modalClose">✕</button>
       <div class="m-head">
-        <div class="m-emoji" style="background:${hexToRgba(zone.color, 0.12)}">${agent.emoji || "🤖"}</div>
+        <div class="m-emoji" style="background:${hexToRgba(zone.color, 0.12)}">${aEmoji(agent)}</div>
         <div><div class="m-cname">${esc(aName(agent))}</div><div class="m-ename">${esc(aSub(agent))}</div>
         <div class="m-badges"><span class="badge zone" style="background:${zone.color}">${zone.icon} ${esc(zName(zone))}</span>${lic}</div></div>
       </div>
-      <div class="m-tagline" style="color:${zone.color}">${esc(aTag(agent))}</div>
+      <div class="m-tagline" style="color:${zone.color}">${esc(cleanTag(aTag(agent)))}</div>
 
       <div class="m-tabs">
         <button class="m-tab on" data-pane="run">${T("tabRun")}</button>
