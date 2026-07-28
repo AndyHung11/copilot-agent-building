@@ -74,7 +74,7 @@
   scene.fog = new THREE.Fog(0x0b1222, 90, 210);
 
   const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 600);
-  const EXTERIOR = { pos: { x: 6, y: 13, z: SHELL_R + 40 }, look: { x: 0, y: 13, z: SHELL_R - 6 } };
+  const EXTERIOR = { pos: { x: 8, y: 20, z: SHELL_R + 62 }, look: { x: 0, y: 11, z: 0 } };
   const INTERIOR = { pos: { x: 0, y: 18, z: 31 }, look: { x: 0, y: 3, z: 0 } };
   camera.position.set(10, 14, SHELL_R + 82);
 
@@ -186,7 +186,15 @@
     return lines.length;
   }
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
-  function canvasTex(cv) { const t = new THREE.CanvasTexture(cv); t.anisotropy = maxAniso; t.encoding = THREE.sRGBEncoding; return t; }
+  function canvasTex(cv) {
+    const t = new THREE.CanvasTexture(cv);
+    t.anisotropy = maxAniso;
+    t.encoding = THREE.sRGBEncoding;
+    t.minFilter = THREE.LinearMipmapLinearFilter;  // crisp at distance, no shimmer
+    t.magFilter = THREE.LinearFilter;              // smooth when viewed up close
+    t.generateMipmaps = true;
+    return t;
+  }
 
   // Clean centered department typography — no plate, no frame, no badge.
   // Reads like architectural signage lettering floating in the pavilion.
@@ -245,9 +253,11 @@
   }
 
   function kioskTexture(agent, zone) {
-    const W = 620, H = 800, cv = document.createElement("canvas");
-    cv.width = W; cv.height = H;
+    // render at 2x for crisp text when the card is viewed up close in 3D
+    const S = 2, W = 620, H = 800, cv = document.createElement("canvas");
+    cv.width = W * S; cv.height = H * S;
     const ctx = cv.getContext("2d");
+    ctx.scale(S, S);
     // card body
     ctx.fillStyle = "#ffffff";
     roundRect(ctx, 8, 8, W - 16, H - 16, 40); ctx.fill();
@@ -273,20 +283,62 @@
     ctx.fillStyle = "#12192b";
     ctx.font = "800 46px 'Segoe UI', sans-serif";
     ctx.textAlign = "center";
-    const nameLines = wrapText(ctx, agent.cname, W / 2, 196, W - 90, 58, 2);
+    const nameLines = wrapText(ctx, agent.cname, W / 2, 182, W - 90, 56, 2);
     // english name
-    const enY = 196 + (nameLines > 1 ? 58 : 0) + 52;
+    const enY = 182 + (nameLines > 1 ? 56 : 0) + 48;
     ctx.fillStyle = "#7b869c";
     ctx.font = "600 24px 'Segoe UI', sans-serif";
     ctx.fillText(agent.ename || "", W / 2, enY);
     // divider
     ctx.strokeStyle = hexToRgba(zone.color, 0.35);
     ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(W / 2 - 70, enY + 42); ctx.lineTo(W / 2 + 70, enY + 42); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W / 2 - 70, enY + 38); ctx.lineTo(W / 2 + 70, enY + 38); ctx.stroke();
     // tagline / what it does
-    ctx.fillStyle = "#49536a";
-    ctx.font = "400 27px 'Segoe UI', sans-serif";
-    wrapText(ctx, (agent.tagline || "").replace(/^✨\s*/, ""), W / 2, enY + 96, W - 96, 40, 3);
+    ctx.fillStyle = "#3c465c";
+    ctx.font = "500 28px 'Segoe UI', sans-serif";
+    const tagY = enY + 86;
+    const tagLines = wrapText(ctx, (agent.tagline || "").replace(/^✨\s*/, ""), W / 2, tagY, W - 96, 40, 3);
+
+    // ---- pain points: fills the empty middle and shows what it solves ----
+    let y = tagY + tagLines * 40 + 30;
+    const roomLeft = (H - 128) - y;                  // vertical space before the CTA
+    const maxPains = Math.max(0, Math.min(3, Math.floor((roomLeft - 34) / 70)));
+    const pains = (agent.painPoints || []).slice(0, maxPains);
+    if (pains.length) {
+      ctx.fillStyle = "#8c97ab";
+      ctx.font = "800 21px 'Segoe UI', sans-serif";
+      ctx.fillText("解決這些問題", W / 2, y);
+      y += 34;
+      ctx.textAlign = "left";
+      pains.forEach((p) => {
+        const boxY = y - 4;
+        ctx.fillStyle = hexToRgba(zone.color, 0.09);
+        roundRect(ctx, 40, boxY, W - 80, 60, 15); ctx.fill();
+        // colored bullet
+        ctx.fillStyle = zone.color;
+        ctx.beginPath(); ctx.arc(64, boxY + 30, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#3f4a5f";
+        ctx.font = "600 24px 'Segoe UI', sans-serif";
+        // single line, ellipsised to fit
+        let s = p;
+        while (ctx.measureText(s + "…").width > W - 130 && s.length) s = s.slice(0, -1);
+        ctx.fillText(s.length < p.length ? s + "…" : s, 84, boxY + 31);
+        y += 70;
+      });
+      ctx.textAlign = "center";
+    }
+
+    // ---- step count chip (only if it fits above the CTA) ----
+    const nSteps = (agent.quickStart || []).length;
+    if (nSteps && y + 48 < H - 128) {
+      const chip = nSteps + " 步驟即可上手";
+      ctx.font = "700 23px 'Segoe UI', sans-serif";
+      const cw = ctx.measureText(chip).width + 48;
+      ctx.fillStyle = "#eef1f6";
+      roundRect(ctx, W / 2 - cw / 2, y + 2, cw, 46, 23); ctx.fill();
+      ctx.fillStyle = "#5d6880";
+      ctx.fillText(chip, W / 2, y + 26);
+    }
 
     // call-to-action
     ctx.fillStyle = hexToRgba(zone.color, 0.14);
@@ -571,7 +623,7 @@
   // ---------- Floating glass card (3D agent display inside a room) ----------
   function buildFloatingCard(agent, zone) {
     const grp = new THREE.Group();
-    const CW = 3.9, CH = 5.03;   // matches the 620x800 texture aspect
+    const CW = 4.6, CH = 5.94;   // matches the 620x800 texture aspect
     const tex = kioskTexture(agent, zone);
 
     // spinner: the part that rotates (glass + both faces + frame + hit box)
@@ -956,7 +1008,7 @@
     carousel.position.set(0, RING_Y, -3);   // ring center, mid-room
     grp.add(carousel);
     // radius derived from card width so cards never crowd each other
-    const ringR = Math.max(7, list.length * 0.86);
+    const ringR = Math.max(8.2, list.length * 1.0);
     list.forEach((agent, idx) => {
       const a = (idx / list.length) * Math.PI * 2;
       const card = buildFloatingCard(agent, zone);
@@ -1112,16 +1164,30 @@
     const look = { x: zone.center.x + d.x * 0.5, y: 2.6, z: zone.center.z + d.z * 0.5 };
     animateCamera(camPos, look, 1150, done);
   }
-  function flyInterior() { setActiveZoneBtn(null); atExterior = false; if (mode === "room") { exitRoom(); return; } animateCamera(INTERIOR.pos, INTERIOR.look, 1200); }
+  function flyInterior() {
+    setActiveZoneBtn(null);
+    if (mode === "room") { atExterior = false; exitRoom(); return; }
+    // keep the exterior state (and its loose limits) for the whole flight so the lobby
+    // camera constraints can't grab the camera mid-animation and cause a stutter
+    animateCamera(INTERIOR.pos, INTERIOR.look, 1600, () => {
+      atExterior = false;
+      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 90;
+    });
+  }
+  function goExterior() {
+    atExterior = true;
+    // outside we need a much wider range so the whole building fits on screen
+    controls.minDistance = 40; controls.maxDistance = 320;
+    animateCamera(EXTERIOR.pos, EXTERIOR.look, 1400);
+  }
   function flyExterior() {
     setActiveZoneBtn(null);
     if (mode === "room") {
       exitRoom();
-      setTimeout(() => { atExterior = true; animateCamera(EXTERIOR.pos, EXTERIOR.look, 1400); }, 620);
+      setTimeout(goExterior, 620);
       return;
     }
-    atExterior = true;
-    animateCamera(EXTERIOR.pos, EXTERIOR.look, 1400);
+    goExterior();
   }
   document.getElementById("homeBtn").addEventListener("click", flyInterior);
   document.getElementById("exteriorBtn").addEventListener("click", flyExterior);
@@ -1296,6 +1362,13 @@
       ? `<span class="badge req">需 M365 Copilot 授權</span>` : `<span class="badge free">免授權即可使用</span>`;
     const pains = (agent.painPoints || []).map((p) => `<div class="pain-item">😵 ${esc(p)}</div>`).join("");
     const steps = (agent.quickStart || []).map((s) => `<li>${esc(s)}</li>`).join("");
+    const sim = (typeof SIM !== "undefined") ? SIM[id] : null;
+    const painCount = (agent.painPoints || []).length;
+    const stepCount = (agent.quickStart || []).length;
+    const metaBits = [];
+    if (painCount) metaBits.push(`<span class="m-meta-i">😵 ${painCount} 個常見痛點</span>`);
+    if (stepCount) metaBits.push(`<span class="m-meta-i">📋 ${stepCount} 步驟上手</span>`);
+    if (sim && sim.turns) metaBits.push(`<span class="m-meta-i">💬 ${sim.turns.zh.length} 輪對話示範</span>`);
     modalEl.innerHTML = `
       <button id="modalClose">✕</button>
       <div class="m-head">
@@ -1304,16 +1377,129 @@
         <div class="m-badges"><span class="badge zone" style="background:${zone.color}">${zone.icon} ${zone.name}</span>${lic}</div></div>
       </div>
       <div class="m-tagline" style="color:${zone.color}">${esc(agent.tagline)}</div>
-      <div class="m-section"><h4>這個 Agent 能幫你做什麼</h4><div class="m-desc">${esc(agent.description)}</div></div>
-      ${pains ? `<div class="m-section"><h4>你可能正在經歷</h4><div class="pain-list">${pains}</div></div>` : ""}
-      ${steps ? `<div class="m-section"><h4>快速上手</h4><ol class="step-list">${steps}</ol></div>` : ""}
-      ${agent.example ? `<div class="m-section"><h4>範例提示詞</h4><div class="example-box">${esc(agent.example)}<button class="copy-btn">複製</button></div></div>` : ""}`;
+
+      <div class="m-tabs">
+        <button class="m-tab on" data-pane="run">▶ 模擬試跑</button>
+        <button class="m-tab" data-pane="info">痛點 · 上手 · 提示詞</button>
+      </div>
+
+      <div class="m-pane on" id="paneRun">
+        <div class="run-head">
+          <span class="sim-badge">⚠ 模擬示意 · 非真實執行結果</span>
+          <button class="run-btn" id="replayBtn">↻ 重播</button>
+        </div>
+        <div class="stage" id="simStage"></div>
+        <div class="sim-foot" id="simFoot"></div>
+      </div>
+
+      <div class="m-pane" id="paneInfo">
+        <div class="m-section"><h4>這個 Agent 能幫你做什麼</h4><div class="m-desc">${esc(agent.description)}</div></div>
+        ${pains ? `<div class="m-section"><h4>你可能正在經歷</h4><div class="pain-list">${pains}</div></div>` : ""}
+        ${steps ? `<div class="m-section"><h4>快速上手</h4><ol class="step-list">${steps}</ol></div>` : ""}
+        ${agent.example ? `<div class="m-section"><h4>範例提示詞</h4><div class="example-box">${esc(agent.example)}<button class="copy-btn">複製</button></div></div>` : ""}
+      </div>`;
+
     modalEl.querySelector("#modalClose").addEventListener("click", closeModal);
     const cp = modalEl.querySelector(".copy-btn");
     if (cp) cp.addEventListener("click", () => { navigator.clipboard.writeText(agent.example); cp.textContent = "已複製 ✓"; setTimeout(() => (cp.textContent = "複製"), 1500); });
+    modalEl.querySelectorAll(".m-tab").forEach((t) => t.addEventListener("click", () => {
+      modalEl.querySelectorAll(".m-tab").forEach((x) => x.classList.toggle("on", x === t));
+      modalEl.querySelectorAll(".m-pane").forEach((p) => p.classList.remove("on"));
+      modalEl.querySelector(t.dataset.pane === "run" ? "#paneRun" : "#paneInfo").classList.add("on");
+      if (t.dataset.pane === "run") playSim(agent, zone, sim);
+    }));
+    modalEl.querySelector("#replayBtn").addEventListener("click", () => playSim(agent, zone, sim));
     modalBackdrop.classList.add("show");
+    playSim(agent, zone, sim);
   }
-  function closeModal() { modalBackdrop.classList.remove("show"); }
+
+  // ---------- Simulated run inside the agent modal ----------
+  let simTimers = [];
+  function playSim(agent, zone, sim) {
+    simTimers.forEach(clearTimeout); simTimers = [];
+    const stage = modalEl.querySelector("#simStage");
+    const foot = modalEl.querySelector("#simFoot");
+    if (!stage) return;
+    stage.innerHTML = "";
+
+    const authored = !!(sim && sim.turns);
+    const push = (html) => { stage.insertAdjacentHTML("beforeend", html); stage.scrollTop = stage.scrollHeight; };
+    const askBubble = (txt) =>
+      `<div class="s-msg u"><div class="s-av u">你</div><div class="s-bub">${esc(txt).replace(/\n/g, "<br>")}</div></div>`;
+    const sayBubble = (html) =>
+      `<div class="s-msg"><div class="s-av a">C</div><div class="s-bub">${html}</div></div>`;
+    const stepLine = (s) =>
+      `<div class="s-step"><span class="s-dot"></span>${esc(s)}</div>`;
+    const settleSteps = () => stage.querySelectorAll(".s-step").forEach((e) => e.classList.add("done"));
+
+    let t = 0;
+    const at = (fn, gap) => { simTimers.push(setTimeout(fn, t)); t += gap; };
+
+    if (authored) {
+      const turns = sim.turns.zh;
+      turns.forEach((turn, ti) => {
+        at(() => { settleSteps(); push(askBubble(turn.ask)); }, ti === 0 ? 320 : 900);
+        if (turn.say) {
+          // agent "typing" beat, then the reply
+          at(() => push(sayBubble(turn.say.replace(/\n/g, "<br>"))), 1250);
+        }
+        (turn.steps || []).forEach((s) => {
+          at(() => { settleSteps(); push(stepLine(s)); }, 660);
+        });
+      });
+      at(() => {
+        settleSteps();
+        push(`<div class="s-msg"><div class="s-av a">C</div><div style="flex:1">${simArtifact(sim, zone)}</div></div>`);
+      }, 0);
+    } else {
+      const prompt = (agent.example || "").split("\n").filter((s) => s.trim())[0] || agent.cname;
+      const steps = (agent.quickStart || []).slice(0, 4).map((s) => s.replace(/^\d+[.、)]\s*/, ""));
+      at(() => push(askBubble(prompt)), 480);
+      steps.forEach((s) => at(() => { settleSteps(); push(stepLine(s)); }, 640));
+      at(() => {
+        settleSteps();
+        push(`<div class="s-msg"><div class="s-av a">C</div><div style="flex:1">${simSkeleton(agent, zone)}</div></div>`);
+      }, 0);
+    }
+
+    foot.innerHTML = authored
+      ? "以上為<b>模擬示意</b>,用於說明這個 Agent 的對話方式與產出型態,非真實執行結果。內容不指涉特定真實企業,不含捏造的具體數據。"
+      : "以上為依官方指示整理的<b>產出結構示意</b>,呈現這個 Agent 的工作流程與產出骨架,不含模擬內容。";
+  }
+
+  function simArtifact(sim, zone) {
+    let body = "";
+    if (sim.art === "swot") {
+      const d = sim.data.zh;
+      const q = (cls, label, arr) =>
+        `<div class="swq ${cls}"><div class="qt">${label}</div><ul>${arr.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+      body = `<div class="swot">${q("s", "優勢 STRENGTHS", d.S)}${q("w", "劣勢 WEAKNESSES", d.W)}${q("o", "機會 OPPORTUNITIES", d.O)}${q("t", "威脅 THREATS", d.T)}</div>`;
+    } else if (sim.art === "brief") {
+      body = sim.data.zh.map((n) =>
+        `<div class="nb"><div class="cat">${esc(n.cat)}</div>
+         <div class="tx"><span class="lv ${n.lv}">${n.lv === "m" ? "MUST-KNOW" : "NICE-TO-KNOW"}</span>${esc(n.tx)}</div></div>`).join("");
+    } else {
+      const d = sim.data.zh, rl = { h: "高", m: "中", l: "低" };
+      body = `<table><thead><tr>${d.head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>
+        ${d.rows.map((r) => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td>
+          <td><span class="rk ${r[3]}">${rl[r[3]]}</span></td></tr>`).join("")}</tbody></table>`;
+    }
+    return `<div class="art"><h5><span class="k">產出</span>${esc(sim.title.zh)}</h5>${body}
+            <div class="art-rec">${sim.rec.zh}</div></div>`;
+  }
+
+  function simSkeleton(agent, zone) {
+    const rows = (agent.quickStart || []).map((s, i) =>
+      `<div class="skrow"><div class="skn">${i + 1}</div>
+       <div class="skb"><div class="d">${esc(s.replace(/^\d+[.、)]\s*/, ""))}</div></div></div>`).join("");
+    return `<div class="art"><h5><span class="k">產出結構</span>這個 Agent 的工作流程</h5>
+            ${rows || `<div class="skb"><div class="d">${esc(agent.description || "")}</div></div>`}
+            <div class="art-rec">依官方 Agent 指示整理,實際產出內容依你的輸入而定。</div></div>`;
+  }
+  function closeModal() {
+    simTimers.forEach(clearTimeout); simTimers = [];
+    modalBackdrop.classList.remove("show");
+  }
   modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
@@ -1406,7 +1592,9 @@
     // The atrium focus stays pinned to the centre (so you can never spin off into space).
     // Hovering a pavilion ORBITS the camera around that centre until the pavilion is
     // framed dead-centre — the target itself never moves.
-    if (mode === "lobby") {
+    // NOTE: skipped while parked outside or mid-flight, otherwise the exterior view gets
+    // yanked back inside the shell and the fly-in animation stutters.
+    if (mode === "lobby" && !atExterior && !flightRAF) {
       focusPt.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
       controls.target.lerp(focusPt, 0.05);
 
@@ -1460,13 +1648,22 @@
     renderer.render(scene, camera);
   }
 
-  // ---------- Boot: exterior → fly through entrance into interior ----------
+  // ---------- Boot: exterior → hold 1s → smooth fly-in to the atrium ----------
   ctxAgents = clickAgents; ctxPortals = clickPortals;
   requestAnimationFrame(() => {
     document.getElementById("loading").style.display = "none";
-    // establish exterior, then dramatic fly-in to the atrium
-    animateCamera(EXTERIOR.pos, EXTERIOR.look, 1400, () => {
-      setTimeout(() => animateCamera(INTERIOR.pos, INTERIOR.look, 2200), 700);
+    // park outside first so the whole building reads, hold, then fly in
+    atExterior = true;
+    controls.minDistance = 40; controls.maxDistance = 320;
+    animateCamera(EXTERIOR.pos, EXTERIOR.look, 1600, () => {
+      setTimeout(() => {
+        // stay in "exterior" state for the whole flight so the lobby camera
+        // constraints never kick in mid-animation (that caused a visible jump)
+        animateCamera(INTERIOR.pos, INTERIOR.look, 2400, () => {
+          atExterior = false;
+          controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 90;
+        });
+      }, 1000);
     });
   });
   animate();

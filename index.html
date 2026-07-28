@@ -144,12 +144,16 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 #zoneHover .zh-tip::after { content: " ▸"; }
 
 /* ---------- Modal ---------- */
-#modalBackdrop { position: fixed; inset: 0; background: rgba(20,30,55,0.32); backdrop-filter: blur(3px);
+/* backdrop covers only the 3D stage (right of the sidebar, below the topbar)
+   so the modal centers inside the VR view, not the whole window */
+#modalBackdrop { position: fixed; top: 62px; right: 0; bottom: 0; left: 256px;
+  background: rgba(20,30,55,0.32); backdrop-filter: blur(3px);
   z-index: 50; display: none; align-items: center; justify-content: center; padding: 24px; }
 #modalBackdrop.show { display: flex; }
 #modal {
-  width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto; background: #fff;
+  width: 100%; max-width: 720px; max-height: 84vh; overflow-y: auto; background: #fff;
   border-radius: 20px; box-shadow: var(--shadow-lg); padding: 26px 28px 30px; position: relative;
+  margin: auto;
   animation: pop 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes pop { from { transform: translateY(14px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -181,6 +185,112 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 .copy-btn { position: absolute; top: 10px; right: 10px; font-size: 11px; padding: 5px 11px; border-radius: 8px;
   border: 1px solid var(--line-strong); background: #fff; color: var(--muted); cursor: pointer; }
 .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ---------- Modal tabs: 說明 / 模擬試跑 ---------- */
+.m-tabs { display: flex; gap: 6px; margin: 18px 0 4px; border-bottom: 1px solid var(--line); }
+.m-tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 9px 14px;
+  font-size: 13.5px; font-weight: 700; color: var(--faint); cursor: pointer; transition: .15s; }
+.m-tab:hover { color: var(--ink); }
+.m-tab.on { color: var(--accent); border-bottom-color: var(--accent); }
+.m-pane { display: none; } .m-pane.on { display: block; }
+
+/* rich card content on the run pane */
+.m-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 13px; }
+.m-meta-i { font-size: 11.5px; font-weight: 700; color: var(--muted);
+  background: #f2f5fa; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; }
+.m-quick { margin-top: 14px; background: #fbfcfe; border: 1px solid var(--line);
+  border-radius: 13px; padding: 13px 15px; }
+.m-quick-h { font-size: 11px; text-transform: uppercase; letter-spacing: .8px;
+  color: var(--faint); font-weight: 800; margin-bottom: 8px; }
+.m-quick-i { font-size: 12.6px; color: var(--muted); line-height: 1.6; padding-left: 17px;
+  position: relative; margin-bottom: 5px; }
+.m-quick-i:last-child { margin-bottom: 0; }
+.m-quick-i::before { content: "—"; position: absolute; left: 0; color: #b9c4d6; }
+
+/* run panel */
+.run-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 16px 0 12px; }
+.sim-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+  padding: 5px 11px; border-radius: 999px; background: rgba(224,150,0,.13); color: #a8701a;
+  border: 1px solid rgba(224,150,0,.32); }
+.run-btn { margin-left: auto; background: var(--accent); border: 0; color: #fff; font-weight: 700;
+  padding: 8px 17px; border-radius: 10px; cursor: pointer; font-size: 13px; }
+.run-btn:hover { filter: brightness(1.1); }
+.stage { background: #f7f9fc; border: 1px solid var(--line); border-radius: 14px;
+  padding: 15px; min-height: 240px; }
+.s-msg { display: flex; gap: 9px; margin-bottom: 12px; opacity: 0; transform: translateY(6px);
+  animation: sIn .36s ease forwards; }
+/* user messages sit on the RIGHT, agent replies on the LEFT */
+.s-msg.u { flex-direction: row-reverse; }
+@keyframes sIn { to { opacity: 1; transform: none; } }
+.s-av { width: 27px; height: 27px; border-radius: 9px; flex: none; display: flex;
+  align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+.s-av.u { background: #8a93a6; }
+.s-av.a { background: linear-gradient(135deg, #3d7bfd, #a35bff); }
+.s-bub { background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 13px; font-size: 13.2px; line-height: 1.65; flex: 1; }
+.s-msg.u .s-bub { background: rgba(79,124,255,.1); border-color: rgba(79,124,255,.28);
+  flex: 0 1 auto; max-width: 78%; text-align: left; }
+.s-step { display: flex; align-items: center; gap: 8px; color: var(--faint);
+  font-size: 12.3px; padding: 5px 3px 5px 36px; opacity: 0; animation: sIn .3s ease forwards; }
+.s-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none;
+  animation: sPulse 1.1s ease-in-out infinite; }
+@keyframes sPulse { 0%,100% { opacity: .3 } 50% { opacity: 1 } }
+.s-step.done .s-dot { background: #1f9d63; animation: none; }
+
+/* output artifact */
+.art { border: 1px solid var(--line-strong); border-radius: 13px; padding: 14px 15px;
+  background: #fff; }
+.art h5 { margin: 0 0 11px; font-size: 13px; display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.art h5 .k { font-size: 9.5px; font-weight: 800; padding: 3px 8px; border-radius: 11px;
+  background: rgba(79,124,255,.13); color: var(--accent); letter-spacing: .05em; }
+.art-rec { margin-top: 11px; padding-top: 10px; border-top: 1px dashed var(--line-strong);
+  font-size: 12.6px; color: var(--muted); line-height: 1.65; }
+
+/* SWOT */
+.swot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 560px) { .swot { grid-template-columns: 1fr; } }
+.swq { border-radius: 11px; padding: 10px 12px; border: 1px solid; }
+.swq .qt { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; margin-bottom: 6px; }
+.swq ul { margin: 0; padding-left: 15px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.swq li { margin-bottom: 3px; }
+.swq.s { background: rgba(31,157,99,.06); border-color: rgba(31,157,99,.26) } .swq.s .qt { color: #178a55 }
+.swq.w { background: rgba(214,64,92,.05); border-color: rgba(214,64,92,.24) } .swq.w .qt { color: #c23a55 }
+.swq.o { background: rgba(79,124,255,.05); border-color: rgba(79,124,255,.24) } .swq.o .qt { color: #3a63d8 }
+.swq.t { background: rgba(224,150,0,.06); border-color: rgba(224,150,0,.26) } .swq.t .qt { color: #a8701a }
+
+/* brief list */
+.nb { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed var(--line); }
+.nb:last-child { border: 0; margin: 0; padding: 0; }
+.nb .cat { font-size: 10.5px; color: var(--faint); font-weight: 700; margin-bottom: 3px; }
+.nb .tx { font-size: 12.7px; line-height: 1.6; color: var(--muted); }
+.lv { display: inline-block; font-size: 9px; font-weight: 800; padding: 2px 7px;
+  border-radius: 10px; margin-right: 6px; vertical-align: 1px; }
+.lv.m { background: rgba(214,64,92,.13); color: #c23a55 }
+.lv.n { background: rgba(120,135,160,.14); color: #6b7a92 }
+
+/* comparison table */
+.art table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.art th { text-align: left; font-size: 10px; letter-spacing: .05em; color: var(--faint);
+  padding: 6px 8px; border-bottom: 1px solid var(--line-strong); font-weight: 800; }
+.art td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top;
+  line-height: 1.5; color: var(--muted); }
+.rk { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+.rk.h { background: rgba(214,64,92,.13); color: #c23a55 }
+.rk.m { background: rgba(224,150,0,.15); color: #a8701a }
+.rk.l { background: rgba(31,157,99,.12); color: #178a55 }
+
+/* generic structure skeleton (agents without authored sim) */
+.skrow { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 9px;
+  opacity: 0; animation: sIn .4s ease forwards; }
+.skn { width: 24px; height: 24px; border-radius: 8px; background: rgba(79,124,255,.12);
+  color: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; flex: none; }
+.skb { flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px; }
+.skb .t { font-weight: 700; font-size: 12.8px; margin-bottom: 4px; }
+.skb .d { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+.sim-foot { margin-top: 12px; font-size: 11.5px; color: #8a701a; background: rgba(224,150,0,.07);
+  border: 1px solid rgba(224,150,0,.24); border-radius: 11px; padding: 10px 13px; line-height: 1.6; }
 
 /* ---------- Loading ---------- */
 #loading { position: fixed; inset: 0; z-index: 100; background: linear-gradient(180deg, #0a0f1c, #111a2e);
@@ -243,6 +353,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
   #brand .t2 { display: none; }
   #roomDeck { width: 100%; max-height: 66vh; border-radius: 18px 18px 0 0; }
   .rd-desc { display: none; }
+  /* sidebar is off-canvas on mobile → let the modal use the full width */
+  #modalBackdrop { left: 0; padding: 16px; }
+  #modal { max-height: 88vh; padding: 22px 20px 26px; }
 }
 </style>
 </head>
@@ -303,6 +416,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
 <script src="data.js"></script>
+<script src="sim-data.js"></script>
 <script src="building.js"></script>
 </body>
 </html>
