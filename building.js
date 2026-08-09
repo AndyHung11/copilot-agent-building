@@ -47,9 +47,9 @@
   const UI = {
     zh: {
       brandT1: "M365 Copilot Agent 智慧大樓",
-      brandT2: "Power of Copilot · 8 大部門 · 53 位 AI 助理",
+      brandT2: "Power of Copilot · {z} 大部門 · {a} 位 AI 助理",
       btnExterior: "看外觀", btnAtrium: "進中庭", btnBack: "返回大廳",
-      sideTitle: "樓層導覽 · 8 大部門",
+      sideTitle: "樓層導覽 · {z} 大部門",
       hintText: "🖱️ 大廳：拖曳環顧·點體驗館進入　·　房間內：拖曳轉動卡片·點卡看詳情",
       searchPh: "搜尋 Agent 名稱或關鍵字…",
       noMatch: "沒有符合的 Agent",
@@ -73,9 +73,9 @@
     },
     en: {
       brandT1: "M365 Copilot Agent Building",
-      brandT2: "Power of Copilot · 8 departments · 53 AI assistants",
+      brandT2: "Power of Copilot · {z} departments · {a} AI assistants",
       btnExterior: "Exterior", btnAtrium: "Atrium", btnBack: "Back to lobby",
-      sideTitle: "Directory · 8 departments",
+      sideTitle: "Directory · {z} departments",
       hintText: "🖱️ Lobby: drag to look around · click a pavilion to enter　·　Inside: drag to spin cards · click a card for details",
       searchPh: "Search agents by name or keyword…",
       noMatch: "No matching agent",
@@ -1683,7 +1683,9 @@
   function applyStaticText() {
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       const v = UI[LANG][el.dataset.i18n];
-      if (typeof v === "string") el.innerHTML = v;
+      // {z} / {a} keep the brand line in step with the data files
+      if (typeof v === "string")
+        el.innerHTML = v.replace("{z}", ZONES.length).replace("{a}", AGENTS.length);
     });
     searchInput.placeholder = T("searchPh");
     document.documentElement.lang = isEN() ? "en" : "zh-Hant";

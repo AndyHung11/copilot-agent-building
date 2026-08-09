@@ -211,5 +211,13 @@ const EDM = {
  "A053": {
   "zh": "A053_RequirementsDetective.html",
   "en": "A053_RequirementsDetective_EN.html"
+ },
+ "A054": {
+  "zh": "A054_OnboardingAgent.html",
+  "en": "A054_OnboardingAgent_EN.html"
+ },
+ "A055": {
+  "zh": "A055_PersonalChiefOfStaff.html",
+  "en": "A055_PersonalChiefOfStaff_EN.html"
  }
 };

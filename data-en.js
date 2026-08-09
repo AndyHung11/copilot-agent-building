@@ -794,5 +794,35 @@ const AGENTS_EN = {
    "Step 3: Review the gaps/ambiguities/contradictions it lists and its MoSCoW ranking, confirm each, then get your requirements document in the chosen format."
   ],
   "example": "I need to define the requirements for a new internal approval workflow for purchase orders. We want to digitize it, but I'm not sure where to start."
+ },
+ "A054": {
+  "tagline": "✨ First-week checklist → HR resources → role-based tool picks → 30/60/90-day goal setting",
+  "description": "An onboarding companion that runs in Copilot Chat: it hands new hires a day-one/week-one checklist and HR resource links, recommends role-based software and working methods, and nudges a 30/60/90-day goals meeting once the checklist is done — all in a friendly, professional tone that encourages questions. Requires an M365 Copilot license.",
+  "painPoints": [
+   "Day one on the job and zero idea what to do",
+   "The intranet's a maze and the SOP I need is nowhere to be found",
+   "Scared to ask 'too many' questions so I just wing it"
+  ],
+  "quickStart": [
+   "Step 1: Build the Onboarding Agent and attach your company's onboarding docs and HR policies, then check the day-one/week-one checklist it gives you.",
+   "Step 2: Tell it your role or position so it can recommend the software and working methods to pick up.",
+   "Step 3: Once your checklist is done, follow its nudge to book a 30/60/90-day goals meeting with your manager."
+  ],
+  "example": "I'm starting Monday — what should I do to prepare for day one?"
+ },
+ "A055": {
+  "tagline": "✨ Clarify first → applies company knowledge & tone → brainstorm, communicate, plan",
+  "description": "A context-aware assistant in Copilot Chat that channels a Chief of Staff's efficiency, strategic thinking, and execution to turn ideas, questions, and tasks into clear decisions, actionable plans, and professional communication. It draws on company knowledge, processes, target-audience insight, and tone-of-voice guidelines, following a Clarify → Analyze → Execute → Review → Deliver workflow so every output is relevant, ready-to-use, and on-standard. Requires an M365 Copilot license or pay-as-you-go.",
+  "painPoints": [
+   "Head full of ideas but no time to turn them into anything real",
+   "AI answers all sound generic and miss the company voice",
+   "Every draft you get still needs a full rewrite to be usable"
+  ],
+  "quickStart": [
+   "Step 1: Build the Personal Chief of Staff and upload your company info, playbook, and tone-of-voice guide as knowledge sources.",
+   "Step 2: Hand it your task (brainstorm, draft, plan) and answer the clarifying questions it asks back.",
+   "Step 3: Get an on-brand, ready-to-use output — ask for adjustments directly if needed."
+  ],
+  "example": "Draft a follow-up email after a Copilot strategy workshop. Summarize outcomes, next steps, and customer value."
  }
 };

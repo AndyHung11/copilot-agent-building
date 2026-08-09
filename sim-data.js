@@ -2036,4 +2036,294 @@ A006: {
       en: "<b>Recommendation:</b> Proactively propose a 'flexible hybrid model' as a constructive alternative — this lets you acknowledge remote work's partial benefits while neutralizing any accusation that you are simply opposing flexibility."
     }
   },
+ "A054": {
+  "art": "table",
+  "turns": {
+   "zh": [
+    {
+     "ask": "我下週一入職，第一天應該做什麼準備？",
+     "say": "歡迎加入！我幫你把第一週該完成的事排成一份檢查清單。先確認三件事：\n\n• 你的職務或角色是什麼？\n• 到職形式是進辦公室、遠距，還是混合？\n• 你的直屬主管和 buddy 已經確定了嗎？"
+    },
+    {
+     "ask": "行銷企劃，混合辦公。主管確定了，buddy 還不知道是誰。",
+     "steps": [
+      "比對公司到職文件與 HR 政策",
+      "依「行銷企劃」角色挑選必備工具",
+      "區分第一天／第一週的先後順序",
+      "標記待 HR 補齊的項目"
+     ]
+    }
+   ],
+   "en": [
+    {
+     "ask": "I'm starting Monday — what should I do to prepare for day one?",
+     "say": "Welcome aboard! I'll turn your first week into a checklist. Three quick things first:\n\n• What's your role or job title?\n• Are you onsite, remote, or hybrid?\n• Do you already know your manager and onboarding buddy?"
+    },
+    {
+     "ask": "Marketing planner, hybrid. Manager is confirmed, buddy is still TBC.",
+     "steps": [
+      "Cross-checking onboarding docs and HR policy",
+      "Selecting the tools a marketing planner needs",
+      "Sequencing day-one vs. week-one items",
+      "Flagging what HR still needs to confirm"
+     ]
+    }
+   ]
+  },
+  "title": {
+   "zh": "第一週到職檢查清單",
+   "en": "First-Week Onboarding Checklist"
+  },
+  "data": {
+   "zh": {
+    "head": [
+     "項目",
+     "什麼時候",
+     "找誰",
+     "優先"
+    ],
+    "rows": [
+     [
+      "完成帳號啟用與雙因素驗證",
+      "第一天上午",
+      "IT 服務台",
+      "h"
+     ],
+     [
+      "簽署到職文件與資安政策確認",
+      "第一天",
+      "HR 窗口",
+      "h"
+     ],
+     [
+      "和主管確認角色期待與首月重點",
+      "第一天下午",
+      "直屬主管",
+      "h"
+     ],
+     [
+      "加入團隊頻道、共用檔案庫與例會",
+      "第一天到第二天",
+      "團隊同事",
+      "m"
+     ],
+     [
+      "熟悉行銷企劃常用工具與內部範本",
+      "第一週前半",
+      "團隊 buddy",
+      "m"
+     ],
+     [
+      "指定 onboarding buddy（尚未確認）",
+      "第一週內",
+      "HR 窗口",
+      "m"
+     ],
+     [
+      "約定 30/60/90 天目標會議",
+      "第一週結束前",
+      "直屬主管",
+      "h"
+     ],
+     [
+      "瀏覽公司福利與請假流程",
+      "第一週內",
+      "HR 自助入口",
+      "l"
+     ]
+    ]
+   },
+   "en": {
+    "head": [
+     "Item",
+     "When",
+     "Who to ask",
+     "Priority"
+    ],
+    "rows": [
+     [
+      "Activate your account and set up MFA",
+      "Day 1, morning",
+      "IT service desk",
+      "h"
+     ],
+     [
+      "Sign onboarding paperwork and security policy",
+      "Day 1",
+      "HR contact",
+      "h"
+     ],
+     [
+      "Align with your manager on role expectations",
+      "Day 1, afternoon",
+      "Your manager",
+      "h"
+     ],
+     [
+      "Join team channels, shared library and recurring meetings",
+      "Day 1–2",
+      "Your teammates",
+      "m"
+     ],
+     [
+      "Get familiar with marketing tools and internal templates",
+      "Early week 1",
+      "Team buddy",
+      "m"
+     ],
+     [
+      "Get an onboarding buddy assigned (still TBC)",
+      "Within week 1",
+      "HR contact",
+      "m"
+     ],
+     [
+      "Book your 30/60/90-day goals meeting",
+      "By end of week 1",
+      "Your manager",
+      "h"
+     ],
+     [
+      "Read up on benefits and the time-off process",
+      "Within week 1",
+      "HR self-service",
+      "l"
+     ]
+    ]
+   }
+  },
+  "rec": {
+   "zh": "<b>下一步：</b>高優先項目集中在第一天，建議先把帳號與資安流程完成，其餘再依序推進；buddy 尚未指定，記得在第一週內向 HR 追一次。清單全部勾完後，就可以和主管排 30/60/90 天目標會議。",
+   "en": "<b>Next：</b>The high-priority items all sit on day one — clear accounts and security first, then work down the list. Your buddy is still unassigned, so chase HR once during week one. Once the checklist is complete, book the 30/60/90-day goals meeting with your manager."
+  }
+ },
+ "A055": {
+  "art": "brief",
+  "turns": {
+   "zh": [
+    {
+     "ask": "幫我起草一封 Copilot 策略工作坊後的追蹤信，摘要結論、下一步與客戶價值。",
+     "say": "沒問題。在我動筆前先釐清三件事，這樣草稿才會貼合情境：\n\n• 收件對象是與會的業務窗口，還是沒參加的決策主管？\n• 語氣要維持顧問式的正式，還是偏合作夥伴的輕鬆？\n• 下一步需要明確標出負責人與時間點嗎？"
+    },
+    {
+     "ask": "寄給沒參加的決策主管，顧問式正式。下一步要標負責人，時間點寫相對週次就好。",
+     "steps": [
+      "讀取工作坊筆記與公司語氣指南",
+      "依決策主管視角重排資訊優先序",
+      "把討論結果轉為結論與行動項",
+      "套用公司信件範本並覆核用語"
+     ]
+    }
+   ],
+   "en": [
+    {
+     "ask": "Draft a follow-up email after a Copilot strategy workshop. Summarize outcomes, next steps, and customer value.",
+     "say": "Happy to. Three things to clarify before I draft, so it lands in context:\n\n• Is this going to the business contacts who attended, or to a decision maker who wasn't there?\n• Consultative and formal, or a lighter partner tone?\n• Should next steps name owners and dates?"
+    },
+    {
+     "ask": "To a decision maker who missed it. Consultative and formal. Name owners; relative weeks are fine for timing.",
+     "steps": [
+      "Reading the workshop notes and tone-of-voice guide",
+      "Re-prioritizing for a decision-maker's view",
+      "Turning discussion into outcomes and actions",
+      "Applying the company email template and reviewing wording"
+     ]
+    }
+   ]
+  },
+  "title": {
+   "zh": "工作坊追蹤信草稿",
+   "en": "Workshop Follow-Up Email Draft"
+  },
+  "data": {
+   "zh": [
+    {
+     "lv": "m",
+     "cat": "主旨建議",
+     "tx": "Copilot 策略工作坊｜結論摘要與後續行動建議"
+    },
+    {
+     "lv": "m",
+     "cat": "結論摘要",
+     "tx": "與會團隊確認以「會議與文件產出」作為第一階段導入場景，其餘應用場景列為第二波評估。"
+    },
+    {
+     "lv": "m",
+     "cat": "結論摘要",
+     "tx": "資安與資料治理需求由法務與 IT 共同把關，導入前先完成權限與敏感度標籤盤點。"
+    },
+    {
+     "lv": "m",
+     "cat": "下一步",
+     "tx": "由業務窗口彙整第一階段使用者名單與現行流程痛點，於下週內回覆。"
+    },
+    {
+     "lv": "m",
+     "cat": "下一步",
+     "tx": "由 IT 負責人啟動權限與標籤盤點，並在第三週的對焦會議提出初步結果。"
+    },
+    {
+     "lv": "n",
+     "cat": "客戶價值",
+     "tx": "把重複性的會議紀錄與文件初稿交給 Copilot，讓團隊把時間放回判斷與溝通。"
+    },
+    {
+     "lv": "n",
+     "cat": "客戶價值",
+     "tx": "從單一場景起步、驗證後再擴散，導入風險與變革阻力都比全面上線低。"
+    },
+    {
+     "lv": "n",
+     "cat": "收尾建議",
+     "tx": "附上工作坊簡報與場景清單，並主動提議一次 30 分鐘的對焦會議。"
+    }
+   ],
+   "en": [
+    {
+     "lv": "m",
+     "cat": "Suggested subject",
+     "tx": "Copilot strategy workshop — outcomes and recommended next steps"
+    },
+    {
+     "lv": "m",
+     "cat": "Outcome",
+     "tx": "The team agreed to start with meetings and document drafting as the phase-one scenario; other use cases move to a second wave."
+    },
+    {
+     "lv": "m",
+     "cat": "Outcome",
+     "tx": "Security and data governance will be jointly owned by Legal and IT, with a permissions and sensitivity-label review completed before rollout."
+    },
+    {
+     "lv": "m",
+     "cat": "Next step",
+     "tx": "The business contact compiles the phase-one user list and current process pain points, back to us within the week."
+    },
+    {
+     "lv": "m",
+     "cat": "Next step",
+     "tx": "The IT owner kicks off the permissions and label review, with initial findings at the week-three alignment call."
+    },
+    {
+     "lv": "n",
+     "cat": "Customer value",
+     "tx": "Handing repetitive minutes and first drafts to Copilot puts the team's time back into judgement and conversation."
+    },
+    {
+     "lv": "n",
+     "cat": "Customer value",
+     "tx": "Starting with one scenario and proving it out keeps both rollout risk and change resistance lower than a full launch."
+    },
+    {
+     "lv": "n",
+     "cat": "Closing",
+     "tx": "Attach the workshop deck and scenario list, and proactively offer a 30-minute alignment call."
+    }
+   ]
+  },
+  "rec": {
+   "zh": "<b>覆核提醒：</b>這是給沒參加的決策主管，因此把結論放在最前、細節收在附件。寄出前請確認兩個負責人姓名與時間點無誤；若對方偏好更短的版本，可只保留「結論摘要」與「下一步」兩段。",
+   "en": "<b>Review note:</b> This is written for a decision maker who wasn't in the room, so outcomes lead and detail moves to the attachment. Confirm both owner names and timings before sending. If they prefer something shorter, keep only the Outcomes and Next steps sections."
+  }
+ }
 };
