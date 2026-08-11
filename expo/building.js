@@ -201,7 +201,7 @@
   const EXTERIOR = { pos: { x: 10, y: 34, z: SHELL_R + 78 }, look: { x: 0, y: 8, z: 0 } };
   // the hall is enclosed and 24 units tall, so the concourse camera must stay
   // inside the shell and below the truss roof
-  const INTERIOR = { pos: { x: 0, y: 19, z: 47 }, look: { x: 0, y: 4, z: 0 } };
+  const INTERIOR = { pos: { x: 0, y: 19.5, z: 52 }, look: { x: 0, y: 3.5, z: 0 } };
   camera.position.set(12, 26, SHELL_R + 96);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -210,7 +210,7 @@
   controls.enablePan = false;         // target is pinned to the atrium centre
   controls.enableZoom = false;        // replaced by custom zoom below
   controls.minDistance = LOBBY_MIN_DIST;
-  controls.maxDistance = 52;
+  controls.maxDistance = 60;
   controls.maxPolarAngle = Math.PI * 0.495;
   controls.target.set(0, 4, 0);
   controls.update();
@@ -701,7 +701,7 @@
     plazaGroup.add(trim);
 
     // four-post truss tower framing the stage
-    const TOWER_H = 10.5, POST_R = PLAZA_R - 3.2;
+    const TOWER_H = 6.2, POST_R = PLAZA_R - 3.2;
     const posts = [];
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
@@ -745,28 +745,28 @@
 
     // the main LED screen: a rotating four-sided video wall above the stage
     const ride = new THREE.Group();
-    ride.position.y = 7.0;
+    ride.position.y = 4.4;
     plazaGroup.add(ride);
     plazaGroup.userData.ride = ride;
-    const SCR_W = 6.2, SCR_H = 3.4;
+    const SCR_W = 5.0, SCR_H = 2.6;
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2;
       const frame = new THREE.Mesh(new THREE.BoxGeometry(SCR_W + 0.4, SCR_H + 0.4, 0.25),
-        new THREE.MeshStandardMaterial({ color: 0x161e2f, roughness: 0.6, metalness: 0.3 }));
-      frame.position.set(Math.sin(a) * 3.3, 0, Math.cos(a) * 3.3);
+        new THREE.MeshStandardMaterial({ color: 0x0e1524, roughness: 0.7, metalness: 0.25 }));
+      frame.position.set(Math.sin(a) * 2.66, 0, Math.cos(a) * 2.66);
       frame.rotation.y = a;
       ride.add(frame);
       const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCR_W, SCR_H),
         new THREE.MeshBasicMaterial({ color: i % 2 ? 0x2f6fd0 : 0x1c4f9e }));
-      screen.position.set(Math.sin(a) * 3.44, 0, Math.cos(a) * 3.44);
+      screen.position.set(Math.sin(a) * 2.8, 0, Math.cos(a) * 2.8);
       screen.rotation.y = a;
       ride.add(screen);
     }
 
     // Copilot logo above the video wall — back-to-back so it reads from every angle
     const emblem = new THREE.Group();
-    emblem.position.y = 13.6;
-    const SZ = 5.0;
+    emblem.position.y = 13.8;
+    const SZ = 3.4;
     const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ, SZ),
       new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
     front.position.z = 0.04;
@@ -780,7 +780,7 @@
     // the stage has no ride mounts; keep the key empty for the shared animate loop
     plazaGroup.userData.mounts = [];
 
-    const eLight = new THREE.PointLight(0x9fc4ff, 1.0, 48); eLight.position.y = 9; plazaGroup.add(eLight);
+    const eLight = new THREE.PointLight(0x9fc4ff, 1.0, 48); eLight.position.y = 6; plazaGroup.add(eLight);
 
     const titleTex = textTexture(T("plazaWelcome"), 1180, 112, "800 52px 'Segoe UI'", "#dbe8ff", "#2f6fd0");
     const title = new THREE.Mesh(new THREE.PlaneGeometry(14, 1.33), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
@@ -1094,9 +1094,13 @@
     // interior accent light
     const pl = new THREE.PointLight(zone.color, 0.6, 20); pl.position.set(0, 4, 0); g.add(pl);
 
-    // portal click plane (enter)
-    const portal = new THREE.Mesh(new THREE.PlaneGeometry(PAV_W - 1, 5.2), new THREE.MeshBasicMaterial({ visible: false }));
-    portal.position.set(0, 2.7, PAV_D / 2 - 0.25);
+    // portal hit volume (enter): wraps the whole structure plus its sign, so a click
+    // anywhere on the pavilion works from any orbit angle — not just the front face
+    const portal = new THREE.Mesh(
+      new THREE.CylinderGeometry(PAV_W * 0.66, PAV_W * 0.66, 13, 20, 1, false),
+      new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+    );
+    portal.position.set(0, 6, 0);
     g.add(portal);
     clickPortals.push({ mesh: portal, zoneId: zone.id });
 
@@ -1461,7 +1465,7 @@
     transition(() => {
       camera.position.set(INTERIOR.pos.x, INTERIOR.pos.y, INTERIOR.pos.z);
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
-      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 52;
+      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 60;
       controls.enableRotate = true; // restore free orbit in the lobby
       controls.enabled = true;
       controls.update();
@@ -1527,7 +1531,7 @@
     // camera constraints can't grab the camera mid-animation and cause a stutter
     animateCamera(INTERIOR.pos, INTERIOR.look, 1600, () => {
       atExterior = false;
-      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 52;
+      controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 60;
     });
   }
   function goExterior() {
@@ -1577,6 +1581,7 @@
   // ---------- Pavilion hover: focus highlight + list of all Agent names ----------
   const zoneHoverEl = document.getElementById("zoneHover");
   let hoveredZoneId = null;
+  let hoverSettling = false;   // true while the camera is rotating a pavilion to centre
   function showZoneHover(zone, cx, cy) {
     if (hoveredZoneId !== zone.id) {
       const list = (agentsByZone[zone.id] || []);
@@ -1610,6 +1615,13 @@
   function hideZoneHover() {
     if (hoveredZoneId !== null) { zoneHoverEl.style.display = "none"; hoveredZoneId = null; }
   }
+  // the focus panel is a large, stationary target — clicking it enters the zone it
+  // describes, so you never have to chase the pavilion while the camera swings round
+  zoneHoverEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (hoveredZoneId && mode === "lobby") enterRoom(hoveredZoneId);
+  });
+  zoneHoverEl.addEventListener("pointerdown", (e) => e.stopPropagation());
 
   canvas.addEventListener("pointermove", (e) => {
     // while dragging the carousel (mouse OR touch), spin it — this must run for touch too
@@ -1633,8 +1645,10 @@
     } else if (hit && hit.type === "portal") {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
       const pz = (ctxPortals || []).find((x) => x.mesh === hit.obj);
-      if (pz && mode === "lobby") showZoneHover(zoneById[pz.zoneId], e.clientX, e.clientY);
-      else hideZoneHover();
+      // don't let the swing itself switch which pavilion is focused
+      if (pz && mode === "lobby" && !(hoverSettling && hoveredZoneId && pz.zoneId !== hoveredZoneId))
+        showZoneHover(zoneById[pz.zoneId], e.clientX, e.clientY);
+      else if (!hoverSettling) hideZoneHover();
     } else if (hit && hit.type === "exit") {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
       hideZoneHover();
@@ -1646,7 +1660,16 @@
       if (mode !== "lobby") hideZoneHover();
     }
   }, { passive: false });
-  canvas.addEventListener("pointerleave", hideZoneHover);
+  // moving the pointer ONTO the focus panel must not dismiss it — the panel is a
+  // click target in its own right
+  canvas.addEventListener("pointerleave", (e) => {
+    if (e.relatedTarget && zoneHoverEl.contains(e.relatedTarget)) return;
+    hideZoneHover();
+  });
+  zoneHoverEl.addEventListener("pointerleave", (e) => {
+    if (e.relatedTarget === canvas) return;
+    hideZoneHover();
+  });
   // once the user grabs to navigate the lobby, release the hover-focus latch so we
   // never fight their manual orbit/pan
   let orbiting = false;
@@ -2113,13 +2136,13 @@
       const hr = Math.hypot(camera.position.x - controls.target.x,
                             camera.position.z - controls.target.z);
       // the venue is enclosed: keep the camera inside the glazing and under the trusses
-      const maxHr = SHELL_R - 11;
+      const maxHr = SHELL_R - 8;
       if (hr > maxHr) {
         const k = maxHr / hr;
         camera.position.x = controls.target.x + (camera.position.x - controls.target.x) * k;
         camera.position.z = controls.target.z + (camera.position.z - controls.target.z) * k;
       }
-      if (camera.position.y > 20) camera.position.y = 20;
+      if (camera.position.y > 19.5) camera.position.y = 19.5;
 
       if (hoveredZoneId && !orbiting) {
         const z = zoneById[hoveredZoneId];
@@ -2133,6 +2156,9 @@
         let diff = want - cur;
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
+        // while the view is still swinging the pavilion to centre, the geometry slides
+        // under a stationary cursor — latch the hover so the target can't change mid-swing
+        hoverSettling = Math.abs(diff) > 0.05;
         if (Math.abs(diff) > 0.002) {
           const a = cur + diff * 0.035;                 // slow, calm rotation
           const r = Math.hypot(cx, cz);
@@ -2159,7 +2185,7 @@
         // constraints never kick in mid-animation (that caused a visible jump)
         animateCamera(INTERIOR.pos, INTERIOR.look, 2400, () => {
           atExterior = false;
-          controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 52;
+          controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 60;
         });
       }, 1000);
     });

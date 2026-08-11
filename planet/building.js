@@ -1194,9 +1194,13 @@
     // interior accent light
     const pl = new THREE.PointLight(zone.color, 0.6, 20); pl.position.set(0, 4, 0); g.add(pl);
 
-    // portal click plane (enter)
-    const portal = new THREE.Mesh(new THREE.PlaneGeometry(PAV_W - 1, 5.2), new THREE.MeshBasicMaterial({ visible: false }));
-    portal.position.set(0, 2.7, PAV_D / 2 - 0.25);
+    // portal hit volume (enter): wraps the whole structure plus its sign, so a click
+    // anywhere on the pavilion works from any orbit angle — not just the front face
+    const portal = new THREE.Mesh(
+      new THREE.CylinderGeometry(PAV_W * 0.66, PAV_W * 0.66, 13, 20, 1, false),
+      new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+    );
+    portal.position.set(0, 6, 0);
     g.add(portal);
     clickPortals.push({ mesh: portal, zoneId: zone.id });
 
@@ -1738,6 +1742,7 @@
   // ---------- Pavilion hover: focus highlight + list of all Agent names ----------
   const zoneHoverEl = document.getElementById("zoneHover");
   let hoveredZoneId = null;
+  let hoverSettling = false;   // true while the camera is rotating a pavilion to centre
   function showZoneHover(zone, cx, cy) {
     if (hoveredZoneId !== zone.id) {
       const list = (agentsByZone[zone.id] || []);
@@ -1771,6 +1776,13 @@
   function hideZoneHover() {
     if (hoveredZoneId !== null) { zoneHoverEl.style.display = "none"; hoveredZoneId = null; }
   }
+  // the focus panel is a large, stationary target — clicking it enters the zone it
+  // describes, so you never have to chase the pavilion while the camera swings round
+  zoneHoverEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (hoveredZoneId && mode === "lobby") enterRoom(hoveredZoneId);
+  });
+  zoneHoverEl.addEventListener("pointerdown", (e) => e.stopPropagation());
 
   canvas.addEventListener("pointermove", (e) => {
     // while dragging the carousel (mouse OR touch), spin it — this must run for touch too
@@ -1794,8 +1806,10 @@
     } else if (hit && hit.type === "portal") {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
       const pz = (ctxPortals || []).find((x) => x.mesh === hit.obj);
-      if (pz && mode === "lobby") showZoneHover(zoneById[pz.zoneId], e.clientX, e.clientY);
-      else hideZoneHover();
+      // don't let the swing itself switch which pavilion is focused
+      if (pz && mode === "lobby" && !(hoverSettling && hoveredZoneId && pz.zoneId !== hoveredZoneId))
+        showZoneHover(zoneById[pz.zoneId], e.clientX, e.clientY);
+      else if (!hoverSettling) hideZoneHover();
     } else if (hit && hit.type === "exit") {
       tooltip.style.display = "none"; document.body.style.cursor = "pointer";
       hideZoneHover();
@@ -1807,7 +1821,16 @@
       if (mode !== "lobby") hideZoneHover();
     }
   }, { passive: false });
-  canvas.addEventListener("pointerleave", hideZoneHover);
+  // moving the pointer ONTO the focus panel must not dismiss it — the panel is a
+  // click target in its own right
+  canvas.addEventListener("pointerleave", (e) => {
+    if (e.relatedTarget && zoneHoverEl.contains(e.relatedTarget)) return;
+    hideZoneHover();
+  });
+  zoneHoverEl.addEventListener("pointerleave", (e) => {
+    if (e.relatedTarget === canvas) return;
+    hideZoneHover();
+  });
   // once the user grabs to navigate the lobby, release the hover-focus latch so we
   // never fight their manual orbit/pan
   let orbiting = false;
@@ -2294,6 +2317,9 @@
         let diff = want - cur;
         while (diff > Math.PI) diff -= Math.PI * 2;
         while (diff < -Math.PI) diff += Math.PI * 2;
+        // while the view is still swinging the pavilion to centre, the geometry slides
+        // under a stationary cursor — latch the hover so the target can't change mid-swing
+        hoverSettling = Math.abs(diff) > 0.05;
         if (Math.abs(diff) > 0.002) {
           const a = cur + diff * 0.035;                 // slow, calm rotation
           const r = Math.hypot(cx, cz);
