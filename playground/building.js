@@ -199,7 +199,7 @@
 
   const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 600);
   const EXTERIOR = { pos: { x: 10, y: 34, z: SHELL_R + 78 }, look: { x: 0, y: 8, z: 0 } };
-  const INTERIOR = { pos: { x: 0, y: 23, z: 45 }, look: { x: 0, y: 6, z: 0 } };
+  const INTERIOR = { pos: { x: 0, y: 24, z: 50 }, look: { x: 0, y: 7, z: 0 } };
   camera.position.set(12, 26, SHELL_R + 96);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -210,7 +210,7 @@
   controls.minDistance = LOBBY_MIN_DIST;
   controls.maxDistance = 105;
   controls.maxPolarAngle = Math.PI * 0.495;
-  controls.target.set(0, 6, 0);
+  controls.target.set(0, 7, 0);
   controls.update();
 
   // ---------- Lighting: open-air park in bright daylight ----------
@@ -991,21 +991,82 @@
     }
 
     if (zone.id === "Z1") {
-      // Strategy Lookout — an observation tower with a viewing deck and a telescope
-      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.3, 8.4, 14), bodyMat);
-      shaft.position.y = 4.4; shaft.castShadow = true; g.add(shaft);
-      for (let i = 0; i < 4; i++) {
-        const r = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.12, 8, 18), accMat);
-        r.rotation.x = Math.PI / 2; r.position.y = 1.6 + i * 2.0; g.add(r);
+      // Strategy Lookout — a Ferris wheel: the park's landmark, and the place you
+      // ride to see the whole picture before you decide
+      const WHEEL_R = 11.2, HUB_Y = 15.4, GONDOLAS = 14;
+      // A-frame supports on both sides of the wheel
+      [-1, 1].forEach((s) => {
+        [-1, 1].forEach((t) => {
+          const legLen = Math.hypot(HUB_Y, 5.6);
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.44, legLen, 10), steelMat);
+          leg.position.set(t * 2.8, HUB_Y / 2, -2.5 + s * 2.9);
+          leg.rotation.z = -Math.atan2(t * 5.6, HUB_Y);
+          leg.castShadow = true;
+          g.add(leg);
+        });
+        // axle bearing block
+        const brg = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.2, 1.1), accMat);
+        brg.position.set(0, HUB_Y, -2.5 + s * 2.9);
+        g.add(brg);
+      });
+      // the wheel itself turns as one piece — set back a little so the ride sign,
+      // which floats at the front edge, reads clearly against the sky beside it
+      const wheel = new THREE.Group();
+      wheel.position.set(0, HUB_Y, -2.5);
+      g.add(wheel);
+      g.userData.wheel = wheel;
+
+      const rimMat = new THREE.MeshStandardMaterial({ color: 0xf6f3ec, roughness: 0.45, metalness: 0.3 });
+      [-1.5, 1.5].forEach((z0) => {
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(WHEEL_R, 0.3, 10, 72), rimMat);
+        rim.position.z = z0; rim.castShadow = true;
+        wheel.add(rim);
+      });
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 3.6, 16), accMat);
+      hub.rotation.x = Math.PI / 2; hub.castShadow = true;
+      wheel.add(hub);
+      // spokes, alternating cream and the ride colour so the spin reads clearly
+      for (let i = 0; i < GONDOLAS; i++) {
+        const a = (i / GONDOLAS) * Math.PI * 2;
+        [-1.5, 1.5].forEach((z0) => {
+          const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.16, WHEEL_R, 0.16),
+            new THREE.MeshStandardMaterial({ color: i % 2 ? 0xf6f3ec : zone.color,
+              roughness: 0.5, metalness: 0.2 }));
+          spoke.position.set(Math.cos(a) * WHEEL_R / 2, Math.sin(a) * WHEEL_R / 2, z0);
+          spoke.rotation.z = a - Math.PI / 2;
+          wheel.add(spoke);
+        });
       }
-      const deck2 = new THREE.Mesh(new THREE.CylinderGeometry(3.4, 3.0, 0.5, 20), bodyMat);
-      deck2.position.y = 8.9; deck2.castShadow = true; g.add(deck2);
-      const rail = new THREE.Mesh(new THREE.TorusGeometry(3.3, 0.11, 8, 30), accMat);
-      rail.rotation.x = Math.PI / 2; rail.position.y = 9.9; g.add(rail);
-      stripedCone(3.9, 2.4, 11.4, 12);
-      // telescope pointing out over the park
-      const tel = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.42, 2.1, 12), steelMat);
-      tel.position.set(1.5, 9.9, 1.5); tel.rotation.set(0.7, 0, -0.5); g.add(tel);
+      // gondolas hang from pins on the rim and stay upright as the wheel turns
+      const cars = [];
+      for (let i = 0; i < GONDOLAS; i++) {
+        const a = (i / GONDOLAS) * Math.PI * 2;
+        const pivot = new THREE.Group();
+        pivot.position.set(Math.cos(a) * WHEEL_R, Math.sin(a) * WHEEL_R, 0);
+        wheel.add(pivot);
+        const car = new THREE.Group();
+        pivot.add(car);
+        const hanger = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 6), steelMat);
+        hanger.position.y = -0.6; car.add(hanger);
+        const cab = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 0.95, 1.5, 14),
+          new THREE.MeshStandardMaterial({ color: FEST[i % FEST.length], roughness: 0.45 }));
+        cab.position.y = -2.0; cab.castShadow = true; car.add(cab);
+        const roofc = new THREE.Mesh(new THREE.ConeGeometry(1.3, 0.75, 14),
+          new THREE.MeshStandardMaterial({ color: 0xf6f3ec, roughness: 0.55 }));
+        roofc.position.y = -1.2; car.add(roofc);
+        cars.push(car);
+      }
+      g.userData.wheelCars = cars;
+      // boarding platform at the foot of the wheel
+      const plat = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.4, 3.2),
+        new THREE.MeshStandardMaterial({ color: 0xd8c9a8, roughness: 0.85 }));
+      plat.position.set(0, 0.5, 3.6); plat.castShadow = true; g.add(plat);
+      const canopy1 = new THREE.Mesh(new THREE.BoxGeometry(7.6, 0.24, 3.6), accMat);
+      canopy1.position.set(0, 3.6, 3.6); g.add(canopy1);
+      [-3.4, 3.4].forEach((px) => {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.15, 3.1, 8), bodyMat);
+        p.position.set(px, 1.95, 3.6); g.add(p);
+      });
     } else if (zone.id === "Z2") {
       // Creative Carousel — a small spinning carousel with its own horses
       const spin = new THREE.Group(); spin.position.y = 0.4; g.add(spin);
@@ -1171,6 +1232,8 @@
 
     // department name: clean lettering floating at the FRONT of the pavilion (in front of
     // the glass, at the entrance edge). depthTest off + high renderOrder → never occluded.
+    // ride name floating in front of the attraction. depthTest off + high renderOrder
+    // → never occluded, so it can sit at a comfortable reading height on every ride.
     const NAME_Y = 9.2;
     const NAME_Z = PAV_D / 2 + 1.6;
     const nameMesh = new THREE.Mesh(new THREE.PlaneGeometry(11.2, 4.7),
@@ -2132,8 +2195,16 @@
       c.mesh.position.z = Math.sin(c.a) * c.r;
       c.mesh.lookAt(camPos.x, c.mesh.position.y, camPos.z);
     });
-    // rides that move: the small carousel turns, the rocket's exhaust flickers
+    // rides that move: the wheel turns, the small carousel spins, the rocket flickers
     zoneGroups.forEach(({ group }) => {
+      if (group.userData.wheel) {
+        const w = group.userData.wheel;
+        w.rotation.z = t * 0.13;
+        // gondolas swing on their pins, so counter-rotate to keep them level
+        (group.userData.wheelCars || []).forEach((c, i) => {
+          c.rotation.z = -w.rotation.z + Math.sin(t * 1.1 + i) * 0.05;
+        });
+      }
       if (group.userData.spin) group.userData.spin.rotation.y = t * 0.34;
       if (group.userData.flame) {
         const f = group.userData.flame;
