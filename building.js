@@ -6,6 +6,25 @@
 (function () {
   "use strict";
 
+  // Fail loudly instead of silently hanging on the loading spinner if the 3D
+  // library never arrived (blocked network, bad deploy, missing vendor/ folder).
+  if (typeof THREE === "undefined" || !THREE.OrbitControls || !THREE.Reflector) {
+    const box = document.getElementById("loading");
+    if (box) {
+      const zh = /^zh\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || "");
+      box.innerHTML = zh
+        ? "<div style='max-width:460px;text-align:center;line-height:1.7'>" +
+          "<div style='font-size:34px;margin-bottom:10px'>🏛️</div>" +
+          "<b>3D 元件載入失敗，展場開不了</b><br>" +
+          "請重新整理頁面；若持續發生，可能是網路或 Proxy 擋掉了程式檔案。</div>"
+        : "<div style='max-width:460px;text-align:center;line-height:1.7'>" +
+          "<div style='font-size:34px;margin-bottom:10px'>🏛️</div>" +
+          "<b>The 3D engine failed to load, so the expo can't open.</b><br>" +
+          "Please refresh. If it keeps happening, your network or proxy may be blocking the script files.</div>";
+    }
+    return;
+  }
+
   const canvas = document.getElementById("three-canvas");
   const tooltip = document.getElementById("tooltip");
   const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -46,11 +65,11 @@
 
   const UI = {
     zh: {
-      brandT1: "M365 Copilot Agent 智慧大樓",
-      brandT2: "Power of Copilot · {z} 大部門 · {a} 位 AI 助理",
-      btnExterior: "看外觀", btnAtrium: "進中庭", btnBack: "返回大廳",
-      sideTitle: "樓層導覽 · {z} 大部門",
-      hintText: "🖱️ 大廳：拖曳環顧·點體驗館進入　·　房間內：拖曳轉動卡片·點卡看詳情",
+      brandT1: "M365 Copilot Agent Expo",
+      brandT2: "Power of Copilot · {z} 大展區 · {a} 個 Agent 攤位",
+      btnExterior: "看會場", btnAtrium: "回主展廳", btnBack: "回主展廳",
+      sideTitle: "展場地圖 · {z} 大展區",
+      hintText: "🖱️ 主展廳：拖曳環顧·點展區進入　·　展區內：拖曳轉動攤位·點卡看詳情",
       searchPh: "搜尋 Agent 名稱或關鍵字…",
       noMatch: "沒有符合的 Agent",
       licReq: "需 M365 Copilot 授權", licFree: "免授權即可使用",
@@ -68,15 +87,15 @@
       swotO: "機會 OPPORTUNITIES", swotT: "威脅 THREATS",
       rkH: "高", rkM: "中", rkL: "低",
       cardSolves: "解決這些問題", cardSteps: (n) => n + " 步驟即可上手", cardCta: "▶  查看詳細",
-      pavEnter: "點擊進入 ▸", agentsSuffix: "AGENTS",
-      deckSub: (n) => n + " 位 AI 助理", enterExp: "點此進入",
+      pavEnter: "點擊進入 ▸", agentsSuffix: "AGENTS", backSign: "← 回主展廳",
+      deckSub: (n) => n + " 個 Agent 攤位", enterExp: "點此進入",
     },
     en: {
-      brandT1: "M365 Copilot Agent Building",
-      brandT2: "Power of Copilot · {z} departments · {a} AI assistants",
-      btnExterior: "Exterior", btnAtrium: "Atrium", btnBack: "Back to lobby",
-      sideTitle: "Directory · {z} departments",
-      hintText: "🖱️ Lobby: drag to look around · click a pavilion to enter　·　Inside: drag to spin cards · click a card for details",
+      brandT1: "M365 Copilot Agent Expo",
+      brandT2: "Power of Copilot · {z} halls · {a} agent booths",
+      btnExterior: "Venue", btnAtrium: "Main hall", btnBack: "Back to main hall",
+      sideTitle: "Floor plan · {z} halls",
+      hintText: "🖱️ Main hall: drag to look around · click a hall to enter　·　Inside: drag to spin booths · click one for details",
       searchPh: "Search agents by name or keyword…",
       noMatch: "No matching agent",
       licReq: "Requires M365 Copilot license", licFree: "No add-on license needed",
@@ -94,8 +113,8 @@
       swotO: "OPPORTUNITIES", swotT: "THREATS",
       rkH: "HIGH", rkM: "MED", rkL: "LOW",
       cardSolves: "Solves these problems", cardSteps: (n) => n + " steps to get started", cardCta: "▶  View details",
-      pavEnter: "Click to enter ▸", agentsSuffix: "AGENTS",
-      deckSub: (n) => n + " AI assistants", enterExp: "Enter",
+      pavEnter: "Click to enter ▸", agentsSuffix: "AGENTS", backSign: "← Main hall",
+      deckSub: (n) => n + " agent booths", enterExp: "Enter",
     },
   };
   const T = (k) => UI[LANG][k];
@@ -603,7 +622,7 @@
     logo.position.set(ex, 19.5, ez + 0.4);
     shellAdd(logo);
     // building name
-    const nameTex = textTexture("COPILOT AGENT 智慧大樓", 1120, 150, "800 76px 'Segoe UI'", "#eaf2ff", "#4f7cff");
+    const nameTex = textTexture("COPILOT AGENT EXPO", 1120, 150, "800 76px 'Segoe UI'", "#eaf2ff", "#4f7cff");
     const nameP = new THREE.Mesh(new THREE.PlaneGeometry(21, 2.8),
       new THREE.MeshBasicMaterial({ map: nameTex, transparent: true }));
     nameP.position.set(ex, 11.3, ez + 0.35);
@@ -688,7 +707,7 @@
     plazaGroup.userData.glowDisc = glowDisc;
     const eLight = new THREE.PointLight(0x8ab6ff, 1.2, 40); eLight.position.y = 7; plazaGroup.add(eLight);
 
-    const titleTex = textTexture("歡迎進入 Copilot Agent 智慧大樓", 980, 112, "800 56px 'Segoe UI'", "#dbe8ff", "#3a6ea5");
+    const titleTex = textTexture("歡迎光臨 Copilot Agent Expo", 980, 112, "800 56px 'Segoe UI'", "#dbe8ff", "#3a6ea5");
     const title = new THREE.Mesh(new THREE.PlaneGeometry(11, 1.26), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
     title.rotation.x = -Math.PI / 2; title.position.set(0, 0.28, PLAZA_R - 2.4);
     plazaGroup.add(title);
@@ -808,7 +827,7 @@
     portal.position.set(0, 2.1, 0);
     grp.add(portal);
     // sign
-    const signTex = textTexture("← 返回大廳", 420, 120, "700 56px 'Segoe UI'", "#eaf2ff", "#4f7cff");
+    const signTex = textTexture(T("backSign"), 420, 120, "700 56px 'Segoe UI'", "#eaf2ff", "#4f7cff");
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 0.86),
       new THREE.MeshBasicMaterial({ map: signTex, transparent: true }));
     sign.position.set(0, 4.85, 0.1);
@@ -1690,8 +1709,8 @@
     searchInput.placeholder = T("searchPh");
     document.documentElement.lang = isEN() ? "en" : "zh-Hant";
     document.title = isEN()
-      ? "M365 Copilot Agent — Building"
-      : "M365 Copilot Agent — 智慧大樓";
+      ? "M365 Copilot Agent Expo"
+      : "M365 Copilot Agent Expo — Agent 博覽會";
   }
 
   function retextureScene() {

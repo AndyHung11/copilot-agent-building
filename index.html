@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>M365 Copilot Agent — 智慧大樓</title>
+<title>M365 Copilot Agent Expo — Agent 博覽會</title>
 <style>
 :root {
   --ink: #1c2333;
@@ -379,9 +379,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 </style>
 </head>
 <body>
-<div id="loading"><div class="spinner"></div><div>正在開啟智慧大樓…</div></div>
+<div id="loading"><div class="spinner"></div><div>正在開展…</div></div>
 <div id="fade"></div>
-<button id="backBtn">← <span data-i18n="btnBack">返回大廳</span></button>
+<button id="backBtn">← <span data-i18n="btnBack">回主展廳</span></button>
 
 <div id="roomDeck">
   <div class="rd-head">
@@ -403,8 +403,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
   <div id="brand">
     <div class="logo"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0c0 6.6 2.2 10.8 8.8 12C14.2 13.2 12 17.4 12 24c0-6.6-2.2-10.8-8.8-12C9.8 10.8 12 6.6 12 0Z"/></svg></div>
     <div class="titles">
-      <div class="t1" data-i18n="brandT1">M365 Copilot Agent 智慧大樓</div>
-      <div class="t2" data-i18n="brandT2">Power of Copilot · 8 大部門 · 53 位 AI 助理</div>
+      <div class="t1" data-i18n="brandT1">M365 Copilot Agent Expo</div>
+      <div class="t2" data-i18n="brandT2">Power of Copilot · 8 大展區 · 55 個 Agent 攤位</div>
     </div>
   </div>
   <div id="searchWrap">
@@ -412,8 +412,8 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
     <input id="searchInput" type="text" placeholder="搜尋 Agent 名稱或關鍵字…" autocomplete="off" />
     <div id="searchResults"></div>
   </div>
-  <button id="exteriorBtn">🏙️ <span data-i18n="btnExterior">看外觀</span></button>
-  <button id="homeBtn">🏢 <span data-i18n="btnAtrium">進中庭</span></button>
+  <button id="exteriorBtn">🏙️ <span data-i18n="btnExterior">看會場</span></button>
+  <button id="homeBtn">🏢 <span data-i18n="btnAtrium">回主展廳</span></button>
   <div id="langSeg">
     <button data-lang="zh" class="on">中</button>
     <button data-lang="en">EN</button>
@@ -421,12 +421,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 </div>
 
 <div id="sidebar">
-  <h3 data-i18n="sideTitle">樓層導覽 · 8 大部門</h3>
+  <h3 data-i18n="sideTitle">展場地圖 · 8 大展區</h3>
   <div id="zoneList"></div>
 </div>
 
 <div id="hint">
-  <span data-i18n="hintText">🖱️ 大廳：拖曳環顧·點體驗館進入　·　房間內：拖曳轉動卡片·點卡看詳情</span>
+  <span data-i18n="hintText">🖱️ 主展廳：拖曳環顧·點展區進入　·　展區內：拖曳轉動攤位·點卡看詳情</span>
   <button id="hintClose">✕</button>
 </div>
 
@@ -435,9 +435,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 
 <div id="modalBackdrop"><div id="modal"></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
+<!-- three.js is served from this site, so the 3D scene never depends on an external CDN
+     (corporate proxies frequently block jsdelivr/unpkg). -->
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/Reflector.js"></script>
 <script src="data.js"></script>
 <script src="data-en.js"></script>
 <script src="sim-data.js"></script>
