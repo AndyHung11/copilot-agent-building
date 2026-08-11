@@ -201,7 +201,7 @@
   const EXTERIOR = { pos: { x: 10, y: 34, z: SHELL_R + 78 }, look: { x: 0, y: 8, z: 0 } };
   // the hall is enclosed and 24 units tall, so the concourse camera must stay
   // inside the shell and below the truss roof
-  const INTERIOR = { pos: { x: 0, y: 19.5, z: 52 }, look: { x: 0, y: 3.5, z: 0 } };
+  const INTERIOR = { pos: { x: 0, y: 15.5, z: 52 }, look: { x: 0, y: 4.5, z: 0 } };
   camera.position.set(12, 26, SHELL_R + 96);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -678,95 +678,33 @@
     }
   })();
 
-  // ---------- Central keynote stage (the venue's centrepiece) ----------
+  // ---------- Central plaza: an open concourse under a floating Copilot emblem ----------
   const plazaGroup = new THREE.Group();
   scene.add(plazaGroup);
   {
-    const deckMat = new THREE.MeshStandardMaterial({ color: 0x1d2740, roughness: 0.5, metalness: 0.35 });
-    const trimMat = new THREE.MeshStandardMaterial({ color: 0x2f6fd0, roughness: 0.35, metalness: 0.5 });
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x8f9db4, metalness: 0.75, roughness: 0.3 });
-
-    // tiered stage platform
-    const disc = new THREE.Mesh(new THREE.CylinderGeometry(PLAZA_R, PLAZA_R + 0.6, 0.55, 64), deckMat);
-    disc.position.y = 0.28; disc.receiveShadow = true;
+    // a flat plaza disc — the eight aisles converge here, but nothing blocks the view
+    // across the hall to the exhibition stands
+    const disc = new THREE.Mesh(
+      new THREE.CylinderGeometry(PLAZA_R, PLAZA_R + 0.5, 0.24, 64),
+      new THREE.MeshStandardMaterial({ color: 0x1d2740, roughness: 0.5, metalness: 0.35 })
+    );
+    disc.position.y = 0.12; disc.receiveShadow = true;
     plazaGroup.add(disc);
-    const deck = new THREE.Mesh(new THREE.CylinderGeometry(PLAZA_R - 1.8, PLAZA_R - 1.8, 0.5, 56),
-      new THREE.MeshStandardMaterial({ color: 0x28344f, roughness: 0.42, metalness: 0.4 }));
-    deck.position.y = 0.8; deck.receiveShadow = true;
-    plazaGroup.add(deck);
-    // glowing edge strip around the stage lip
-    const trim = new THREE.Mesh(new THREE.TorusGeometry(PLAZA_R - 1.8, 0.15, 12, 80),
+    // inlaid ring in polished tile
+    const inlay = new THREE.Mesh(new THREE.RingGeometry(PLAZA_R - 3.4, PLAZA_R - 1.2, 64),
+      new THREE.MeshBasicMaterial({ color: 0x2f6fd0, transparent: true, opacity: 0.28,
+        side: THREE.DoubleSide }));
+    inlay.rotation.x = -Math.PI / 2; inlay.position.y = 0.25;
+    plazaGroup.add(inlay);
+    const trim = new THREE.Mesh(new THREE.TorusGeometry(PLAZA_R - 0.4, 0.12, 12, 80),
       new THREE.MeshBasicMaterial({ color: 0x4f9bff }));
-    trim.rotation.x = Math.PI / 2; trim.position.y = 1.05;
+    trim.rotation.x = Math.PI / 2; trim.position.y = 0.26;
     plazaGroup.add(trim);
 
-    // four-post truss tower framing the stage
-    const TOWER_H = 6.2, POST_R = PLAZA_R - 3.2;
-    const posts = [];
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const px = Math.cos(a) * POST_R, pz = Math.sin(a) * POST_R;
-      posts.push([px, pz]);
-      const post = new THREE.Mesh(new THREE.BoxGeometry(0.55, TOWER_H, 0.55), steelMat);
-      post.position.set(px, TOWER_H / 2 + 1.05, pz); post.castShadow = true;
-      plazaGroup.add(post);
-      // lattice webbing up each post
-      for (let w = 0; w < 5; w++) {
-        const d = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.12, 0.12), steelMat);
-        d.position.set(px, 2.4 + w * 1.7, pz);
-        d.rotation.set(0, -a, w % 2 ? 0.6 : -0.6);
-        plazaGroup.add(d);
-      }
-    }
-    // header trusses linking the four posts
-    for (let i = 0; i < 4; i++) {
-      const [x0, z0] = posts[i], [x1, z1] = posts[(i + 1) % 4];
-      const len = Math.hypot(x1 - x0, z1 - z0);
-      [0, -1.3].forEach((dy) => {
-        const beam = new THREE.Mesh(new THREE.BoxGeometry(len, 0.24, 0.24), steelMat);
-        beam.position.set((x0 + x1) / 2, TOWER_H + 1.05 + dy, (z0 + z1) / 2);
-        beam.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
-        plazaGroup.add(beam);
-      });
-      // stage wash lights aimed down from the header
-      for (let L = 0; L < 3; L++) {
-        const t = (L + 0.5) / 3;
-        const lx = x0 + (x1 - x0) * t, lz = z0 + (z1 - z0) * t;
-        const can = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.42, 0.6, 10), deckMat);
-        can.position.set(lx, TOWER_H + 0.3, lz);
-        plazaGroup.add(can);
-        const beamGlow = new THREE.Mesh(new THREE.ConeGeometry(1.5, 8, 12, 1, true),
-          new THREE.MeshBasicMaterial({ color: 0x8fc4ff, transparent: true, opacity: 0.07,
-            side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
-        beamGlow.position.set(lx, TOWER_H - 3.8, lz);
-        plazaGroup.add(beamGlow);
-      }
-    }
-
-    // the main LED screen: a rotating four-sided video wall above the stage
-    const ride = new THREE.Group();
-    ride.position.y = 4.4;
-    plazaGroup.add(ride);
-    plazaGroup.userData.ride = ride;
-    const SCR_W = 5.0, SCR_H = 2.6;
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2;
-      const frame = new THREE.Mesh(new THREE.BoxGeometry(SCR_W + 0.4, SCR_H + 0.4, 0.25),
-        new THREE.MeshStandardMaterial({ color: 0x0e1524, roughness: 0.7, metalness: 0.25 }));
-      frame.position.set(Math.sin(a) * 2.66, 0, Math.cos(a) * 2.66);
-      frame.rotation.y = a;
-      ride.add(frame);
-      const screen = new THREE.Mesh(new THREE.PlaneGeometry(SCR_W, SCR_H),
-        new THREE.MeshBasicMaterial({ color: i % 2 ? 0x2f6fd0 : 0x1c4f9e }));
-      screen.position.set(Math.sin(a) * 2.8, 0, Math.cos(a) * 2.8);
-      screen.rotation.y = a;
-      ride.add(screen);
-    }
-
-    // Copilot logo above the video wall — back-to-back so it reads from every angle
+    // Copilot emblem, floating over the plaza — back-to-back so it reads from every angle
     const emblem = new THREE.Group();
-    emblem.position.y = 13.8;
-    const SZ = 3.4;
+    emblem.position.y = 11;
+    const SZ = 6.6;
     const front = new THREE.Mesh(new THREE.PlaneGeometry(SZ, SZ),
       new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
     front.position.z = 0.04;
@@ -775,16 +713,32 @@
       new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, depthWrite: false }));
     back.position.z = -0.04; back.rotation.y = Math.PI;
     emblem.add(back);
+    // soft halo so the emblem reads against the bright hall roof. it must be a radial
+    // gradient — a flat plane shows its own square edge against the ceiling
+    const haloCan = document.createElement("canvas"); haloCan.width = haloCan.height = 128;
+    const hctx = haloCan.getContext("2d");
+    const hg = hctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+    hg.addColorStop(0.0, "rgba(150,196,255,0.55)");
+    hg.addColorStop(0.45, "rgba(120,170,255,0.16)");
+    hg.addColorStop(1.0, "rgba(120,170,255,0)");
+    hctx.fillStyle = hg; hctx.fillRect(0, 0, 128, 128);
+    const halo = new THREE.Mesh(new THREE.PlaneGeometry(SZ * 2.6, SZ * 2.6),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(haloCan), transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false }));
+    halo.position.z = -0.2;
+    emblem.add(halo);
     plazaGroup.add(emblem);
     plazaGroup.userData.emblem = emblem;
-    // the stage has no ride mounts; keep the key empty for the shared animate loop
+    // no stage rig any more; keep the keys the shared animate loop expects
+    plazaGroup.userData.ride = null;
     plazaGroup.userData.mounts = [];
 
-    const eLight = new THREE.PointLight(0x9fc4ff, 1.0, 48); eLight.position.y = 6; plazaGroup.add(eLight);
+
+    const eLight = new THREE.PointLight(0x9fc4ff, 1.0, 48); eLight.position.y = 7; plazaGroup.add(eLight);
 
     const titleTex = textTexture(T("plazaWelcome"), 1180, 112, "800 52px 'Segoe UI'", "#dbe8ff", "#2f6fd0");
-    const title = new THREE.Mesh(new THREE.PlaneGeometry(14, 1.33), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
-    title.rotation.x = -Math.PI / 2; title.position.set(0, 0.58, PLAZA_R + 3.2);
+    const title = new THREE.Mesh(new THREE.PlaneGeometry(15.5, 1.47), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
+    title.rotation.x = -Math.PI / 2; title.position.set(0, 0.26, 3.6);
     plazaGroup.add(title);
     plazaGroup.userData.title = title;
   }
@@ -2041,7 +1995,6 @@
     t += 0.016;
     controls.update();
     camera.getWorldPosition(camPos);
-    // the central carousel turns steadily; its horses rise and fall on their poles
     if (plazaGroup.userData.ride) {
       plazaGroup.userData.ride.rotation.y = t * 0.16;
       (plazaGroup.userData.mounts || []).forEach((m) => {
@@ -2049,8 +2002,10 @@
       });
     }
     if (plazaGroup.userData.emblem) {
+      // the emblem turns slowly and drifts a little, so the empty plaza still has life
       const em = plazaGroup.userData.emblem;
-      em.rotation.y = t * 0.16;   // turn with the ride below it
+      em.rotation.y = t * 0.16;
+      em.position.y = 11 + Math.sin(t * 0.7) * 0.28;
     }
     // clouds drift slowly around the park and always face the camera
     clouds.forEach((c) => {
