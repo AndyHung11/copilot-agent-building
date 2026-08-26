@@ -35,12 +35,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 }
 #brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
 #brand .logo {
-  width: 34px; height: 34px; flex: none; border-radius: 10px;
+  width: 34px; height: 34px; flex: none;
   display: flex; align-items: center; justify-content: center;
-  background: conic-gradient(from 205deg, #00b7c3, #0f6cbd, #8378de, #e3008c, #00b7c3);
-  box-shadow: 0 4px 14px rgba(15,108,189,0.35);
 }
-#brand .logo svg { width: 19px; height: 19px; }
+#brand .logo img { width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(15,108,189,0.24)); }
 #brand .titles { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
 #brand .t1 { font-weight: 700; font-size: 15.5px; letter-spacing: -0.2px; white-space: nowrap; }
 #brand .t2 { font-size: 11px; color: var(--faint); letter-spacing: 0.4px; }
@@ -453,7 +452,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 <div id="topbar">
   <button id="hamburger" aria-label="選單">☰</button>
   <div id="brand">
-    <div class="logo"><svg viewBox="0 0 24 24" fill="white"><path d="M12 0c0 6.6 2.2 10.8 8.8 12C14.2 13.2 12 17.4 12 24c0-6.6-2.2-10.8-8.8-12C9.8 10.8 12 6.6 12 0Z"/></svg></div>
+    <div class="logo"><img src="copilot-logo.png" alt="Copilot" /></div>
     <div class="titles">
       <div class="t1" data-i18n="brandT1">M365 Copilot Agent 遊樂園</div>
       <div class="t2" data-i18n="brandT2">Power of Copilot · 8 大園區 · 55 座 AI 設施</div>
