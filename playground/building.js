@@ -1157,7 +1157,7 @@
       coasterRide.position.y = 0.15;
       g.add(coasterRide);
       const pts = [];
-      for (let i = 0; i <= 60; i++) {
+      for (let i = 0; i < 60; i++) {
         const u = i / 60, a = u * Math.PI * 2;
         pts.push(new THREE.Vector3(
           Math.cos(a) * 5.0,
@@ -1181,14 +1181,13 @@
       for (let i = 0; i < 3; i++) {
         const car = new THREE.Group();
         const carMaterial = new THREE.MeshStandardMaterial({
-          color: FEST[i % FEST.length], roughness: 0.5,
-          polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+          color: FEST[i % FEST.length], roughness: 0.52, metalness: 0.04,
         });
         const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.58, 1.15),
           carMaterial);
         body.position.y = 0.4; car.add(body);
         const nose = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.3, 0.28), accMat);
-        nose.position.set(0, 0.48, 0.68); car.add(nose);
+        nose.position.set(0, 0.48, 0.73); car.add(nose);
         [-1, 1].forEach((side) => [-0.32, 0.32].forEach((z) => {
           const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 10), steelMat);
           wheel.rotation.z = Math.PI / 2;
@@ -1196,9 +1195,15 @@
           car.add(wheel);
         }));
         coasterRide.add(car);
-        coasterCars.push({ car, offset: i * 0.028 });
+        coasterCars.push({ car, offset: i * 0.04 });
       }
-      g.userData.coaster = { curve, cars: coasterCars };
+      g.userData.coaster = {
+        curve, cars: coasterCars,
+        worldUp: new THREE.Vector3(0, 1, 0),
+        right: new THREE.Vector3(),
+        up: new THREE.Vector3(),
+        rotation: new THREE.Matrix4(),
+      };
     } else if (zone.id === "Z7") {
       // Innovation Launchpad — a rocket on a gantry
       const launchRide = new THREE.Group();
@@ -2288,9 +2293,12 @@
           const u = (t * 0.055 - offset + 1) % 1;
           const point = coaster.curve.getPointAt(u);
           const tangent = coaster.curve.getTangentAt(u).normalize();
-          point.y += 0.72;
+          point.y += 0.9;
           car.position.copy(point);
-          car.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
+          coaster.right.crossVectors(coaster.worldUp, tangent).normalize();
+          coaster.up.crossVectors(tangent, coaster.right).normalize();
+          coaster.rotation.makeBasis(coaster.right, coaster.up, tangent);
+          car.quaternion.setFromRotationMatrix(coaster.rotation);
         });
       }
       if (group.userData.flame) {
