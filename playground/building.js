@@ -90,6 +90,7 @@
       pavEnter: "點擊入園 ▸", agentsSuffix: "設施", backSign: "← 回中央廣場",
       plazaWelcome: "歡迎光臨 Copilot Agent 遊樂園", parkSign: "COPILOT AGENT 遊樂園",
       deckSub: (n) => n + " 座 AI 設施", enterExp: "點此入園",
+      loadingZone: "正在開啟園區", loadingPlaza: "正在返回中央廣場",
     },
     en: {
       brandT1: "M365 Copilot Agent Playground",
@@ -117,6 +118,7 @@
       pavEnter: "Click to enter ▸", agentsSuffix: "RIDES", backSign: "← Back to plaza",
       plazaWelcome: "Welcome to the Copilot Agent Playground", parkSign: "COPILOT AGENT PLAYGROUND",
       deckSub: (n) => n + " AI rides", enterExp: "Enter zone",
+      loadingZone: "Opening zone", loadingPlaza: "Returning to the main plaza",
     },
   };
   const T = (k) => UI[LANG][k];
@@ -975,9 +977,11 @@
     const kerb = new THREE.Mesh(new THREE.TorusGeometry(PAV_W * 0.46, 0.2, 8, 40), accMat);
     kerb.rotation.x = Math.PI / 2; kerb.position.y = 0.32;
     g.add(kerb);
+    const rideStart = g.children.length;
+    const compactRideScale = { Z2: 1.28, Z4: 1.22, Z5: 1.35, Z8: 1.24 }[zone.id] || 1;
 
     // helper: a striped conical roof, used by several of the rides
-    function stripedCone(radius, height, y, wedges) {
+    function stripedCone(radius, height, y, wedges, parent = g) {
       const wa = (Math.PI * 2) / wedges;
       for (let i = 0; i < wedges; i++) {
         const w = new THREE.Mesh(
@@ -986,7 +990,7 @@
             roughness: 0.62, side: THREE.DoubleSide })
         );
         w.position.y = y; w.castShadow = true;
-        g.add(w);
+        parent.add(w);
       }
     }
 
@@ -1000,7 +1004,7 @@
           const legLen = Math.hypot(HUB_Y, 5.6);
           const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.44, legLen, 10), steelMat);
           leg.position.set(t * 2.8, HUB_Y / 2, -2.5 + s * 2.9);
-          leg.rotation.z = -Math.atan2(t * 5.6, HUB_Y);
+          leg.rotation.z = Math.atan2(t * 5.6, HUB_Y);
           leg.castShadow = true;
           g.add(leg);
         });
@@ -1086,15 +1090,18 @@
       g.userData.spin = spin;
     } else if (zone.id === "Z3") {
       // Team Big Top — a large striped circus tent with a pennant
-      stripedCone(6.4, 6.6, 4.6, 16);
+      const bigTop = new THREE.Group();
+      bigTop.scale.setScalar(1.28);
+      g.add(bigTop);
+      stripedCone(6.4, 6.6, 4.6, 16, bigTop);
       const skirt = new THREE.Mesh(new THREE.CylinderGeometry(6.4, 6.4, 1.6, 24, 1, true),
         new THREE.MeshStandardMaterial({ color: 0xfaf8f4, roughness: 0.7, side: THREE.DoubleSide }));
-      skirt.position.y = 0.9; g.add(skirt);
+      skirt.position.y = 0.9; bigTop.add(skirt);
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.6, 6), bodyMat);
-      pole.position.y = 9.1; g.add(pole);
+      pole.position.y = 9.1; bigTop.add(pole);
       const pen = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.9),
         new THREE.MeshStandardMaterial({ color: zc, roughness: 0.6, side: THREE.DoubleSide }));
-      pen.position.set(0.88, 9.9, 0); g.add(pen);
+      pen.position.set(0.88, 9.9, 0); bigTop.add(pen);
     } else if (zone.id === "Z4") {
       // Risk House — a haunted house with a crooked roof and glowing windows
       const house = new THREE.Mesh(new THREE.BoxGeometry(8.2, 6.0, 7.0),
@@ -1145,42 +1152,64 @@
       });
     } else if (zone.id === "Z6") {
       // Project Coaster — a swooping track supported on a lattice of columns
+      const coasterRide = new THREE.Group();
+      coasterRide.scale.set(1.95, 1.55, 1.95);
+      coasterRide.position.y = 0.15;
+      g.add(coasterRide);
       const pts = [];
       for (let i = 0; i <= 60; i++) {
         const u = i / 60, a = u * Math.PI * 2;
         pts.push(new THREE.Vector3(
           Math.cos(a) * 5.0,
-          2.4 + Math.sin(a * 2) * 2.6 + Math.sin(a) * 1.2,
+          4.4 + Math.sin(a * 2) * 2.6 + Math.sin(a) * 1.2,
           Math.sin(a) * 4.2));
       }
       const curve = new THREE.CatmullRomCurve3(pts, true);
       const track = new THREE.Mesh(new THREE.TubeGeometry(curve, 120, 0.19, 8, true), accMat);
-      track.castShadow = true; g.add(track);
+      track.castShadow = true; coasterRide.add(track);
       const track2 = new THREE.Mesh(new THREE.TubeGeometry(curve, 120, 0.12, 6, true), steelMat);
-      track2.position.y = 0.55; g.add(track2);
+      track2.position.y = 0.55; coasterRide.add(track2);
       // support columns down to the deck
       for (let i = 0; i < 10; i++) {
         const p = curve.getPoint(i / 10);
         const h = Math.max(0.4, p.y - 0.3);
         const c = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, h, 7), steelMat);
-        c.position.set(p.x, h / 2 + 0.3, p.z); g.add(c);
+        c.position.set(p.x, h / 2 + 0.3, p.z); coasterRide.add(c);
       }
-      // a train of cars parked on the track
+      // A three-car train follows the track in the animation loop.
+      const coasterCars = [];
       for (let i = 0; i < 3; i++) {
-        const p = curve.getPoint(0.02 + i * 0.035);
-        const car = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.62, 0.8),
-          new THREE.MeshStandardMaterial({ color: FEST[i % FEST.length], roughness: 0.5 }));
-        car.position.copy(p); car.position.y += 0.42; car.castShadow = true; g.add(car);
+        const car = new THREE.Group();
+        const carMaterial = new THREE.MeshStandardMaterial({
+          color: FEST[i % FEST.length], roughness: 0.5,
+          polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+        });
+        const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.58, 1.15),
+          carMaterial);
+        body.position.y = 0.4; car.add(body);
+        const nose = new THREE.Mesh(new THREE.BoxGeometry(0.76, 0.3, 0.28), accMat);
+        nose.position.set(0, 0.48, 0.68); car.add(nose);
+        [-1, 1].forEach((side) => [-0.32, 0.32].forEach((z) => {
+          const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 10), steelMat);
+          wheel.rotation.z = Math.PI / 2;
+          wheel.position.set(side * 0.48, 0.12, z);
+          car.add(wheel);
+        }));
+        coasterRide.add(car);
+        coasterCars.push({ car, offset: i * 0.028 });
       }
-      g.userData.coaster = { curve, cars: [] };
+      g.userData.coaster = { curve, cars: coasterCars };
     } else if (zone.id === "Z7") {
       // Innovation Launchpad — a rocket on a gantry
-      const rocket = new THREE.Group(); rocket.position.y = 0.3; g.add(rocket);
+      const launchRide = new THREE.Group();
+      launchRide.scale.set(1.28, 1.45, 1.28);
+      g.add(launchRide);
+      const rocket = new THREE.Group(); rocket.position.y = 3.6; launchRide.add(rocket);
       const fus = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.35, 6.4, 16), bodyMat);
       fus.position.y = 3.5; fus.castShadow = true; rocket.add(fus);
       const nose = new THREE.Mesh(new THREE.ConeGeometry(1.15, 2.6, 16), accMat);
       nose.position.y = 8.0; nose.castShadow = true; rocket.add(nose);
-      const strip = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 0.9, 16), accMat);
+      const strip = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 0.82, 16), accMat);
       strip.position.y = 5.2; rocket.add(strip);
       for (let i = 0; i < 3; i++) {
         const a = (i / 3) * Math.PI * 2;
@@ -1189,18 +1218,19 @@
         fin.rotation.y = -a; fin.castShadow = true; rocket.add(fin);
       }
       // exhaust flame
-      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.0, 12),
-        new THREE.MeshBasicMaterial({ color: 0xffb03a, transparent: true, opacity: 0.75 }));
-      flame.position.y = -0.7; flame.rotation.x = Math.PI; rocket.add(flame);
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(1.05, 3.8, 14),
+        new THREE.MeshBasicMaterial({ color: 0xff5a1f, transparent: true, opacity: 0.9,
+          depthWrite: false }));
+      flame.position.y = -2.0; flame.rotation.x = Math.PI; rocket.add(flame);
       g.userData.flame = flame;
       // gantry tower alongside
       [-1, 1].forEach((s) => {
         const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 7.6, 8), steelMat);
-        leg.position.set(3.2, 4.1, s * 1.3); g.add(leg);
+        leg.position.set(3.2, 4.1, s * 1.3); launchRide.add(leg);
       });
       for (let i = 0; i < 4; i++) {
         const x = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 2.6), steelMat);
-        x.position.set(3.2, 1.6 + i * 1.9, 0); g.add(x);
+        x.position.set(3.2, 1.6 + i * 1.9, 0); launchRide.add(x);
       }
     } else {
       // Agent Training Camp — a striped booth with targets and a prize shelf
@@ -1230,6 +1260,13 @@
       });
     }
 
+    if (compactRideScale > 1) {
+      const ride = new THREE.Group();
+      ride.scale.setScalar(compactRideScale);
+      g.children.slice(rideStart).forEach((part) => ride.add(part));
+      g.add(ride);
+    }
+
     // department name: clean lettering floating at the FRONT of the pavilion (in front of
     // the glass, at the entrance edge). depthTest off + high renderOrder → never occluded.
     // ride name floating in front of the attraction. depthTest off + high renderOrder
@@ -1255,11 +1292,14 @@
 
     // portal hit volume (enter): wraps the whole structure plus its sign, so a click
     // anywhere on the pavilion works from any orbit angle — not just the front face
+    const largeRide = compactRideScale > 1 || zone.id === "Z3" || zone.id === "Z6" || zone.id === "Z7";
+    const portalRadius = zone.id === "Z6" ? 10.5 : (largeRide ? PAV_W * 0.82 : PAV_W * 0.66);
+    const portalHeight = largeRide ? 18 : 13;
     const portal = new THREE.Mesh(
-      new THREE.CylinderGeometry(PAV_W * 0.66, PAV_W * 0.66, 13, 20, 1, false),
+      new THREE.CylinderGeometry(portalRadius, portalRadius, portalHeight, 24, 1, false),
       new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
     );
-    portal.position.set(0, 6, 0);
+    portal.position.set(0, portalHeight / 2 - 0.5, 0);
     g.add(portal);
     clickPortals.push({ mesh: portal, zoneId: zone.id });
 
@@ -1342,13 +1382,6 @@
       const r = SHELL_R + 7 + (i % 3) * 4.5;
       tree(Math.cos(a) * r, Math.sin(a) * r, 0.9 + (i % 4) * 0.16);
     }
-    // a few trees filling the gaps between rides inside the park
-    for (let i = 0; i < ZONES.length; i++) {
-      const a = (i + 0.5) * ((Math.PI * 2) / ZONES.length) - Math.PI / 2 + OFF;
-      tree(Math.cos(a) * (RADIUS - 4), Math.sin(a) * (RADIUS - 4), 0.85);
-      tree(Math.cos(a) * (RADIUS + 7), Math.sin(a) * (RADIUS + 7), 1.0);
-    }
-
     // balloon carts dotted around the concourse
     for (let i = 0; i < 6; i++) {
       const a = (i / 6) * Math.PI * 2 + 0.4;
@@ -1553,19 +1586,29 @@
     return room;
   }
 
-  // ---------- Scene transition (black fade) ----------
+  // ---------- Scene transition ----------
   const fadeEl = document.getElementById("fade");
+  const fadeIcon = document.getElementById("fadeIcon");
+  const fadeName = document.getElementById("fadeName");
+  const fadeStatus = document.getElementById("fadeStatus");
   const backBtn = document.getElementById("backBtn");
   const roomDeck = document.getElementById("roomDeck");
   let transitioning = false;
-  function transition(midpoint) {
+  function transition(midpoint, zone) {
     if (transitioning) return;
     transitioning = true;
+    fadeEl.style.setProperty("--fade-color", zone ? zone.color : "#5aa0ff");
+    fadeIcon.textContent = zone ? zone.icon : "🎠";
+    fadeName.textContent = zone ? zName(zone) : T("plazaWelcome");
+    fadeStatus.innerHTML = `${zone ? T("loadingZone") : T("loadingPlaza")}<span class="fade-dots"></span>`;
     fadeEl.classList.add("show");
     setTimeout(() => {
       midpoint();
-      setTimeout(() => { fadeEl.classList.remove("show"); transitioning = false; }, 80);
-    }, 440);
+      setTimeout(() => {
+        fadeEl.classList.remove("show");
+        transitioning = false;
+      }, 60);
+    }, 260);
   }
 
   function populateDeck(zone) {
@@ -1603,6 +1646,9 @@
     hideZoneHover();
     transition(() => {
       const room = rooms[id] || buildRoom(zone);
+      Object.values(rooms).forEach((candidate) => {
+        candidate.group.visible = candidate === room;
+      });
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
       roomLook.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
@@ -1617,11 +1663,12 @@
       setActiveZoneBtn(id);
       backBtn.classList.add("show");
       if (after) after();
-    });
+    }, zone);
   }
   function exitRoom() {
     atExterior = false;
     transition(() => {
+      Object.values(rooms).forEach((room) => { room.group.visible = false; });
       camera.position.set(INTERIOR.pos.x, INTERIOR.pos.y, INTERIOR.pos.z);
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
       controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 105;
@@ -1836,8 +1883,10 @@
   controls.addEventListener("end", () => { orbiting = false; });
 
   let downPos = null;
+  let downHit = null;
   canvas.addEventListener("pointerdown", (e) => {
     downPos = { x: e.clientX, y: e.clientY };
+    downHit = pickAt(e.clientX, e.clientY);
     // primary button (mouse-left) or any touch/pen contact starts a carousel drag in a room
     const primary = e.button === 0 || e.pointerType === "touch" || e.pointerType === "pen";
     if (mode === "room" && primary) {
@@ -1859,20 +1908,24 @@
     endDrag(e);
     if (!downPos) return;
     const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y); downPos = null;
-    if (moved > 8) return; // it was a drag, not a tap
-    const hit = pickAt(e.clientX, e.clientY);
-    // if the camera is outside the building shell (parked exterior, or zoomed way out),
-    // a building click should first bring you into the atrium — never teleport into a room
-    const outside = mode === "lobby" &&
-      Math.hypot(camera.position.x, camera.position.z) > SHELL_R - 4;
-    if (atExterior || outside) { if (hit) flyInterior(); return; }
+    if (moved > 8) { downHit = null; return; } // it was a drag, not a tap
+    const hit = downHit || pickAt(e.clientX, e.clientY);
+    downHit = null;
+    // From the explicit park-view state, a building click first returns to the plaza.
+    // The normal plaza camera sits near the shell edge, so its radius cannot reliably
+    // distinguish the plaza from the exterior view.
+    if (atExterior) { if (hit) flyInterior(); return; }
     if (!hit) return;
     if (hit.type === "agent") openModal((ctxAgents || []).find((x) => x.mesh === hit.obj).agentId);
     else if (hit.type === "exit") exitRoom();
     else enterRoom((ctxPortals || []).find((x) => x.mesh === hit.obj).zoneId);
     void wasDragging;
   });
-  canvas.addEventListener("pointercancel", endDrag);
+  canvas.addEventListener("pointercancel", (e) => {
+    downPos = null;
+    downHit = null;
+    endDrag(e);
+  });
 
   // ---------- Zoom (pure dolly toward the pinned target) ----------
   canvas.addEventListener("wheel", (e) => {
@@ -2229,10 +2282,21 @@
         });
       }
       if (group.userData.spin) group.userData.spin.rotation.y = t * 0.34;
+      if (group.userData.coaster) {
+        const coaster = group.userData.coaster;
+        coaster.cars.forEach(({ car, offset }) => {
+          const u = (t * 0.055 - offset + 1) % 1;
+          const point = coaster.curve.getPointAt(u);
+          const tangent = coaster.curve.getTangentAt(u).normalize();
+          point.y += 0.72;
+          car.position.copy(point);
+          car.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), tangent);
+        });
+      }
       if (group.userData.flame) {
         const f = group.userData.flame;
-        f.scale.set(1, 0.82 + Math.sin(t * 9) * 0.16, 1);
-        f.material.opacity = 0.6 + Math.sin(t * 12) * 0.16;
+        f.scale.set(1, 1 + Math.sin(t * 9) * 0.16, 1);
+        f.material.opacity = 0.87 + Math.sin(t * 12) * 0.09;
       }
     });
     // room: the carousel is turned MANUALLY by dragging; here we only apply
