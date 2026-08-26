@@ -68,6 +68,7 @@
       brandT1: "M365 Copilot Agent 遊樂園",
       brandT2: "Power of Copilot · {z} 大園區 · {a} 座 AI 設施",
       btnExterior: "看園區", btnAtrium: "回中央廣場", btnBack: "回中央廣場",
+      btnExteriorShort: "看園區", btnAtriumShort: "回廣場",
       sideTitle: "園區地圖 · {z} 大主題區",
       hintText: "🖱️ 廣場：拖曳環顧·點園區入園　·　園區內：拖曳轉動設施·點卡開始玩",
       searchPh: "搜尋 Agent 名稱或關鍵字…",
@@ -96,6 +97,7 @@
       brandT1: "M365 Copilot Agent Playground",
       brandT2: "Power of Copilot · {z} zones · {a} AI rides",
       btnExterior: "Park view", btnAtrium: "Main plaza", btnBack: "Back to plaza",
+      btnExteriorShort: "Park", btnAtriumShort: "Plaza",
       sideTitle: "Park map · {z} themed zones",
       hintText: "🖱️ Plaza: drag to look around · click a zone to enter　·　Inside: drag to spin rides · click one to play",
       searchPh: "Search agents by name or keyword…",
@@ -2147,6 +2149,7 @@
   // ---------- Viewport: shift the 3D framing right so the scene centers in the
   // visible stage (the 256px sidebar overlays the canvas on desktop) ----------
   function applyViewOffset() {
+    window.scrollTo(0, 0);
     const W = window.innerWidth, H = window.innerHeight;
     const side = W > 860 ? 256 : 0;   // sidebar is off-canvas on mobile
     camera.aspect = W / H;
@@ -2174,6 +2177,12 @@
         el.innerHTML = v.replace("{z}", ZONES.length).replace("{a}", AGENTS.length);
     });
     searchInput.placeholder = T("searchPh");
+    const exteriorBtn = document.getElementById("exteriorBtn");
+    exteriorBtn.setAttribute("aria-label", T("btnExterior"));
+    exteriorBtn.title = T("btnExterior");
+    const homeBtn = document.getElementById("homeBtn");
+    homeBtn.setAttribute("aria-label", T("btnAtrium"));
+    homeBtn.title = T("btnAtrium");
     document.documentElement.lang = isEN() ? "en" : "zh-Hant";
     document.title = isEN()
       ? "M365 Copilot Agent — Playground"
