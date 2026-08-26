@@ -118,7 +118,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 
 /* ---------- Pavilion hover panel (agent name list) ---------- */
 #zoneHover {
-  position: fixed; z-index: 14; pointer-events: auto; cursor: pointer; display: none;
+  position: fixed; z-index: 16; pointer-events: auto; cursor: pointer; display: none;
   min-width: 268px; max-width: 460px;
   background: rgba(11,17,32,0.94); backdrop-filter: blur(14px);
   border: 1px solid rgba(120,160,255,0.22); border-left: 4px solid #4f7cff;
@@ -148,6 +148,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 #zoneHover .zh-tip { margin-top: 13px; font-size: 11px; color: #8aa0c8; font-weight: 700;
   border-top: 1px solid rgba(120,160,255,0.14); padding-top: 10px; }
 #zoneHover .zh-tip::after { content: " ▸"; }
+@media (min-width: 861px) and (max-width: 1429px) {
+  #zoneHover { max-height: min(250px, calc(50vh - 190px)); overflow: hidden; }
+  #zoneHover .zh-list { max-height: 112px; overflow-y: auto; scrollbar-width: thin; }
+}
 
 /* ---------- Modal ---------- */
 /* backdrop covers only the 3D stage (right of the sidebar, below the topbar)
