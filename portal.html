@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Power of Copilot</title>
+<script>
+  (() => {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    let saved = null;
+    try { saved = localStorage.getItem("copilotPortalTheme"); } catch (_) {}
+    const theme =
+      param || saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #FF3399;
+  --cp-accent-hover: #FF3399;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+  --cp-brand-pink: #FF3399;
+  --cp-brand-purple: #C73ECC;
+  --cp-brand-blue: #0078D4;
+  --cp-gradient: linear-gradient(105deg, var(--cp-brand-pink), var(--cp-brand-purple), var(--cp-brand-blue));
+  --cp-gradient-soft: linear-gradient(135deg, var(--cp-accent-soft), var(--cp-highlight), color-mix(in srgb, var(--cp-link) 10%, var(--cp-surface)));
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+  --cp-brand-pink: var(--cp-accent);
+  --cp-brand-purple: color-mix(in srgb, var(--cp-accent) 48%, var(--cp-link));
+  --cp-brand-blue: var(--cp-link);
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--cp-bg); }
+body {
+  min-width: 280px; min-height: 100vh; margin: 0;
+  background:
+    radial-gradient(circle at 12% 12%, var(--cp-accent-soft), transparent 34%),
+    radial-gradient(circle at 88% 22%, color-mix(in srgb, var(--cp-link) 13%, transparent), transparent 32%),
+    linear-gradient(var(--cp-sheen), var(--cp-sheen)),
+    var(--cp-bg);
+  color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a { color: inherit; }
+.shell { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--cp-overlay); border-bottom: 1px solid var(--cp-border);
+  backdrop-filter: blur(18px);
+}
+.topbar::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: var(--cp-gradient);
+}
+.topbar-inner {
+  min-height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand img { width: 38px; height: 38px; object-fit: contain; flex: none; }
+.brand-copy { min-width: 0; }
+.brand-name { font-size: 15px; font-weight: 700; line-height: 1.25; }
+.brand-sub { margin-top: 2px; color: var(--cp-text-muted); font-size: 12px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.resource-count {
+  flex: none; padding: 7px 10px; border: 1px solid var(--cp-border);
+  border-radius: 0.625rem; color: var(--cp-text-muted); font-size: 12px;
+  background: var(--cp-surface);
+}
+.theme-toggle {
+  min-width: 104px; height: 36px; padding: 0 11px; display: inline-flex; align-items: center;
+  justify-content: center; gap: 7px; border: 1px solid var(--cp-border); border-radius: 0.625rem;
+  background: var(--cp-surface); color: var(--cp-text); font: 600 12px "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+  cursor: pointer; transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+.theme-toggle:hover { transform: translateY(-1px); border-color: var(--cp-border-strong); box-shadow: 0 0 2px var(--cp-border); }
+.theme-toggle:focus-visible { outline: 3px solid var(--cp-highlight); outline-offset: 2px; }
+.theme-icon { width: 18px; text-align: center; font-size: 16px; line-height: 1; }
+main { padding: 56px 0 72px; }
+.intro { max-width: 720px; margin-bottom: 36px; }
+.eyebrow {
+  margin: 0 0 10px; color: var(--cp-accent); font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0;
+}
+h1 {
+  margin: 0; font-size: clamp(32px, 5vw, 54px); line-height: 1.08; letter-spacing: 0;
+  color: var(--cp-accent); background: var(--cp-gradient); background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.intro p { margin: 18px 0 0; color: var(--cp-text-muted); font-size: 16px; line-height: 1.7; }
+.card-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;
+}
+.product-card {
+  position: relative; min-height: 270px; overflow: hidden;
+  display: flex; flex-direction: column; padding: 24px;
+  border: 1px solid var(--cp-border); border-radius: 16px;
+  background: var(--cp-surface); text-decoration: none;
+  box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+.product-card::before {
+  content: ""; position: absolute; inset: 0 0 auto; height: 5px; background: var(--cp-gradient);
+}
+.product-card:hover, .product-card:focus-visible {
+  transform: translateY(-4px); border-color: var(--cp-border-strong); box-shadow: var(--cp-shadow);
+}
+.product-card:focus-visible { outline: 3px solid var(--cp-highlight); outline-offset: 3px; }
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.card-visual {
+  width: 76px; height: 76px; flex: none; display: grid; place-items: center;
+  border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-gradient-soft);
+  color: var(--cp-accent); font-size: 34px;
+}
+.card-index { color: var(--cp-text-soft); font: 700 12px Consolas, "Courier New", Courier, monospace; }
+.card-body { margin-top: 28px; }
+.card-kicker { color: var(--cp-accent); font-size: 12px; font-weight: 700; }
+h2 { margin: 8px 0 0; font-size: 23px; line-height: 1.25; letter-spacing: 0; }
+.card-description { margin: 12px 0 0; color: var(--cp-text-muted); font-size: 14px; line-height: 1.65; }
+.card-foot {
+  margin-top: auto; padding-top: 24px; display: flex; align-items: center; justify-content: space-between;
+  color: var(--cp-link); font-size: 13px; font-weight: 700;
+}
+.card-arrow {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-gradient);
+  color: var(--cp-accent-fg); font-size: 17px;
+}
+footer { padding: 24px 0 36px; border-top: 1px solid var(--cp-border); color: var(--cp-text-soft); font-size: 12px; }
+@media (max-width: 720px) {
+  .shell { width: min(100% - 28px, 1180px); }
+  .topbar-inner { min-height: 62px; }
+  .brand img { width: 34px; height: 34px; }
+  .brand-sub { display: none; }
+  .topbar-actions { gap: 6px; }
+  .theme-toggle { min-width: 38px; width: 38px; padding: 0; }
+  .theme-label { display: none; }
+  main { padding: 36px 0 52px; }
+  .intro { margin-bottom: 26px; }
+  h1 { font-size: 34px; }
+  .intro p { font-size: 14px; }
+  .card-grid { grid-template-columns: 1fr; gap: 14px; }
+  .product-card { min-height: 238px; padding: 20px; }
+  .card-visual { width: 64px; height: 64px; font-size: 29px; }
+  .card-body { margin-top: 22px; }
+  h2 { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-card { transition: none; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <img src="copilot-logo.png" alt="Copilot" />
+      <div class="brand-copy">
+        <div class="brand-name">Power of Copilot</div>
+        <div class="brand-sub">探索、練習，然後把 Copilot 帶進日常工作</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="resource-count" id="resourceCount" aria-live="polite"></div>
+      <button class="theme-toggle" id="themeToggle" type="button">
+        <span class="theme-icon" aria-hidden="true"></span>
+        <span class="theme-label"></span>
+      </button>
+    </div>
+  </div>
+</header>
+<main>
+  <div class="shell">
+    <section class="intro" aria-labelledby="pageTitle">
+      <p class="eyebrow">Copilot Learning Hub</p>
+      <h1 id="pageTitle">今天想從哪裡開始？</h1>
+      <p>選擇一個主題開始探索。這裡會持續加入新的體驗與練習資源，向下捲動即可瀏覽全部內容。</p>
+    </section>
+    <section class="card-grid" id="productGrid" aria-label="Copilot 體驗與學習資源"></section>
+  </div>
+</main>
+<footer>
+  <div class="shell">Microsoft 365 Copilot 學習入口</div>
+</footer>
+<script>
+const PRODUCTS = [
+  {
+    title: "Copilot Agent 遊樂園",
+    kicker: "互動體驗",
+    description: "走進八大主題園區，探索不同 Copilot Agent 的工作情境與應用方式。",
+    icon: "🎡",
+    href: "playground/",
+  },
+  {
+    title: "Copilot 一分鐘小教室",
+    kicker: "每週精選",
+    description: "用一分鐘掌握實用 Agent、提示詞與工作方法，快速找到下一個 Copilot 靈感。",
+    icon: "⚡",
+    href: "https://andyhung11.github.io/Copilot-in-1mins/",
+  },
+  {
+    title: "Copilot Chat Basic 練習手冊",
+    kicker: "基礎練習",
+    description: "從日常問答到內容生成，透過循序情境熟悉 Copilot Chat 的核心能力。",
+    icon: "📘",
+    href: "https://andyhung11.github.io/Copilot-in-1mins/Basic/",
+  },
+  {
+    title: "Copilot Chat Pro 練習手冊",
+    kicker: "進階實戰",
+    description: "以策略、資料、內容與流程情境，練習多輪迭代與進階提示技巧。",
+    icon: "🚀",
+    href: "https://andyhung11.github.io/Copilot-in-1mins/Pro/",
+  },
+];
+
+const grid = document.getElementById("productGrid");
+const themeToggle = document.getElementById("themeToggle");
+function syncThemeToggle() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  const action = dark ? "切換為淺色模式" : "切換為深色模式";
+  themeToggle.querySelector(".theme-icon").textContent = dark ? "☀" : "☾";
+  themeToggle.querySelector(".theme-label").textContent = dark ? "淺色模式" : "深色模式";
+  themeToggle.setAttribute("aria-label", action);
+  themeToggle.setAttribute("aria-pressed", String(dark));
+  themeToggle.title = action;
+}
+themeToggle.addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem("copilotPortalTheme", next); } catch (_) {}
+  syncThemeToggle();
+});
+syncThemeToggle();
+document.getElementById("resourceCount").textContent = `${PRODUCTS.length} 個入口`;
+grid.innerHTML = PRODUCTS.map((product, index) => `
+  <a class="product-card" href="${product.href}" target="_blank" rel="noopener noreferrer"
+     aria-label="開啟 ${product.title}（新分頁）">
+    <div class="card-top">
+      <div class="card-visual" aria-hidden="true">${product.icon}</div>
+      <span class="card-index">${String(index + 1).padStart(2, "0")}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-kicker">${product.kicker}</div>
+      <h2>${product.title}</h2>
+      <p class="card-description">${product.description}</p>
+    </div>
+    <div class="card-foot">
+      <span>在新分頁開啟</span>
+      <span class="card-arrow" aria-hidden="true">↗</span>
+    </div>
+  </a>
+`).join("");
+</script>
+</body>
+</html>
