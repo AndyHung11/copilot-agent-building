@@ -311,21 +311,30 @@
     ctx.closePath();
   }
   function wrapText(ctx, text, x, y, maxW, lh, maxLines) {
-    const chars = (text || "").split("");
+    const value = text || "";
+    const wordMode = /[A-Za-z]/.test(value) && /\s/.test(value);
+    const tokens = wordMode ? (value.match(/\S+\s*/g) || []) : value.split("");
     const lines = [];
-    let line = "", truncated = false;
-    for (let i = 0; i < chars.length; i++) {
-      const ch = chars[i];
-      if (line && ctx.measureText(line + ch).width > maxW) {
-        lines.push(line);
-        line = ch;
+    let line = "", truncated = false, index = 0;
+    for (; index < tokens.length; index++) {
+      const token = tokens[index];
+      if (line && ctx.measureText(line + token).width > maxW) {
+        lines.push(line.trimEnd());
+        line = token;
         if (lines.length === maxLines) { truncated = true; line = ""; break; }
-      } else line += ch;
+      } else {
+        line += token;
+      }
     }
-    if (line) lines.push(line);
+    if (line) lines.push(line.trimEnd());
     if (truncated && lines.length) {
       let last = lines[lines.length - 1];
-      while (ctx.measureText(last + "…").width > maxW && last.length) last = last.slice(0, -1);
+      if (wordMode) {
+        while (ctx.measureText(last + "…").width > maxW && last)
+          last = last.replace(/\s*\S+\s*$/, "").trimEnd();
+      }
+      if (!wordMode)
+        while (ctx.measureText(last + "…").width > maxW && last.length) last = last.slice(0, -1);
       lines[lines.length - 1] = last + "…";
     }
     lines.forEach((l, i) => ctx.fillText(l, x, y + i * lh));
@@ -1693,6 +1702,7 @@
   function enterRoom(id, after) {
     const zone = zoneById[id];
     if (!zone) return;
+    closeModal();
     atExterior = false;
     hideZoneHover();
     transition(() => {
@@ -1717,6 +1727,7 @@
     }, zone);
   }
   function exitRoom() {
+    closeModal();
     atExterior = false;
     transition(() => {
       Object.values(rooms).forEach((room) => { room.group.visible = false; });
@@ -1782,6 +1793,7 @@
     animateCamera(camPos, look, 1150, done);
   }
   function flyInterior() {
+    closeModal();
     setActiveZoneBtn(null);
     if (mode === "room") { atExterior = false; exitRoom(); return; }
     // keep the exterior state (and its loose limits) for the whole flight so the lobby
@@ -1798,6 +1810,7 @@
     animateCamera(EXTERIOR.pos, EXTERIOR.look, 1400);
   }
   function flyExterior() {
+    closeModal();
     setActiveZoneBtn(null);
     if (mode === "room") {
       exitRoom();
@@ -2017,6 +2030,29 @@
   }, { passive: false });
   const modalBackdrop = document.getElementById("modalBackdrop");
   const modalEl = document.getElementById("modal");
+  function fitEdmFrame(frame) {
+    const doc = frame && frame.contentDocument;
+    if (!doc || !doc.body || !frame.clientWidth) return;
+    // The 728px email table sits inside a wrapper cell with 10px padding per side.
+    const emailWidth = 748;
+    const scale = Math.min(1, frame.clientWidth / emailWidth);
+    doc.documentElement.style.width = emailWidth + "px";
+    doc.documentElement.style.minWidth = emailWidth + "px";
+    doc.documentElement.style.overflow = "hidden";
+    doc.body.style.width = emailWidth + "px";
+    doc.body.style.minWidth = emailWidth + "px";
+    doc.body.style.margin = "0";
+    doc.body.style.transformOrigin = "top left";
+    doc.body.style.transform = `scale(${scale})`;
+    frame.style.height = Math.ceil(doc.body.scrollHeight * scale) + "px";
+    frame.classList.add("responsive");
+    frame.setAttribute("scrolling", "no");
+    if (!frame.dataset.scrollLocked) {
+      frame.contentWindow.addEventListener("scroll", () => frame.contentWindow.scrollTo(0, 0));
+      frame.dataset.scrollLocked = "true";
+    }
+    frame.contentWindow.scrollTo(0, 0);
+  }
   function openModal(id) {
     const agent = agentById[id]; if (!agent) return;
     const zone = zoneById[agent.zone];
@@ -2086,7 +2122,16 @@
       if (pane === "edm") {
         // load the newsletter only the first time the tab is opened
         const fr = modalEl.querySelector("#edmFrame");
-        if (fr && !fr.getAttribute("src")) fr.setAttribute("src", `edm/${LANG}/${edmFile}`);
+        if (fr && !fr.getAttribute("src")) {
+          fr.addEventListener("load", () => {
+            fitEdmFrame(fr);
+            requestAnimationFrame(() => fitEdmFrame(fr));
+            setTimeout(() => fitEdmFrame(fr), 250);
+          });
+          fr.setAttribute("src", `edm/${LANG}/${edmFile}`);
+        } else if (fr) {
+          fitEdmFrame(fr);
+        }
       }
     }));
     modalEl.querySelector("#replayBtn").addEventListener("click", () => playSim(agent, zone, sim));
@@ -2094,6 +2139,11 @@
     modalBackdrop.classList.add("show");
     playSim(agent, zone, sim);
   }
+
+  window.addEventListener("resize", () => {
+    const frame = modalEl.querySelector("#edmFrame");
+    if (frame && frame.contentDocument) fitEdmFrame(frame);
+  });
 
   // ---------- Simulated run inside the agent modal ----------
   let simTimers = [];

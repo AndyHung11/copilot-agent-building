@@ -214,6 +214,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 .edm-open:hover { border-color: var(--accent); background: rgba(79,124,255,.06); }
 .edm-frame { width: 100%; height: 66vh; min-height: 380px; border: 1px solid var(--line);
   border-radius: 13px; background: #fff; display: block; }
+.edm-frame.responsive { min-height: 0; overflow: hidden; }
 /* the newsletter is a fixed 728px email layout — widen the shell so it never clips */
 #modal.wide { max-width: 840px; }
 
@@ -346,12 +347,31 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 }
 
 /* ---------- Back-to-lobby button (only inside a department room) ---------- */
-#backBtn { position: absolute; top: 74px; left: 18px; z-index: 22; display: none;
+#backBtn { position: absolute; top: 74px; left: 274px; z-index: 22; display: none;
   padding: 10px 16px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.18);
   background: rgba(16,24,42,0.82); backdrop-filter: blur(10px); color: #eaf2ff; font-size: 13.5px;
   font-weight: 600; cursor: pointer; font-family: var(--font); box-shadow: var(--shadow-lg); }
 #backBtn:hover { border-color: #5aa0ff; color: #9cc4ff; }
 #backBtn.show { display: block; }
+
+html[lang="en"] #sidebar,
+html[lang="en"] #zoneHover,
+html[lang="en"] #modal,
+html[lang="en"] #roomDeck {
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+html[lang="en"] .zone-btn .n1 { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; }
+html[lang="en"] .sr-item .nm { white-space: normal; overflow: visible; text-overflow: clip; }
+html[lang="en"] .zh-name,
+html[lang="en"] .zh-desc,
+html[lang="en"] .zh-list li,
+html[lang="en"] .m-cname,
+html[lang="en"] .m-desc,
+html[lang="en"] .rd-name,
+html[lang="en"] .rd-card .rc-nm,
+html[lang="en"] .rd-card .rc-tl { word-break: normal; overflow-wrap: normal; hyphens: none; }
 
 /* ---------- Room card deck (agent selection inside a department) ---------- */
 #roomDeck {
@@ -396,6 +416,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
   #brand { grid-column: 2 / 4; grid-row: 1; overflow: hidden; }
   #brand .logo { width: 30px; height: 30px; border-radius: 9px; }
   #brand .t1 { font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+  html[lang="en"] #brand .t1 {
+    font-size: 12px; line-height: 1.15; white-space: normal; overflow: visible; text-overflow: clip;
+  }
   #brand .t2 { display: none; }
   #langSeg { grid-column: 4; grid-row: 1; align-self: center; }
   #langSeg button { padding: 5px 8px; }
@@ -412,14 +435,17 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
   }
   #exteriorBtn { grid-column: 3; }
   #homeBtn { grid-column: 4; }
-  #sidebar { top: 105px; transform: translateX(-100%); width: 80vw; max-width: 300px; }
+  #sidebar { top: 105px; z-index: 25; transform: translateX(-100%); width: 80vw; max-width: 300px; }
   #sidebar.open { transform: translateX(0); }
-  #backBtn { top: 117px; }
+  #backBtn { top: 117px; left: 12px; }
   #roomDeck { width: 100%; max-height: 66vh; border-radius: 18px 18px 0 0; }
   .rd-desc { display: none; }
   /* sidebar is off-canvas on mobile → let the modal use the full width */
   #modalBackdrop { top: 105px; left: 0; padding: 16px; }
   #modal { max-height: 88vh; padding: 22px 20px 26px; }
+  .edm-bar { align-items: flex-start; flex-wrap: wrap; }
+  .edm-note { flex: 1 1 180px; }
+  .edm-open { margin-left: 0; }
 }
 </style>
 </head>
