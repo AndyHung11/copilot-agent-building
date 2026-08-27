@@ -3,7 +3,7 @@ const ZONES = [
     "id": "Z1",
     "name": "策略瞭望台",
     "nameEn": "Strategy Lookout",
-    "icon": "🔭",
+    "icon": "🎡",
     "color": "#4f7cff",
     "count": 9
   },
