@@ -1,4 +1,5 @@
-/* edm/index.js — maps each agent id to its newsletter file (v2) */
+/* edm/index.js — canonical newsletter location and agent-to-file map (v2) */
+const EDM_BASE_URL = new URL("./", document.currentScript.src).href;
 const EDM = {
  "A001": {
   "zh": "A001_ExecNewsAggregator.html",
@@ -219,5 +220,17 @@ const EDM = {
  "A055": {
   "zh": "A055_PersonalChiefOfStaff.html",
   "en": "A055_PersonalChiefOfStaff_EN.html"
+ },
+ "A056": {
+  "zh": "A056_CustomerFeedbackSynthesizer.html",
+  "en": "A056_CustomerFeedbackSynthesizer_EN.html"
+ },
+ "A057": {
+  "zh": "A057_StrategicOnePager.html",
+  "en": "A057_StrategicOnePager_EN.html"
+ },
+ "A058": {
+  "zh": "A058_CopilotCompass.html",
+  "en": "A058_CopilotCompass_EN.html"
  }
 };

@@ -1695,6 +1695,7 @@
     const sim = (typeof SIM !== "undefined") ? SIM[id] : null;
     const ex = aExample(agent);
     const edmFile = (typeof EDM !== "undefined" && EDM[id]) ? EDM[id][LANG] || EDM[id].zh : null;
+    const edmUrl = edmFile ? new URL(`${LANG}/${edmFile}`, EDM_BASE_URL).href : null;
     modalEl.innerHTML = `
       <button id="modalClose">✕</button>
       <div class="m-head">
@@ -1726,10 +1727,10 @@
         ${ex ? `<div class="m-section"><h4>${T("secExample")}</h4><div class="example-box">${esc(ex)}<button class="copy-btn">${T("copy")}</button></div></div>` : ""}
       </div>
 
-      ${edmFile ? `<div class="m-pane" id="paneEdm">
+      ${edmUrl ? `<div class="m-pane" id="paneEdm">
         <div class="edm-bar">
           <span class="edm-note">${T("edmNote")}</span>
-          <a class="edm-open" href="edm/${LANG}/${edmFile}" target="_blank" rel="noopener">${T("edmOpen")}</a>
+          <a class="edm-open" href="${edmUrl}" target="_blank" rel="noopener">${T("edmOpen")}</a>
         </div>
         <iframe class="edm-frame" id="edmFrame" title="newsletter" loading="lazy"></iframe>
       </div>` : ""}`;
@@ -1754,7 +1755,7 @@
       if (pane === "edm") {
         // load the newsletter only the first time the tab is opened
         const fr = modalEl.querySelector("#edmFrame");
-        if (fr && !fr.getAttribute("src")) fr.setAttribute("src", `edm/${LANG}/${edmFile}`);
+        if (fr && !fr.getAttribute("src")) fr.setAttribute("src", edmUrl);
       }
     }));
     modalEl.querySelector("#replayBtn").addEventListener("click", () => playSim(agent, zone, sim));
