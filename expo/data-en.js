@@ -824,5 +824,50 @@ const AGENTS_EN = {
    "Step 3: Get an on-brand, ready-to-use output — ask for adjustments directly if needed."
   ],
   "example": "Draft a follow-up email after a Copilot strategy workshop. Summarize outcomes, next steps, and customer value."
+ },
+ "A056": {
+  "tagline": "✨ Dedupe → grade sentiment → cluster themes → rank the top three actions 📣",
+  "description": "The Customer Feedback Synthesizer transforms unstructured feedback from surveys, support tickets, reviews, social media, and direct interactions into clear insights and prioritized actions. It removes duplicates and irrelevant content, groups feedback into meaningful themes, evaluates sentiment and frequency, and highlights the most important improvement opportunities. Requires an M365 Copilot license or pay-as-you-go.",
+  "painPoints": [
+   "Surveys, tickets, reviews, and social posts are scattered and tedious to reconcile",
+   "After reading the pile, you still cannot quantify sentiment or recurring themes",
+   "The report sounds accurate but gives leadership no clear next action"
+  ],
+  "quickStart": [
+   "Step 1: Provide at least ten feedback items plus product or service context, source, and time period.",
+   "Step 2: Have it deduplicate and clean the input, grade sentiment, and cluster recurring themes with counts.",
+   "Step 3: Review the top three priorities with a specific action, expected outcome, owner, and timeline for each."
+  ],
+  "example": "Analyze the following customer feedback from our product reviews collected during the last 30 days. Identify the main themes, summarize sentiment, prioritize the most important issues, and provide three actionable recommendations for the product team."
+ },
+ "A057": {
+  "tagline": "✨ Executive summary → three insights → risks and opportunities → one recommended focus 📄",
+  "description": "The Strategic One-Pager transforms conversations, documents, meeting notes, research, presentations, and knowledge sources into a concise, executive-ready one-page briefing. It identifies the most important insights, business implications, opportunities, risks, and recommended next steps, then packages them into a professional PDF designed for rapid decisions. Best practice: add it to an ongoing conversation and tag @Strategic One-Pager.",
+  "painPoints": [
+   "Conversations, attachments, and conclusions are scattered across too many places",
+   "Leadership has five minutes but the material is not organized for a decision",
+   "Facts, inferences, assumptions, risks, and next steps blur together"
+  ],
+  "quickStart": [
+   "Step 1: Add the agent to an existing conversation or provide the relevant files, notes, and research.",
+   "Step 2: Tag @Strategic One-Pager so it can identify the topic, audience, and decision-relevant content.",
+   "Step 3: Review the one-page A4 PDF, including its three insights, risks and opportunities, and recommended focus."
+  ],
+  "example": "Generate a Strategic One-Pager from the current conversation and available context. Analyze the provided content and create the final Strategic One-Pager as a PDF."
+ },
+ "A058": {
+  "tagline": "✨ Describe the task → weigh goal and complexity → name the best-fit surface → get a copy-ready prompt 🧭",
+  "description": "Copilot Compass helps Microsoft 365 Copilot users choose the best Copilot tool for a task. Based on the work involved and desired outcome, it matches requests with Copilot Chat, Copilot in Microsoft 365 apps, Researcher, Analyst, specialized agents, or Cowork, then explains why, how to begin, and what prompt to use. No M365 Copilot license required.",
+  "painPoints": [
+   "Too many Copilot entry points make choosing a tool a task of its own",
+   "Simple jobs get over-engineered while complex work gets forced into one chat",
+   "You know the product names but not where or how to start"
+  ],
+  "quickStart": [
+   "Step 1: Describe your goal, required output, source material, and the apps involved.",
+   "Step 2: Let it weigh complexity, direct-action needs, and access constraints, then recommend one primary option.",
+   "Step 3: Use its concrete starting step and copy-ready prompt; consider the alternative only when the tradeoff matters."
+  ],
+  "example": "Research three competitors, analyze their positioning, and produce a cited briefing plus a comparison deck. Which Copilot tool should I use?"
  }
 };

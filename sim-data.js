@@ -2325,5 +2325,300 @@ A006: {
    "zh": "<b>覆核提醒：</b>這是給沒參加的決策主管，因此把結論放在最前、細節收在附件。寄出前請確認兩個負責人姓名與時間點無誤；若對方偏好更短的版本，可只保留「結論摘要」與「下一步」兩段。",
    "en": "<b>Review note:</b> This is written for a decision maker who wasn't in the room, so outcomes lead and detail moves to the attachment. Confirm both owner names and timings before sending. If they prefer something shorter, keep only the Outcomes and Next steps sections."
   }
+ },
+ "A056": {
+  "art": "table",
+  "turns": {
+   "zh": [
+    {
+     "ask": "請分析過去 30 天的 126 則產品評論，找出主要主題、情緒與前三項行動。",
+     "say": "可以。請先確認產品版本、回饋來源，以及資安或法遵疑慮是否需要立即升報。"
+    },
+    {
+     "ask": "版本 4.2，來源是 App Store 與客服工單；資安和法遵疑慮要立即標出。",
+     "steps": [
+      "移除重複、灌水與無關內容",
+      "標記情緒與強度",
+      "歸納高頻主題並計次",
+      "依頻率、強度與商業影響排序"
+     ]
+    }
+   ],
+   "en": [
+    {
+     "ask": "Analyze 126 product reviews from the last 30 days and identify the main themes, sentiment, and top three actions.",
+     "say": "I can do that. Please confirm the product version, feedback sources, and whether security or compliance concerns require immediate escalation."
+    },
+    {
+     "ask": "Version 4.2, from App Store reviews and support tickets. Escalate security and compliance concerns immediately.",
+     "steps": [
+      "Removing duplicates, spam, and irrelevant entries",
+      "Classifying sentiment and intensity",
+      "Clustering recurring themes with counts",
+      "Ranking by frequency, intensity, and business impact"
+     ]
+    }
+   ]
+  },
+  "title": {
+   "zh": "客戶回饋優先分析",
+   "en": "Customer Feedback Priority Analysis"
+  },
+  "data": {
+   "zh": {
+    "head": [
+     "主題",
+     "出現頻率",
+     "主要情緒",
+     "優先"
+    ],
+    "rows": [
+     [
+      "啟動與載入效能",
+      "38 則",
+      "強烈負面",
+      "h"
+     ],
+     [
+      "帳號登入可靠性",
+      "24 則",
+      "中度負面",
+      "h"
+     ],
+     [
+      "首次使用引導",
+      "17 則",
+      "中度負面",
+      "m"
+     ],
+     [
+      "新版介面",
+      "14 則",
+      "正負意見分歧",
+      "m"
+     ]
+    ]
+   },
+   "en": {
+    "head": [
+     "Theme",
+     "Frequency",
+     "Primary sentiment",
+     "Priority"
+    ],
+    "rows": [
+     [
+      "Startup and loading performance",
+      "38 mentions",
+      "Highly negative",
+      "h"
+     ],
+     [
+      "Sign-in reliability",
+      "24 mentions",
+      "Moderately negative",
+      "h"
+     ],
+     [
+      "First-use onboarding",
+      "17 mentions",
+      "Moderately negative",
+      "m"
+     ],
+     [
+      "New interface",
+      "14 mentions",
+      "Mixed",
+      "m"
+     ]
+    ]
+   }
+  },
+  "rec": {
+   "zh": "<b>前三項行動：</b>效能團隊兩週內提出冷啟動改善方案；身分團隊 48 小時內檢查登入失敗紀錄；產品團隊在下一個 sprint 測試精簡版首次使用引導。未發現具證據支持的重大資安或法遵風險。",
+   "en": "<b>Top three actions:</b> Performance team to propose a cold-start fix within two weeks; identity team to inspect sign-in failures within 48 hours; product team to test a shorter first-use flow next sprint. No evidence-supported critical security or compliance risk was identified."
+  }
+ },
+ "A057": {
+  "art": "brief",
+  "turns": {
+   "zh": [
+    {
+     "ask": "請依據目前這串客戶工作坊對話、會議筆記和附件，產出策略一頁報 PDF。",
+     "steps": [
+      "讀取對話、附件與知識來源",
+      "辨識高階主管需要決定的核心議題",
+      "區分事實、洞察與假設",
+      "壓縮為 A4 直式單頁內容"
+     ]
+    }
+   ],
+   "en": [
+    {
+     "ask": "Generate a Strategic One-Pager PDF from this client-workshop thread, meeting notes, and attachments.",
+     "steps": [
+      "Reviewing the conversation, attachments, and knowledge sources",
+      "Identifying the core executive decision",
+      "Separating facts, insights, and assumptions",
+      "Optimizing the content for one A4 portrait page"
+     ]
+    }
+   ]
+  },
+  "title": {
+   "zh": "Copilot 導入策略一頁報",
+   "en": "Copilot Adoption Strategic One-Pager"
+  },
+  "data": {
+   "zh": [
+    {
+     "lv": "m",
+     "cat": "執行摘要",
+     "tx": "團隊已確認先以會議摘要與文件起草作為導入場景；決策點是是否核准 30 人、六週的受控試行。"
+    },
+    {
+     "lv": "m",
+     "cat": "洞察",
+     "tx": "兩個首波場景頻率高且容易衡量，適合作為採用成效的早期證據。"
+    },
+    {
+     "lv": "m",
+     "cat": "風險",
+     "tx": "權限與敏感度標籤盤點尚未完成，試行前必須由 IT 與法務共同確認。"
+    },
+    {
+     "lv": "n",
+     "cat": "機會",
+     "tx": "小規模試行可先建立提示範本與成功案例，再降低第二波擴展阻力。"
+    },
+    {
+     "lv": "m",
+     "cat": "建議聚焦",
+     "tx": "核准受控試行，但以完成權限盤點和確認成功指標作為啟動條件。"
+    }
+   ],
+   "en": [
+    {
+     "lv": "m",
+     "cat": "Executive summary",
+     "tx": "The team selected meeting recap and document drafting as the first scenarios. The decision is whether to approve a controlled six-week pilot for 30 users."
+    },
+    {
+     "lv": "m",
+     "cat": "Insight",
+     "tx": "Both initial scenarios are frequent and measurable, making them useful early evidence of adoption value."
+    },
+    {
+     "lv": "m",
+     "cat": "Risk",
+     "tx": "The permissions and sensitivity-label review requires joint IT and Legal sign-off before launch."
+    },
+    {
+     "lv": "n",
+     "cat": "Opportunity",
+     "tx": "A small pilot can establish reusable prompts and proof points before a broader second wave."
+    },
+    {
+     "lv": "m",
+     "cat": "Recommended focus",
+     "tx": "Approve the pilot, conditional on completing the access review and confirming success measures."
+    }
+   ]
+  },
+  "rec": {
+   "zh": "<b>假設提醒：</b>30 位試行使用者與六週時程來自工作坊提案，尚未正式核准；PDF 交付前應保留此標示。",
+   "en": "<b>Assumption:</b> The 30-user group and six-week timeline come from the workshop proposal and are not yet approved. Preserve that label in the delivered PDF."
+  }
+ },
+ "A058": {
+  "art": "brief",
+  "turns": {
+   "zh": [
+    {
+     "ask": "幫我研究三家競爭對手、分析市場定位，並產出附引用來源的簡報與比較投影片。我該用哪個 Copilot 工具？",
+     "steps": [
+      "判斷目標、來源深度與引用需求",
+      "確認產出包含多份相關交付物",
+      "比較 Researcher、PowerPoint Copilot 與 Cowork",
+      "選出能完成任務的最簡單主選項"
+     ]
+    }
+   ],
+   "en": [
+    {
+     "ask": "Research three competitors, analyze their positioning, and produce a cited briefing plus a comparison deck. Which Copilot tool should I use?",
+     "steps": [
+      "Evaluating the goal, source depth, and citation requirement",
+      "Confirming multiple related deliverables",
+      "Comparing Researcher, Copilot in PowerPoint, and Cowork",
+      "Selecting the simplest primary option capable of the whole task"
+     ]
+    }
+   ]
+  },
+  "title": {
+   "zh": "Copilot 工具選用建議",
+   "en": "Copilot Tool Recommendation"
+  },
+  "data": {
+   "zh": [
+    {
+     "lv": "m",
+     "cat": "最適選擇",
+     "tx": "Cowork。這是跨網路研究、分析與多份交付物的協調型多步驟專案。"
+    },
+    {
+     "lv": "m",
+     "cat": "原因",
+     "tx": "Researcher 適合附引用研究，但不適合單獨統籌完整簡報與比較投影片的端到端產出。"
+    },
+    {
+     "lv": "m",
+     "cat": "如何開始",
+     "tx": "在 Cowork 建立任務，指定三家競爭對手、目標市場、來源要求、簡報受眾與兩份交付物。"
+    },
+    {
+     "lv": "n",
+     "cat": "可複製提示",
+     "tx": "研究三家指定競爭對手，引用可靠來源比較其定位，產出高階摘要簡報與一份並列比較投影片。"
+    },
+    {
+     "lv": "n",
+     "cat": "替代方案",
+     "tx": "若 Cowork 不可用，先用 Researcher 完成附引用研究，再到 PowerPoint 產出簡報。"
+    }
+   ],
+   "en": [
+    {
+     "lv": "m",
+     "cat": "Best fit",
+     "tx": "Cowork. This is a coordinated, multi-step project spanning web research, analysis, and several related deliverables."
+    },
+    {
+     "lv": "m",
+     "cat": "Why",
+     "tx": "Researcher is strong for cited research but is not the most direct way to coordinate both deliverables end to end."
+    },
+    {
+     "lv": "m",
+     "cat": "How to start",
+     "tx": "Create a Cowork task naming the three competitors, target market, source requirements, audience, and both deliverables."
+    },
+    {
+     "lv": "n",
+     "cat": "Copy-ready prompt",
+     "tx": "Research the three named competitors, cite reliable sources, compare their positioning, and create an executive briefing plus a side-by-side comparison deck."
+    },
+    {
+     "lv": "n",
+     "cat": "Alternative",
+     "tx": "If Cowork is unavailable, complete the cited research in Researcher and then create the deck in PowerPoint."
+    }
+   ]
+  },
+  "rec": {
+   "zh": "<b>存取提醒：</b>Cowork、Researcher 與相關用量條件可能因授權和系統管理員設定而異，開始前請先確認組織內的可用性。",
+   "en": "<b>Access note:</b> Cowork, Researcher, and usage conditions can vary by license and administrator settings. Confirm availability in your organization before starting."
+  }
  }
 };
