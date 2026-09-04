@@ -60,9 +60,10 @@
     font-size:11px; letter-spacing:.18em; padding:5px 11px; border-radius:4px; font-weight:700}
   .dest i{width:6px;height:6px;border-radius:50%;background:#ffd77a; box-shadow:0 0 7px #ffd77a}
   .cvt{font-size:clamp(21px,2.5vw,30px); font-weight:700; margin:12px 0 8px; letter-spacing:-.015em; color:#111827}
-  .cvs{font-size:14px; color:#374151; line-height:1.8; margin:0}
-  .scene-line{color:var(--ink2); font-style:italic}
-  .cvs .scene-line{display:block; margin-top:2px; color:#4b5563}
+  .cvs{font-size:14px; color:var(--ink); line-height:1.8; margin:0}
+  .scene-line,.scene-line *{color:var(--ink2)!important}
+  .scene-line{font-style:italic}
+  .cvs .scene-line{display:block; margin-top:2px}
   .cvcta{margin-top:26px; font-size:13px; color:var(--ink2); letter-spacing:.06em; text-align:center}
   /* departure */
   #cover.leaving .train{transition:transform 1.05s cubic-bezier(.5,.02,.62,.4); transform:translateX(155vw)}
@@ -1769,12 +1770,10 @@ var T={
 
 T.zh.notes[5][2]=[
   '多數工作型 Agent 需要 Microsoft 365 Copilot 授權。',
-  'Word、Excel、PowerPoint Agent 還需要租戶啟用 Anthropic；其他需求依各站說明。',
   '若無法開啟，可能是缺少必要授權、管理員尚未啟用，或尚未推送到你的環境。'
 ];
 T.en.notes[5][2]=[
   'Most work-focused agents require a Microsoft 365 Copilot licence.',
-  'Word, Excel and PowerPoint Agents also require Anthropic enabled for the tenant; see each station for other requirements.',
   'If an agent will not open, you might not have the required licence, your admin might not have enabled it, or it might not have reached your tenant.'
 ];
 
@@ -2018,12 +2017,15 @@ function open(id){var L=visible(),i=-1;
    Shown between the departing train and the map: who these agents are, and
    the one idea the map depends on — every station is one agent.        */
 var ANNOUNCE = {"zh": {"kicker": "站內廣播", "sub": "PB AGENT 捷運 ・ 全線", "lines": ["各位旅客您好，歡迎搭乘 PB Agent 捷運。", "本捷運沿線的代理程式（Agent），是 Microsoft 自行打造、內建於 Microsoft 365 Copilot 的 AI 助理 —— 不需自行開發，開啟即可使用。", "本捷運共 <b>20 站、4 條路線，每一個站點即為一個代理程式</b>。", "<b>紅線「新手上路」為免費路線</b>，未持有 Copilot 授權亦可搭乘；其餘三線依用途分為知識解答、資料分析、產出執行。", "抵達各站後，您可先透過<b>模擬對話</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗。", "行程期間將播送<b>搭乘指南</b>，請隨時留意站內廣播；如需再次查看，請點選大聲公圖示。", "列車即將發車，請小心月台間隙。"], "go": "發車，前往路網圖 →"}, "en": {"kicker": "Station announcement", "sub": "PB AGENT METRO ・ ALL LINES", "lines": ["Attention passengers: welcome aboard the PB Agent Metro.", "The agents on this metro are AI assistants Microsoft built into Microsoft 365 Copilot — nothing to develop, just open one and go.", "This metro has <b>20 stations across 4 lines, and every station is one agent</b>.", "<b>The red “Start here” line is free to ride</b> — no Copilot licence required. The other three are grouped into knowledge and answers, data and analysis, and creation and execution.", "On arrival at any station, preview how the agent responds through a <b>simulated conversation</b>, then open the agent to try it for yourself.", "A <b>boarding guide</b> is announced along the way. To review it, select the megaphone icon.", "The train is about to depart. Please mind the gap."], "go": "Depart for the map →"}};
-ANNOUNCE.zh.lines[3]='<b>紅線「新手上路」適合初次探索 Agent 的使用者</b>；各站的授權與整合需求不同，請以站點說明與官方文件為準';
-ANNOUNCE.zh.lines[4]='抵達各站後，您可先透過<b>試乘模擬</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗';
-/* The announcement reads as spoken lines, so the trailing full stops are dropped. */
-ANNOUNCE.zh.lines=ANNOUNCE.zh.lines.map(function(line){ return line.replace(/。$/,'') });
+ANNOUNCE.zh.lines[3]='<b>紅線「新手上路」適合初次探索 Agent 的使用者</b>；各站的授權與整合需求不同，請以站點說明與官方文件為準。';
+ANNOUNCE.zh.lines[4]='抵達各站後，您可先透過<b>試乘模擬</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗。';
 ANNOUNCE.en.lines[3]='<b>The red “Start here” line is an entry point for people exploring agents</b>. Licensing and integration requirements vary by station; check the station description and official documentation.';
 ANNOUNCE.en.lines[4]='On arrival at any station, use the <b>trial simulation</b> to see how the agent responds, then open the agent to try it for yourself.';
+/* Opening and closing lines are scene-setting italics, so they omit terminal punctuation. */
+[ANNOUNCE.zh.lines,ANNOUNCE.en.lines].forEach(function(lines){
+  lines[0]=lines[0].replace(/[。.\s]+$/,'');
+  lines[lines.length-1]=lines[lines.length-1].replace(/[。.\s]+$/,'');
+});
 ANNOUNCE.zh.lines[2]=ANNOUNCE.zh.lines[2].replace('20 站',AGENTS.length+' 站');
 ANNOUNCE.en.lines[2]=ANNOUNCE.en.lines[2].replace('20 stations',AGENTS.length+' stations');
 var brief=document.getElementById('brief');
