@@ -139,7 +139,8 @@
 
   main{max-width:1320px; margin:0 auto; padding:28px 22px 70px}
   h1{font-size:clamp(21px,2.8vw,29px); margin:0 0 9px; font-weight:700; letter-spacing:-.015em}
-  .lede{margin:0 0 22px; color:var(--ink2); font-size:14.4px; line-height:1.85; max-width:82ch}
+  .lede{margin:0 0 22px; color:var(--ink2); font-size:14.4px; line-height:1.85; max-width:82ch;
+    text-wrap:pretty; word-break:keep-all; line-break:strict}
   .key{display:flex; gap:9px; flex-wrap:wrap; align-items:center; margin-bottom:18px}
   .kb{border:1px solid var(--line); background:#fff; border-radius:20px; padding:7px 15px; cursor:pointer;
     font-size:13px; font-weight:600; color:var(--ink2); display:inline-flex; gap:8px; align-items:center}
@@ -183,7 +184,7 @@
     .cnt{margin-right:13px}
     svg.map{display:none}
     .vmap{display:block}
-    .totop{position:fixed; right:14px; bottom:16px; z-index:30; display:inline-flex; align-items:center;
+    .totop{position:fixed; left:50%; right:auto; bottom:12px; transform:translateX(-50%); z-index:30; display:inline-flex; align-items:center;
       gap:6px; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:999px;
       padding:10px 15px; font-size:12.6px; font-weight:700; cursor:pointer;
       box-shadow:0 10px 24px rgba(20,30,45,.16)}
@@ -199,6 +200,11 @@
     transition:transform .16s ease; transform-origin:center; transform-box:fill-box}
   .stop:hover .lbl{fill:#000; transform:scale(1.22)}
   .stop:hover .sub{transform:scale(1.22)}
+  .stop.lg .lbl{font-size:15px; font-weight:800}
+  .stop.lg .sub{font-size:11.4px}
+  .stop.lg .dot,.stop.lg .ring{transform:scale(1.16)}
+  .stop.sm .lbl{font-size:10.6px}
+  .stop.sm .sub{font-size:8.8px}
   .linelabel{font-family:var(--sans); font-size:13px; font-weight:800; letter-spacing:.03em}
   .linecount{font-family:var(--sans); font-size:10.5px; fill:var(--ink2)}
   .dim{opacity:.14; transition:opacity .22s}
@@ -552,6 +558,67 @@
     .ch-foot{align-items:stretch; flex-wrap:wrap}
     .ch-sim{flex:0 0 100%}
   }
+  /* ---------- Teams meeting demo ---------- */
+  .tm{border-color:#d9dce5; background:#f0f0f0; border-radius:10px}
+  .tm-bar{height:42px; display:flex; align-items:center; gap:9px; padding:0 13px;
+    color:#242424; background:#fff; border-bottom:1px solid #e1e1e1}
+  .tm-live-dot{width:8px; height:8px; border-radius:50%; background:#d83b01;
+    box-shadow:0 0 0 3px rgba(216,59,1,.14)}
+  .tm-bar b{font-size:12.5px}
+  .tm-meta{margin-left:auto; color:#616161; font-size:11px}
+  .tm-bar .tm-controls{margin-left:4px; padding-left:9px; border-left:1px solid #e1e1e1}
+  .tm-layout{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(270px,.85fr);
+    min-height:340px}
+  .tm-stage{min-width:0; padding:12px; display:flex; flex-direction:column; gap:10px}
+  .tm-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1}
+  .tm-person{position:relative; min-height:92px; display:flex; align-items:center;
+    justify-content:center; background:#fff; border:1px solid #e1e1e1; border-radius:6px;
+    overflow:hidden}
+  .tm-face{width:48px; height:48px; border-radius:50%; display:flex; align-items:center;
+    justify-content:center; color:#fff; font-size:14px; font-weight:800; background:#6264a7}
+  .tm-person:nth-child(2) .tm-face{background:#038387}
+  .tm-person:nth-child(3) .tm-face{background:#c239b3}
+  .tm-person:nth-child(4) .tm-face{background:#8e562e}
+  .tm-person span:last-child{position:absolute; left:8px; bottom:6px; color:#424242;
+    font-size:10.5px; font-weight:600}
+  .tm-status{display:flex; align-items:center; gap:8px; min-height:31px; padding:6px 10px;
+    border-radius:6px; background:#fff; border:1px solid #e1e1e1; color:#242424; font-size:11.5px}
+  .tm-wave{display:flex; align-items:center; gap:2px; height:14px}
+  .tm-wave i{display:block; width:2px; border-radius:2px; background:#6264a7;
+    animation:tmwave .9s ease-in-out infinite}
+  .tm-wave i:nth-child(1),.tm-wave i:nth-child(5){height:5px}
+  .tm-wave i:nth-child(2),.tm-wave i:nth-child(4){height:10px; animation-delay:.14s}
+  .tm-wave i:nth-child(3){height:14px; animation-delay:.28s}
+  @keyframes tmwave{50%{transform:scaleY(.45)}}
+  .tm-controls{display:flex; align-items:center; gap:6px}
+  .tm-control{width:26px; height:26px; border-radius:5px; display:flex; align-items:center;
+    justify-content:center; border:1px solid #d1d1d1; background:#fff; color:#424242; font-size:11px}
+  .tm-control.end{background:#c4314b; border-color:#c4314b}
+  .tm-panel{min-width:0; background:#fff; border-left:1px solid #d9dce5; display:flex;
+    flex-direction:column}
+  .tm-panel-head{display:flex; align-items:center; gap:8px; min-height:43px; padding:8px 12px;
+    border-bottom:1px solid var(--line); background:#f8f8fb}
+  .tm-panel-head b{font-size:12.5px}
+  .tm-panel-head span:last-child{margin-left:auto; color:#137333; font-size:10.5px;
+    font-weight:800}
+  .tm .ch-body{flex:1; padding:13px; overflow:auto}
+  .tm .ch-ask{font-weight:700; color:#42464d}
+  .tm .ch-opt{padding:9px 10px; border-radius:6px; background:#fafafe}
+  .tm .ch-q{font-size:12.5px; line-height:1.5}
+  .tm-result{animation:say .25s ease both}
+  .tm-result .ch-lead{padding-left:10px; border-left:3px solid #6264a7}
+  .tm .ch-foot{margin-top:10px}
+  @media (max-width:680px){
+    .tm-layout{grid-template-columns:1fr}
+    .tm-stage{min-height:215px; padding:9px}
+    .tm-grid{min-height:150px}
+    .tm-person{min-height:70px}
+    .tm-face{width:38px; height:38px; font-size:12px}
+    .tm-panel{border-left:0; border-top:1px solid #d9dce5}
+    .tm-bar{gap:7px; padding:0 10px}
+    .tm-meta{display:none}
+    .tm-control{width:23px; height:23px}
+  }
   @media (prefers-reduced-motion:reduce){ .ch-typing i,.ch-reply{animation:none} }
 
   /* ---------- phones ---------- */
@@ -608,10 +675,10 @@
     letter-spacing:.16em; color:#0f766e; text-transform:uppercase; margin-bottom:3px}
   .pa-kick i{width:7px; height:7px; border-radius:50%; background:#0f766e;
     animation:onair 1.4s ease-in-out infinite}
-  .bf-skip{margin-left:auto; border:0; background:none; padding:2px 0; cursor:pointer;
-    font:inherit; font-size:11px; font-weight:600; letter-spacing:0; text-transform:none;
-    color:var(--ink2)}
-  .bf-skip:hover{color:var(--ink); text-decoration:underline}
+  .bf-skip{margin-left:auto; border:1px solid var(--line); background:#f4f6f8; padding:6px 10px;
+    border-radius:6px; cursor:pointer; font:inherit; font-size:12.5px; font-weight:700;
+    letter-spacing:0; text-transform:none; white-space:nowrap; color:var(--ink2)}
+  .bf-skip:hover{color:var(--ink); background:#fff; border-color:#c8ced7}
   @keyframes onair{0%,100%{opacity:.25}50%{opacity:1}}
   @keyframes say{to{opacity:1; transform:none}}
   .rip{opacity:0; animation:rip 2.1s ease-out infinite}
@@ -1000,7 +1067,7 @@
 
         <!-- car number + headlights -->
         <text x="60" y="288" font-family="Segoe UI, sans-serif" font-size="15"
-              font-weight="700" fill="#b6c1ce" letter-spacing="3">PB-021</text>
+              font-weight="700" fill="#b6c1ce" letter-spacing="3">PB-020</text>
         <!-- one lamp only: from the side the far headlight would be hidden -->
         <g fill="#ffffff" stroke="#c9d3de" stroke-width="2.4">
           <rect x="996" y="242" width="60" height="24" rx="12"/>
@@ -1297,6 +1364,8 @@ var ICONS = {
   cap:"<path d=\"M3 9l9-4 9 4-9 4z\"/><path d=\"M7 11.5V16c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4.5\"/>",
   board:"<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M8 8v9M13 8v5M18 8v7\"/>",
   pulse:"<path d=\"M3 12h4l2.5-6 4 12L16 12h5\"/>",
+  mic:"<rect x=\"9\" y=\"3\" width=\"6\" height=\"12\" rx=\"3\"/><path d=\"M5 11a7 7 0 0014 0M12 18v3M9 21h6\"/>",
+  hangup:"<path d=\"M5 15.5l1.1-3.3c.2-.6.7-1 1.3-1.2a17 17 0 019.2 0c.6.2 1.1.6 1.3 1.2l1.1 3.3\"/><path d=\"M5 15.5l3.2 1.1 1.3-3.1a9.6 9.6 0 015 0l1.3 3.1 3.2-1.1\"/>",
   poll:"<rect x=\"4\" y=\"4\" width=\"16\" height=\"17\" rx=\"2\"/><path d=\"M8 9h8M8 13h6\"/><circle cx=\"16.5\" cy=\"16.8\" r=\"2.2\"/>",
   helmet:"<path d=\"M4 15a8 8 0 0116 0\"/><rect x=\"2.5\" y=\"15\" width=\"19\" height=\"4.5\" rx=\"1.6\"/><path d=\"M12 7V4\"/>",
   list:"<rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"2\"/><path d=\"M8 8h8M8 12h8M8 16h5\"/>",
@@ -1308,38 +1377,70 @@ var ICONS = {
 };
 
 var AGENTS = [{"id": "idea-coach", "name": "Idea Coach", "color": "#8a4992", "icon": "bulb", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_be483bea-dc19-b6ae-1d69-fde1f2c7b661&source=agentCenterDialog", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/agents-built-by-microsoft", "zh": {"sub": "點子教練", "tagline": "帶著你規劃並走完腦力激盪的過程。", "lead": "像一位隨身的腦力激盪夥伴，用輕鬆、協作的語氣激發創意，並協助你規劃與推進整個發想過程，讓討論保持聚焦、不偏離主題。設計上搭配 Microsoft 365 Copilot 使用。", "can": ["規劃一場腦力激盪要怎麼進行", "一次問一題，把想法逐層引導出來", "讓討論保持聚焦，偏題時拉回來", "用輕鬆、協作的語氣帶動想法"], "who": "要辦活動、想企劃、做創新提案、帶工作坊的人。", "prompts": ["我要在部門推廣 Copilot，幫我規劃一場腦力激盪要怎麼進行。", "我們的討論越來越發散，幫我拉回主題。", "針對這個主題，一次問我一個問題，帶我把想法想清楚。"], "status": "Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Plan and navigate the brainstorming process.", "lead": "A personal brainstorming companion that inspires creativity with a fun, collaborative tone. It helps you plan and navigate the brainstorming process, and makes sure you stay focused and on track. Designed to work with Microsoft 365 Copilot.", "can": ["Plan how a brainstorm should run", "Draw ideas out by asking one question at a time", "Keep the discussion focused, and pull it back when it drifts", "Set a fun, collaborative tone"], "who": "Anyone planning an event, campaign, innovation pitch or workshop.", "prompts": ["I want to promote Copilot in my department — help me plan the brainstorm.", "Our ideas are drifting. Bring the discussion back to the topic.", "Ask me one question at a time and help me think this through."], "sub": "Idea Coach", "status": "Agent", "product": "Microsoft 365 Copilot"}, "n": 1, "file": "MS-01", "domain": "free", "stop": 0, "prop": "bulb"}, {"id": "word-agent", "name": "Word Agent", "color": "#2b579a", "icon": "doc", "status": "ga", "domain": "free", "url": "https://m365.cloud.microsoft/chat/?titleId=P_15f67c5b-bfb1-fbd9-043a-cbb047bb7bd0", "docs": "https://support.microsoft.com/en-us/office/365-copilot-app/get-started-with-word-excel-and-powerpoint-agents-in-microsoft-365-copilot", "zh": {"sub": "Word 文件生成", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "描述你要的文件，直接產出一份 Word 檔。", "lead": "Word Agent 讓你用一句話描述需求，就生成完整的 Word 文件草稿 —— 不需要排版或設計技巧。你可以用「再短一點」「多加一段」這類高層次回饋直接修改，也能在 Word 中繼續編修。它會依你原本的權限自動引用檔案、郵件、聊天與會議內容。由 Microsoft 直接安裝，會出現在 Copilot 的「工具」與左側 Agent 清單，需要 Microsoft 365 Copilot 授權；產出的檔案會存到你的 OneDrive。", "can": ["從一段描述生成完整的 Word 文件草稿", "用「再短一點」「加一節」等回饋直接改稿", "引用你有權限的檔案、郵件、會議內容充實內容", "完成的檔案自動存到 OneDrive，可直接用 Word 開啟續編"], "who": "要寫提案、報告、指南、公告等長文件，又不想從空白頁開始的人。", "prompts": ["幫我做一份 2 頁的專案提案，包含前言、問題描述、解決方案與時程。", "撰寫一份 5 頁的新人上手指南，涵蓋公司簡介、規章、職務訓練與常見問題，語氣親切好讀。", "用 Q3_sales.xlsx 的資料，整理成一份含圖表的摘要報告。"]}, "en": {"sub": "Word Agent", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "Describe the document you need — get a Word file back.", "lead": "Word Agent creates a full Word document from a plain description, with no formatting or design skills needed. Refine the draft with high-level feedback like “make it shorter” or “add a section”, or keep editing in Word. It pulls in your files, emails, chats and meetings under your existing permissions. Installed by Microsoft and shown in the Tools menu and agent list; a Microsoft 365 Copilot licence is required. Generated files are saved to your OneDrive.", "can": ["Generate a complete Word draft from one prompt", "Refine with high-level feedback such as “make it shorter”", "Ground the draft in files, emails and meetings you can already access", "Save the finished file to OneDrive and keep editing in Word"], "who": "Anyone writing proposals, reports, guides or announcements who would rather not start from a blank page.", "prompts": ["Create a 2-page project proposal with an introduction, problem statement, solution overview, and timeline.", "Draft a 5-page employee onboarding guide with company overview, policies, role-specific training and FAQs. Use a friendly, informative tone.", "Use data from Q3_sales.xlsx to create a summary report with charts."]}, "n": 2, "file": "MS-02", "prop": "doc"}, {"id": "excel-agent", "name": "Excel Agent", "color": "#1c7a4a", "icon": "grid", "status": "ga", "domain": "free", "url": "https://m365.cloud.microsoft/chat/?titleId=P_8d830dc1-9a14-1528-1182-c8e3be94cf5a", "docs": "https://support.microsoft.com/en-us/office/365-copilot-app/get-started-with-word-excel-and-powerpoint-agents-in-microsoft-365-copilot", "zh": {"sub": "試算表生成", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "用一句話描述，就生成一份可以直接用的活頁簿。", "lead": "Excel Agent 讓你不必打開 Excel，就能用自然語言建立活頁簿。描述你要什麼——預算追蹤表、專案計畫或財務模型——它就把結構搭好：建立分頁、整理資料，並寫好可以運作的公式，拿到就能開始用。", "can": ["用自然語言描述就建立活頁簿", "建立分頁並整理資料結構", "寫好可以直接運作的公式", "預算追蹤、專案計畫、財務模型都適用", "在 Excel 之外完成，不用從空白活頁簿開始"], "who": "常要做預算表、專案計畫或財務模型，但不想自己手刻結構與公式的人。", "prompts": ["建立一份預算追蹤表，每月一個分頁。", "幫我做一份專案計畫的活頁簿，包含時程與負責人。", "建立一個簡單的財務模型，含收入、成本與利潤試算。"]}, "en": {"sub": "Excel Agent", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "Create an Excel workbook using just your words.", "lead": "The Excel agent gives you a natural-language way of creating workbooks outside of Excel. Describe what you need — a budget tracker, a project plan or a financial model — and it builds the structure for you: it sets up the sheets, organises the data and creates working formulas so you can start working immediately.", "can": ["Create a workbook from a plain-language description", "Set up the sheets and organise the data", "Write working formulas, ready to use", "Budget trackers, project plans, financial models", "Done outside Excel — no blank workbook to start from"], "who": "Anyone building budgets, project plans or financial models who would rather skip the structure and formula work.", "prompts": ["Set up a budget tracker with a sheet for each month.", "Build me a project plan workbook with the timeline and owners.", "Create a simple financial model with revenue, costs and profit."]}, "n": 3, "file": "MS-03", "prop": "grid"}, {"id": "powerpoint-agent", "name": "PowerPoint Agent", "color": "#c43e1c", "icon": "slides", "status": "ga", "domain": "free", "url": "https://m365.cloud.microsoft/chat/?titleId=P_54c3f25e-3850-e1e6-231a-aa85fbe9447b", "docs": "https://support.microsoft.com/en-us/office/365-copilot-app/get-started-with-word-excel-and-powerpoint-agents-in-microsoft-365-copilot", "zh": {"sub": "簡報生成", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "說出主題與頁數，直接生成一份簡報。", "lead": "PowerPoint Agent 依你的描述產生整份簡報，含版面與設計，不必自己排版。生成後可以用「加一張投影片」「換個風格」這類回饋調整，也能在 PowerPoint 裡繼續修。它會自動引用你有權限的工作內容。由 Microsoft 直接安裝，會出現在 Copilot 的「工具」與左側 Agent 清單，需要 Microsoft 365 Copilot 授權；產出的檔案會存到你的 OneDrive。", "can": ["依主題與張數生成完整簡報", "用「加一張投影片」等回饋直接調整", "引用你有權限的檔案與資料充實內容", "完成的簡報存到 OneDrive，可用 PowerPoint 續編"], "who": "要在短時間內生出一份像樣的簡報，或缺少設計時間的人。", "prompts": ["做一份 10 頁的行銷策略簡報，風格現代簡潔。", "建立一份 10 張投影片的行銷策略簡報，包含前言、分析、建議與結論。", "把這份提案文件改成 8 頁的主管簡報，每頁重點不超過三行。"]}, "en": {"sub": "PowerPoint Agent", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "Name the topic and the length — get a deck.", "lead": "PowerPoint Agent builds a complete presentation from your description, layout and design included. Adjust it with feedback such as “add a slide”, or keep polishing in PowerPoint. It draws on the work content you already have access to. Installed by Microsoft and shown in the Tools menu and agent list; a Microsoft 365 Copilot licence is required. Generated files are saved to your OneDrive.", "can": ["Build a full deck from a topic and a slide count", "Adjust with feedback such as “add a slide”", "Ground slides in files and data you can already access", "Save to OneDrive and finish in PowerPoint"], "who": "Anyone who needs a presentable deck fast, or has no time for design.", "prompts": ["Build a 10-slide marketing strategy presentation with a modern design.", "Build a 10-slide marketing strategy deck with introduction, analysis, recommendations, and conclusion.", "Turn this proposal into an 8-slide executive deck, three bullets per slide maximum."]}, "n": 4, "file": "MS-04", "prop": "slides"}, {"id": "ai-learning-advisor", "name": "AI Learning Advisor", "color": "#9a423c", "icon": "compass", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_8c75de5c-bfa0-68eb-5528-89a1c35a90b7&source=agentCenterDialog", "docs": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-template-ai-learning-advisor", "zh": {"sub": "AI 學習顧問", "tagline": "教你用 Agent Builder、Copilot Studio 與 Power Platform，也幫你排錯。", "lead": "教你上手並排解 Microsoft 的 AI 與低程式碼技術，涵蓋 Microsoft 365 Copilot Agent Builder、Copilot Studio 與 Power Platform（Power Apps、Power Automate、AI Builder、Dataverse）。它用白話解釋概念、規劃個人化學習計畫、依情境推薦該用哪個工具、給出逐步的建置指引，並協助排解錯誤與行為異常的 Agent、主題或流程。內容以 Microsoft Learn 為依據；不處理授權、定價、法務或租戶專屬資料。", "can": ["用白話解釋 AI 與低程式碼概念", "規劃個人化的學習計畫", "依情境推薦該用哪個工具", "給出逐步的建置指引", "排解錯誤與行為異常的 Agent、主題或流程"], "who": "想導入 Copilot／Power Platform 但不知從何開始的人，以及要帶團隊上手的推廣者。", "prompts": ["我沒接觸過 Copilot Studio，幫我規劃四週的入門學習計畫。", "我建的 Agent 一直抓不到知識來源，幫我找出可能的原因。", "我想自動彙整週報，該用 Agent Builder、Copilot Studio 還是 Power Automate？"], "status": "Agent", "product": "Copilot Studio / Microsoft Learn"}, "en": {"tagline": "Teaches and troubleshoots Copilot Agent Builder, Copilot Studio and Power Platform.", "lead": "Teaches and troubleshoots Microsoft’s AI and low-code stack — Microsoft 365 Copilot Agent Builder, Copilot Studio and Power Platform (Power Apps, Power Automate, AI Builder, Dataverse). It explains concepts in plain language, builds personalised learning plans, recommends the right tool for the job, gives step-by-step build guides, and troubleshoots errors and misbehaving agents, topics and flows. Grounded in Microsoft Learn; it does not handle licensing, pricing, legal or tenant-specific data.", "can": ["Explain AI and low-code concepts plainly", "Build a personalised learning plan", "Recommend the right tool for the job", "Give step-by-step build guides", "Troubleshoot errors and misbehaving agents, topics and flows"], "who": "Anyone starting with Copilot or Power Platform, and those enabling a team.", "prompts": ["I’ve never used Copilot Studio — plan me a four-week path.", "My agent isn’t picking up its knowledge source — help me debug it.", "To automate a weekly report, should I use Agent Builder, Copilot Studio or Power Automate?"], "sub": "AI Learning Advisor", "status": "Agent", "product": "Copilot Studio / Microsoft Learn"}, "n": 5, "file": "MS-05", "domain": "grow", "stop": 0, "prop": "compass"}, {"id": "learning", "name": "Learning", "color": "#4c7637", "icon": "cap", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_ad3f22f7-c966-2226-0625-5498e4ef2f73&source=agentCenterDialog", "docs": "", "zh": {"sub": "學習", "tagline": "個人化的學習推薦與技能發展。", "lead": "提供個人化的學習推薦與技能發展建議，協助你依照自己的角色與目標持續累積能力。", "can": ["依你的角色推薦合適的學習內容", "協助規劃技能發展方向", "把學習與工作目標連結起來", "追蹤學習進度"], "who": "想持續進修的員工，以及負責規劃學習發展的人資與主管。", "prompts": ["依我的角色，推薦接下來三個月值得投入的學習主題。", "幫我把學習排進每週固定的節奏，並避開我的會議。", "我想強化資料分析能力，給我一條由淺到深的學習路徑。"], "status": "Agent", "product": "Microsoft Viva Learning"}, "en": {"tagline": "Personalised learning recommendations and skill growth.", "lead": "Offers personalised learning recommendations and skill development guidance, so you can keep building capability around your role and goals.", "can": ["Recommend learning suited to your role", "Help shape a skill development direction", "Connect learning to your work goals", "Track how you are progressing"], "who": "Employees investing in their own growth, plus HR and managers planning development.", "prompts": ["Given my role, what should I learn over the next three months?", "Fit my learning into a weekly rhythm that avoids my meetings.", "I want to strengthen data analysis — give me a path from the basics up."], "sub": "Learning", "status": "Agent", "product": "Microsoft Viva Learning"}, "n": 6, "file": "MS-06", "domain": "grow", "stop": 2, "prop": "book"}, {"id": "prompt-coach", "name": "Prompt Coach", "color": "#5a6fa8", "icon": "chat", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_f0ff38f1-4d81-a9b7-dbf1-b161328daa1f", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/agents-built-by-microsoft", "zh": {"sub": "提示教練", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "寫出提示，也把既有的提示改得更好。", "lead": "協助你寫出結構清楚、真正有效的提示。它既能依你的目標直接產生新的提示，也能分析你手上現有的提示，確認是否對得上目標；過程中會給你回饋、範例與可以直接動手的改進建議。設計上搭配 Microsoft 365 Copilot 使用。", "can": ["依你的目標直接產生新的提示", "分析既有提示，檢查是否對得上目標", "用範例說明好提示與不好提示的差別", "給出可以直接動手的改進建議"], "who": "剛開始用 Copilot、或覺得「AI 回答得不夠好」的人 —— 這是最好的第一站。", "prompts": ["我想請 Copilot 整理會議紀錄，但結果都太籠統，幫我改寫成更好的提示。", "教我一個寫提示的通用結構，並用我的工作情境示範一次。", "我要為季度回顧做一份摘要，直接幫我寫一個提示。"]}, "en": {"sub": "Prompt Coach", "status": "Agent", "product": "Microsoft 365 Copilot", "tagline": "Write and improve your prompts.", "lead": "Helps you craft well-structured, effective prompts. It both generates new prompts from your goal and analyses the ones you already have, checking they line up with what you want — offering feedback, examples and actionable suggestions along the way. Designed to work with Microsoft 365 Copilot.", "can": ["Generate a new prompt from your goal", "Analyse an existing prompt against what you want", "Show, with examples, what separates a weak prompt from a strong one", "Give actionable suggestions you can apply straight away"], "who": "Anyone new to Copilot, or anyone who feels the answers are not good enough yet.", "prompts": ["My meeting-notes prompts keep giving vague results — rewrite this into a better prompt.", "Teach me a general structure for writing prompts and demo it on my job.", "I need a summary for our quarterly review — write me the prompt."]}, "domain": "grow", "n": 7, "file": "MS-07", "prop": "star"}, {"id": "writing-coach", "name": "Writing Coach", "color": "#92497c", "icon": "pen", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_e3d64609-7a28-6de6-3093-402c20bb96ce&source=agentCenterDialog", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/agents-built-by-microsoft", "zh": {"sub": "寫作教練", "tagline": "給出具體回饋，把每一種寫作都寫得更好。", "lead": "專門提供詳細且有建設性回饋的寫作助理。不論是修一封 Email、寫一則故事，還是發展一份白皮書，都會一路陪你改到好，並說明為什麼這樣改更好。設計上搭配 Microsoft 365 Copilot 使用。", "can": ["針對任何寫作任務給出詳細回饋", "指出問題在哪裡，並說明可以怎麼改", "從 Email、故事到白皮書都適用", "一路陪你改到完成"], "who": "所有需要把文字寫好的人，從日常郵件到長篇文件。", "prompts": ["幫我看這封給客戶的信：語氣恰當嗎？哪裡可以更精簡？", "這段內容太冗長，幫我改寫成更精簡的版本。", "我在寫一份白皮書，幫我看開頭這一段的結構夠不夠清楚。"], "status": "Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Detailed feedback that lifts any piece of writing.", "lead": "An expert assistant dedicated to detailed, constructive feedback. Whether you are refining an email, crafting a story or developing a whitepaper, it guides you every step of the way and explains why each change is an improvement. Designed to work with Microsoft 365 Copilot.", "can": ["Give detailed feedback on any writing task", "Point out what is not working, and how to fix it", "Works for email, stories and whitepapers alike", "Guides you step by step to the finished piece"], "who": "Anyone whose writing needs to land — from everyday email to long-form documents.", "prompts": ["Review this customer email — right tone? Where can it be tighter?", "This passage is too long — rewrite it more concisely.", "I am drafting a whitepaper — is the structure of this opening clear enough?"], "sub": "Writing Coach", "status": "Agent", "product": "Microsoft 365 Copilot"}, "n": 8, "file": "MS-08", "domain": "grow", "stop": 1, "prop": "pen"}, {"id": "career-coach", "name": "Career Coach", "color": "#92495f", "icon": "path", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_fcaaab0f-7062-e237-7557-77b846a22444&source=agentCenterDialog", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/agents-built-by-microsoft", "zh": {"sub": "職涯教練", "tagline": "在現在的角色上持續進步，把技能落差補起來。", "lead": "陪你走過職涯的每一步：想在現在的角色上更進一步、想探索新的可能，或想補起技能落差，都能依你自己的經歷與路徑，給出個人化且可以立刻執行的建議。設計上搭配 Microsoft 365 Copilot 使用。", "can": ["找出技能落差並排出補強順序", "給出可以立刻執行的具體建議", "規劃在現有角色上進一步的做法", "依你的經歷量身調整，不給通則"], "who": "想把現在的工作做得更好、或想有系統地補強技能的工作者。", "prompts": ["依我現在的角色，列出我最該補強的技能並排優先順序。", "我想在一年內承擔更大的專案責任，我還缺什麼？", "我要跟主管談發展方向，幫我準備談話重點。"], "status": "Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Grow in the role you are in, and close your skill gaps.", "lead": "Guides you through every step of your professional journey — advancing in your current role, exploring new opportunities, or bridging skill gaps — with personalised, actionable advice tailored to your own path. Designed to work with Microsoft 365 Copilot.", "can": ["Spot skill gaps and put them in order", "Give advice you can act on immediately", "Map how to go further in your current role", "Tailored to your path, not generic guidance"], "who": "Anyone who wants to do their current job better, or close skill gaps methodically.", "prompts": ["For the role I am in now, rank the skills I should strengthen first.", "I want to take on bigger project responsibility within a year — what am I missing?", "I am talking to my manager about my development — help me prepare."], "sub": "Career Coach", "status": "Agent", "product": "Microsoft 365 Copilot"}, "n": 9, "file": "MS-09", "domain": "grow", "stop": 2, "prop": "ladder"}, {"id": "sme-finder", "name": "SME Finder", "color": "#9a683c", "icon": "search", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_a8f2ed7d-faf1-5ad5-e4bc-dbd09bf80ed8&source=agentCenterDialog", "docs": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-template-sme-finder", "zh": {"sub": "專家搜尋", "tagline": "找出公司裡最可信的內部專家，並附上佐證。", "lead": "針對任何主題、產品、流程或客戶，找出公司裡最可信的內部專家。它會給出首選人選與備選，並附上來自 SharePoint、Teams、Outlook、行事曆與組織資料的佐證，還附一封可以直接寄出的 Email 或 Teams 訊息。也能找出非主管職的隱藏高手、辨識應用程式或網站的擁有者、比較兩位專家該先找誰、擬定會前談話重點，以及尋找導師。不處理人資、法務、併購與薪酬相關問題。", "can": ["給出首選與備選專家，並附上佐證", "佐證來自 SharePoint、Teams、Outlook、行事曆與組織資料", "找出非主管職的隱藏高手", "辨識應用程式或網站的擁有者", "比較兩位專家，決定先找誰", "擬好可直接寄出的 Email 或 Teams 訊息", "整理會前談話重點，也能協助尋找導師", "不處理人資、法務、併購與薪酬"], "who": "新進人員、跨部門合作者，以及在大組織裡找不到人問的每一個人。", "prompts": ["公司裡誰最懂這個產品的技術架構？請附上判斷依據。", "這個應用程式現在是誰在負責？", "這兩位專家我該先找誰？"], "status": "Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Find the most credible experts inside your company.", "lead": "Finds the most credible subject matter expert in your company for any topic, product, process or customer. It returns a top pick plus a backup, with cited evidence from SharePoint, Microsoft Teams, Outlook, Calendar and org data, along with an email or Teams message ready to send. It also surfaces hidden-gem experts outside leadership, identifies who owns an app or site, compares two experts so you know who to approach first, drafts pre-meeting talking points, and finds mentors. It does not handle HR, legal, M&A or compensation.", "can": ["Return a top pick and a backup, with cited evidence", "Evidence drawn from SharePoint, Teams, Outlook, Calendar and org data", "Surface hidden-gem experts outside leadership", "Identify who owns an app or a site", "Compare two experts so you know who to approach first", "Draft an email or Teams message ready to send", "Prepare pre-meeting talking points, and find mentors", "Does not handle HR, legal, M&A or compensation"], "who": "New joiners, cross-team collaborators and anyone lost in a large org.", "prompts": ["Who knows this product’s architecture best? Show me the evidence.", "Who owns this app now?", "Which of these two experts should I approach first?"], "sub": "SME Finder", "status": "Agent", "product": "Microsoft 365 Copilot"}, "n": 10, "file": "MS-10", "domain": "grow", "stop": 1, "prop": "people"}, {"id": "researcher", "name": "Researcher", "color": "#3e368c", "icon": "book", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_552e6eda-fc18-7fb9-0ef6-1bf2de3393e4", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/get-started-with-researcher-in-microsoft-365-copilot", "zh": {"sub": "研究工具", "tagline": "深度推理你的工作內容與網路資料，形成觀點並提出洞察。", "lead": "Researcher 以深度推理能力，通盤解讀你有權限的工作內容（檔案、郵件、會議、聊天）與網路上的資料，理解、推論之後形成觀點並提出洞察，而不只是把資料整理起來，等於讓每一位員工隨時都有專家級的分析可用。結論會標註引用來源，完成的研究報告還能直接輸出成 Word、PowerPoint、PDF、資訊圖表或語音。", "can": ["對複雜主題做多步驟的深度推理", "同時解讀你的工作內容與網路資料", "不只彙整，會形成明確的觀點與洞察", "結論附上引用來源", "報告可輸出成 Word、PowerPoint、PDF、資訊圖表或語音"], "who": "需要做市場研究、競品分析、提案前置作業與產業趨勢彙整的人。", "prompts": ["根據目前所有文件與會議紀錄，建立客戶 A 的 Account Plan，並補充最新市場資訊與競爭者動態。", "把剛剛的研究結果做成一份 PowerPoint，重點放在給主管看的結論。", "比較這兩個解決方案的優缺點，做成資訊圖表並標註每項結論的來源。"], "status": "推理型 Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Deep reasoning across your work and the web, with a point of view.", "lead": "Researcher uses deep reasoning to parse the entirety of your work context — files, email, meetings and chats — along with the web, then reasons through it to form a point of view and offer insights rather than simply summarising, putting expertise on demand in every employee's hands. Conclusions are cited, and the finished report can be delivered as a Word document, a PowerPoint deck, a PDF, an infographic or audio.", "can": ["Reason through complex topics in multiple steps", "Draw on both your work context and the web", "Goes beyond summarising — it forms a view and offers insight", "Cites the source behind each conclusion", "Delivers as Word, PowerPoint, PDF, an infographic or audio"], "who": "Anyone doing market research, competitive analysis or pre-sales preparation.", "prompts": ["Build an account plan for Customer A from all our existing documents and meeting notes, and add the latest market intelligence and competitor moves.", "Turn that research into a PowerPoint deck aimed at an executive audience.", "Compare these two solutions as an infographic, citing the source behind each point."], "sub": "Researcher", "status": "Reasoning agent", "product": "Microsoft 365 Copilot"}, "n": 11, "file": "MS-11", "domain": "insight", "stop": 3, "prop": "report"}, {"id": "analyst", "name": "Analyst", "color": "#6d4992", "icon": "chart", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_8cfc4e6f-267e-db15-c6e7-3fc47a54f61e", "docs": "https://support.microsoft.com/en-us/Microsoft-365-Copilot/get-started-with-analyst-in-microsoft-365-copilot", "zh": {"sub": "資料分析師", "tagline": "用問的就能分析資料，不必是資料分析師。", "lead": "Analyst 能對各種格式的檔案執行複雜、多步驟的資料分析與程式碼執行。你不必翻遍上千列資料，也不必把 Excel、CSV、資料庫等多個檔案手動整併；只要用白話問一個問題，它就會計算統計、找出趨勢與異常值，並回覆一份易讀的報告，可以包含圖表與表格。", "can": ["對各種格式的檔案做複雜、多步驟的分析", "執行程式碼處理任意資料集", "一次整併多個 Excel、CSV 與資料庫檔案", "計算統計、找出趨勢與異常值", "回覆易讀的報告，可含圖表與表格", "用白話問就好，不必懂分析方法"], "who": "手上有一堆資料檔、但沒時間也不想自己跑分析的人。", "prompts": ["比較各區域與各季的銷售資料，並指出主要趨勢。", "依客戶互動指標，找出表現最好的產品或服務。", "這幾個檔案幫我合起來看，有沒有明顯的異常值？"], "status": "推理型 Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Ask a question about your data — no analyst required.", "lead": "Analyst performs complex, multi-step data analysis and code execution over arbitrary datasets. You do not have to comb through thousands of rows, or consolidate Excel spreadsheets, CSV files and databases yourself — just ask a simple question and it calculates statistics, identifies trends and shows outliers, then returns a report in easy-to-read language that can include charts and tables.", "can": ["Complex, multi-step analysis over files in many formats", "Executes code across arbitrary datasets", "Consolidates multiple Excel, CSV and database files at once", "Calculates statistics, identifies trends and shows outliers", "Returns an easy-to-read report with charts and tables", "Ask in plain language — no analyst skills needed"], "who": "Anyone sitting on data files with no time, or no wish, to run the analysis themselves.", "prompts": ["Compare sales data by region and quarter and highlight key trends.", "Identify top-performing products or services based on customer engagement metrics.", "Consolidate these files and show me any clear outliers."], "sub": "Analyst", "status": "Reasoning agent", "product": "Microsoft 365 Copilot"}, "n": 12, "file": "MS-12", "domain": "insight", "stop": 2, "prop": "chart"}, {"id": "surveys", "name": "Surveys", "color": "#37766f", "icon": "poll", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_a64931a6-8080-b1e7-e057-8e775a24ed66&source=agentCenterDialog", "docs": "", "zh": {"sub": "問卷調查", "tagline": "從建立、發放到分析，一條龍處理問卷。", "lead": "Forms Agent 與 Microsoft Forms 及 Copilot 聊天搭配使用，把問卷流程從建立、發放到分析一路串起來。建立：描述一次就生成完整問卷，可以在聊天旁邊直接編輯，也可以轉到 Microsoft Forms 繼續。發放：透過 Email、Teams、QR code 或連結分享，並協助擬邀請文字、建議回收進度的檢查點。分析：彙整重點發現、指出趨勢與異常，並提出可以執行的後續建議。", "can": ["描述一次就生成完整問卷", "在聊天旁邊編輯，或轉到 Microsoft Forms 繼續", "建議改進、調整設定並直接套用", "以 Email、Teams、QR code 或連結發放", "協助擬邀請文字，並建議回收檢查點", "彙整重點、指出趨勢與異常", "提出可以執行的後續建議"], "who": "要做員工調查、活動回饋、客戶滿意度調查的人。", "prompts": ["幫我設計一份員工滿意度問卷，10 題以內，涵蓋工作、團隊與發展。", "這份問卷的結果有什麼值得注意的趨勢或異常？", "幫我把這份問卷發出去，並擬一段邀請文字。"], "status": "Agent", "product": "Microsoft Forms"}, "en": {"tagline": "Form creation, distribution and analysis, automated.", "lead": "Forms Agent works with Microsoft Forms and Microsoft 365 Copilot chat, streamlining the process end to end. Create: describe what you need and get a complete form in one step, editable side by side with your chat or in Microsoft Forms. Distribute: share by email, Microsoft Teams, QR code or a direct link, with help composing the invitation and checkpoints to keep collection on track. Analyze: it summarises key findings, surfaces trends and anomalies, and recommends actionable takeaways.", "can": ["Generate a complete form in one step", "Edit side by side with chat, or continue in Microsoft Forms", "Suggest improvements, adjust settings and apply changes", "Share by email, Teams, QR code or a direct link", "Compose invitations and suggest collection checkpoints", "Summarise key findings, trends and anomalies", "Recommend actionable takeaways"], "who": "Anyone running employee surveys, event feedback or satisfaction studies.", "prompts": ["Design an employee satisfaction survey, under 10 questions, covering work, team and growth.", "What trends or anomalies stand out in these responses?", "Share this form for me and draft the invitation."], "sub": "Surveys", "status": "Agent", "product": "Microsoft Forms"}, "n": 13, "file": "MS-13", "domain": "insight", "stop": 1, "prop": "poll"}, {"id": "workforce-insights-frontier", "name": "Workforce Insights", "color": "#377656", "icon": "pulse", "status": "frontier", "url": "https://m365.cloud.microsoft/chat/?titleId=P_cee13b52-3ca2-f561-866d-5f91fdbf6689&source=agentCenterDialog", "docs": "", "zh": {"sub": "人力洞察", "tagline": "即時掌握組織的人員、結構與技能。", "lead": "為主管與其代理人提供組織的即時全貌，可依角色、年資、地點、職能等屬性檢視，讓人力決策更快也更有依據。不論是規劃組織調整、追蹤招募趨勢，或找出改善組織體質的機會，只要問一句就能得到洞察。資料來自你租戶內的人員與組織資料；若已連接 Workday、SAP SuccessFactors 等 HCM 系統（透過 Microsoft 365 的 Organizational Data Ingestion 服務），可取得更完整可靠的屬性；若租戶只有 Entra ID 這類身分資料，洞察範圍與品質會受限。設計上符合 Microsoft 的隱私與治理標準。", "can": ["依角色、年資、地點、職能等屬性檢視組織", "規劃組織調整時先看清現況結構", "追蹤招募趨勢", "找出可以改善組織體質的地方", "問一句話就得到洞察", "連接 Workday、SAP SuccessFactors 等 HCM 系統可取得更完整的屬性", "僅有身分資料（如 Entra ID）時，洞察範圍與品質會受限"], "who": "主管，以及獲授權代表主管查看的人。", "prompts": ["依角色與年資，我的組織目前的人力分布如何？", "過去半年的招募趨勢如何？哪些職能成長最快？", "如果要做組織調整，目前結構上有哪些問題？"], "status": "Frontier 計畫 Agent", "product": "Viva Insights"}, "en": {"tagline": "Real-time insight into your people, structure and skills.", "lead": "Gives leaders and their delegates a real-time, comprehensive view of their organisation — across role, tenure, location, function and other attributes — for faster, better-informed workforce decisions. Whether you are planning a reorg, monitoring hiring trends or looking for ways to improve org hygiene, the insight comes from a single question. It draws on the people and organisational data in your Microsoft 365 tenant; with a connected HCM system such as Workday or SAP SuccessFactors, powered through Organizational Data Ingestion, the attributes are richer and more reliable. If your tenant has only identity data such as Entra ID, available insights may be limited or vary in quality. Built to align with Microsoft's privacy and governance standards.", "can": ["View the organisation by role, tenure, location and function", "See the current structure clearly before planning a reorg", "Monitor hiring trends", "Spot opportunities to improve org hygiene", "Surface the insight from a single question", "Richer attributes when Workday or SAP SuccessFactors is connected", "Limited or variable quality on identity data alone"], "who": "Leaders, and the delegates authorised to look on their behalf.", "prompts": ["What does my organisation look like by role and tenure?", "What are the hiring trends over the last six months, and which functions grew fastest?", "If we reorganise, what structural issues should I know about first?"], "sub": "Workforce Insights", "status": "Frontier program agent", "product": "Viva Insights"}, "n": 14, "file": "MS-14", "domain": "insight", "stop": 0, "prop": "network"}, {"id": "plan-my-day", "name": "Plan My Day", "color": "#8c8031", "icon": "sunrise", "status": "preview", "url": "https://m365.cloud.microsoft/chat/?titleId=P_ba30b62a-2a65-5db1-5925-b1889ad225f8&source=agentCenterDialog", "docs": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-template-plan-my-day", "zh": {"sub": "每日規劃", "tagline": "整理今天的會議、待辦、郵件與優先順序。", "lead": "把今天的會議、待辦事項與郵件整理成一份晨間簡報，並標出真正的優先順序，讓每天都能在資訊充分、準備妥當的狀態下開始。", "can": ["彙整今日會議、待辦與待回覆郵件", "標出今天真正的優先事項", "提醒需要提前準備的行程", "讓一天的開始有明確方向"], "who": "每天早上被行程與訊息淹沒、想先抓重點的人。", "prompts": ["幫我做今天的晨間簡報：重要會議、待回覆的事、三個優先。", "今天行程很滿，哪些會議是我可以不用參加的？", "明天有沒有需要提前準備的會議？"], "status": "Agent", "product": "Microsoft 365 Copilot"}, "en": {"tagline": "Today’s meetings, tasks, mail and priorities — sorted.", "lead": "Compiles today’s meetings, tasks and email into a morning briefing and surfaces what actually matters, so you start the day informed and prepared.", "can": ["Pull together meetings, tasks and replies owed", "Surface the real priorities for today", "Flag anything needing advance preparation", "Give the day a clear direction"], "who": "Anyone whose morning starts buried in invites and messages.", "prompts": ["Give me today’s brief: key meetings, replies owed, top three priorities.", "My day is packed — which meetings could I skip?", "Anything tomorrow I should prepare for in advance?"], "sub": "Plan My Day", "status": "Agent", "product": "Microsoft 365 Copilot"}, "n": 15, "file": "MS-15", "domain": "work", "stop": 0, "prop": "clock"}, {"id": "planner-agent", "name": "Planner Agent", "color": "#37763c", "icon": "board", "status": "ga", "url": "https://m365.cloud.microsoft/chat/?titleId=P_b2f25cb5-1ccd-b7ed-8a74-35d2b43e0130&source=agentCenterDialog", "docs": "", "zh": {"sub": "專案規劃", "tagline": "管理專案、追蹤任務、規劃工作。", "lead": "協助管理專案、追蹤任務進度並規劃工作安排，讓專案的推進狀況一目了然。", "can": ["建立與整理專案任務", "追蹤任務進度與負責人", "協助安排工作順序與時程", "掌握專案整體狀況"], "who": "專案經理、團隊負責人與需要管理多線任務的人。", "prompts": ["幫我把這個專案拆成任務，並排出先後順序。", "目前有哪些任務逾期或沒有負責人？", "依團隊目前的可用時間，幫我重排這個專案的時程。"], "status": "Agent", "product": "Microsoft Planner"}, "en": {"tagline": "Manage projects, track tasks, plan the work.", "lead": "Helps manage projects, track task progress and plan work, so the state of a project is visible at a glance.", "can": ["Create and organise project tasks", "Track progress and owners", "Sequence work and set timelines", "See the overall project picture"], "who": "Project managers, team leads and anyone juggling several workstreams.", "prompts": ["Break this project into tasks and put them in order.", "Which tasks are overdue or have no owner?", "Reschedule this project around the team’s available time."], "sub": "Planner Agent", "status": "Agent", "product": "Microsoft Planner"}, "n": 16, "file": "MS-16", "domain": "work", "stop": 2, "prop": "board"}, {"id": "workflows-frontier", "name": "Workflows", "color": "#738c31", "icon": "flow", "status": "frontier", "url": "https://m365.cloud.microsoft/chat/?titleId=P_91fe45e4-9413-b0e6-dad9-c855b4952367&source=agentCenterDialog", "docs": "", "zh": {"sub": "工作流程", "tagline": "用自然語言，建立 Workflow 與自動化。", "lead": "讓你用自然語言描述需求，就能建立工作流程與自動化，不需要從頭設定每一個步驟。屬於 Frontier 計畫的功能，仍在持續演進中。", "can": ["用自然語言描述就能建立流程", "把重複性的工作自動化", "協助調整既有流程", "降低建立自動化的門檻"], "who": "想把重複作業自動化，但不想寫程式或設定複雜流程的人。", "prompts": ["每週一早上把上週的專案進度整理成郵件寄給團隊。", "有人在這個清單新增項目時，通知負責人並建立待辦。", "幫我檢視這個流程，有沒有可以優化的地方？"], "status": "Frontier 計畫 Agent", "product": "Copilot Studio"}, "en": {"tagline": "Build workflows and automation in natural language.", "lead": "Describe what you want in natural language and have the workflow or automation built for you, without configuring every step by hand. Part of the Frontier program, so it is still evolving.", "can": ["Build a flow from a plain-language description", "Automate repetitive work", "Adjust an existing flow", "Lower the barrier to automation"], "who": "Anyone who wants to automate repetitive work without building it by hand.", "prompts": ["Every Monday morning, email the team last week’s project progress.", "When someone adds an item to this list, notify the owner and create a task.", "Review this flow — is there anything worth optimising?"], "sub": "Workflows", "status": "Frontier program agent", "product": "Copilot Studio"}, "n": 17, "file": "MS-17", "domain": "work", "stop": 1, "prop": "gear"}, {"id": "sharepoint-list-agent", "name": "SharePoint List Agent", "color": "#36518c", "icon": "list", "status": "frontier", "url": "https://m365.cloud.microsoft/chat/?titleId=P_d57d4da7-846d-b18b-1845-90ea5921bed8&source=agentCenterDialog", "docs": "", "zh": {"sub": "SharePoint 清單", "tagline": "把 Copilot 的對話與表格，直接建立成 SharePoint 清單。", "lead": "讓建立清單變得簡單：你可以用多輪自然語言對話建立新的清單，它也會自動把 Copilot 產生的結構化內容（例如表格）轉成 SharePoint 清單。建立時可以選擇存到 SharePoint 網站或個人的 OneDrive for Business；內容可同時取自企業資料與網路資料。屬於 Frontier 計畫的功能，仍在持續演進中。", "can": ["用多輪自然語言對話建立新的清單", "把 Copilot 產生的表格等結構化內容轉成清單", "選擇存到 SharePoint 網站或個人 OneDrive for Business", "結合企業資料與網路資料建立清單"], "who": "要把討論結果或整理好的資料，快速變成一份可管理清單的團隊。", "prompts": ["把剛剛整理的那張表格，建立成一份 SharePoint 清單。", "幫我建一份追蹤清單，欄位包含項目、負責人、狀態與到期日。", "這份清單存到我的 OneDrive，不要放在小組網站。"], "status": "Frontier 計畫 Agent", "product": "SharePoint Online"}, "en": {"tagline": "Turn Copilot chat context into a SharePoint list.", "lead": "Makes list creation effortless: build a new list through multi-turn natural language conversation, and let it convert the structured content Copilot produces — tables, for example — straight into a SharePoint list. Choose whether to save to a SharePoint site or your personal OneDrive for Business, and draw on both enterprise and web data. Part of the Frontier program, so it is still evolving.", "can": ["Create a new list through multi-turn conversation", "Convert structured Copilot content such as tables into a list", "Save to a SharePoint site or your personal OneDrive for Business", "Build lists from both enterprise and web data"], "who": "Teams who need a discussion, or a pile of data, to become a manageable list.", "prompts": ["Turn the table we just built into a SharePoint list.", "Create a tracking list with item, owner, status and due date columns.", "Save this list to my OneDrive rather than the team site."], "sub": "SharePoint List Agent", "status": "Frontier program agent", "product": "SharePoint Online"}, "n": 18, "file": "MS-18", "domain": "work", "stop": 4, "prop": "list"}, {"id": "frontline-agent", "name": "Frontline Agent", "color": "#36738c", "icon": "helmet", "status": "preview", "url": "https://m365.cloud.microsoft/chat/?titleId=P_720226f2-da2b-b5c6-c0b9-4ff3405ad25e&source=agentCenterDialog", "docs": "", "zh": {"sub": "第一線人員助理", "tagline": "快速取得答案、找到檔案，掌握最新消息。", "lead": "為第一線工作者設計的助理，協助快速取得答案、找到重要檔案並掌握最新消息。適用於零售、製造、醫療與現場服務等步調快速的環境。查詢範圍僅限於你本身有權限的 SharePoint 網站、聊天與頻道。", "can": ["快速回答工作上的問題", "找出需要的檔案與文件", "掌握最新的公告與異動", "僅使用你有權限的 SharePoint 網站、聊天與頻道"], "who": "零售、製造、醫療與現場服務等第一線工作人員與現場主管。", "prompts": ["這台設備出現 E-42 錯誤代碼，標準處理流程是什麼？", "這週我這邊有什麼新的公告或異動？", "幫我找這份作業程序的最新版本。"], "status": "Agent", "product": "Microsoft 365 Frontline"}, "en": {"tagline": "Quick answers, the right files, and what has changed.", "lead": "A simple assistant for frontline workers: quick answers, the files that matter, and the latest updates. Built for fast-paced settings such as retail, manufacturing, healthcare and field services. It draws only on the SharePoint sites, chats and channels you already have access to.", "can": ["Answer on-the-job questions quickly", "Find the files and documents you need", "Keep up with announcements and changes", "Stays within the SharePoint sites, chats and channels you can access"], "who": "Frontline staff and supervisors in retail, manufacturing, healthcare and field services.", "prompts": ["This machine is showing error E-42 — what is the standard procedure?", "What is new for my site this week?", "Find me the latest version of this work instruction."], "sub": "Frontline Agent", "status": "Agent", "product": "Microsoft 365 Frontline"}, "n": 20, "file": "MS-20", "domain": "work", "stop": 3, "prop": "helmet"}];
-/* Word, Excel and PowerPoint Agents require Microsoft 365, but not necessarily
-  the additional Microsoft 365 Copilot licence. Available sources differ. */
+AGENTS=AGENTS.filter(function(agent){
+  return agent.id!=="surveys" && agent.id!=="frontline-agent" && agent.id!=="workforce-insights-frontier";
+});
+
+/* July 2026 ABS overview: prefer its Learn article, or its Blog when no Learn
+   article is listed, for the station's official-document button. */
+var OFFICIAL_DOCS={
+  "idea-coach":"https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/agent-template-idea-coach",
+  "word-agent":"https://learn.microsoft.com/en-us/copilot/microsoft-365/wordexcelppt-agents",
+  "excel-agent":"https://learn.microsoft.com/en-us/copilot/microsoft-365/wordexcelppt-agents",
+  "powerpoint-agent":"https://learn.microsoft.com/en-us/copilot/microsoft-365/wordexcelppt-agents",
+  "ai-learning-advisor":"https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-template-ai-learning-advisor",
+  "learning":"https://learn.microsoft.com/en-us/viva/learning/learning-agent-overview",
+  "prompt-coach":"https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/agent-template-prompt-coach",
+  "writing-coach":"https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/agent-template-writing-coach",
+  "career-coach":"https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/agent-template-career-coach",
+  "researcher":"https://www.microsoft.com/microsoft-365/blog/2025/03/25/introducing-researcher-and-analyst-in-microsoft-365-copilot/",
+  "analyst":"https://www.microsoft.com/microsoft-365/blog/2025/03/25/introducing-researcher-and-analyst-in-microsoft-365-copilot/",
+  "plan-my-day":"https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-template-plan-my-day",
+  "planner-agent":"https://techcommunity.microsoft.com/blog/plannerblog/planner-agent-brings-work-management-directly-into-microsoft-365-copilot/4511720?previewMessage=true",
+  "workflows-frontier":"https://www.microsoft.com/en-us/microsoft-365/blog/2025/10/28/microsoft-365-copilot-now-enables-you-to-build-apps-and-workflows/"
+};
+AGENTS.forEach(function(agent){
+  if(OFFICIAL_DOCS[agent.id]) agent.docs=OFFICIAL_DOCS[agent.id];
+});
+var IDEA_AGENT=AGENTS.filter(function(agent){ return agent.id==="idea-coach" })[0];
+IDEA_AGENT.name="Ideas Coach";
+IDEA_AGENT.en.sub="Ideas Coach";
+
+/* Word, Excel and PowerPoint Agents require Microsoft 365 Copilot, and the
+   tenant must have Anthropic enabled. */
 var WORD_AGENT=AGENTS.filter(function(agent){ return agent.id==="word-agent" })[0];
-WORD_AGENT.zh.lead="Word Agent 讓你用自然語言描述需求，就生成有標題、段落與專業格式的 Word 文件草稿。你可以用「再短一點」「多加一段」等高層次回饋修改，也能在 Word 中繼續編修。需要 Microsoft 365 Copilot 授權，並可依原有權限使用檔案、郵件、聊天與會議等工作內容。檔案會存到 OneDrive，分享前仍應檢查內容。";
-WORD_AGENT.zh.can=["從描述生成有結構與專業格式的 Word 草稿","用高層次回饋修改，或在 Word 繼續編修","使用你有權限的檔案、郵件、聊天與會議等工作內容","檔案存到 OneDrive，分享前應檢查內容"];
-WORD_AGENT.en.lead="Word Agent turns a natural-language description into a structured, professionally formatted Word draft. Refine it with high-level feedback or continue in Word. A Microsoft 365 Copilot licence is required, and it can use permitted work content such as files, email, chats and meetings. Files are saved to OneDrive and should be reviewed before sharing.";
-WORD_AGENT.en.can=["Generate a structured, professionally formatted Word draft","Refine with high-level feedback or continue in Word","Use permitted files, email, chats and meetings","Save to OneDrive and review before sharing"];
+WORD_AGENT.zh.sub="文件專家";
+WORD_AGENT.zh.lead="Word Agent 讓你用自然語言描述需求，就生成有標題、段落與專業格式的 Word 文件草稿。你可以用「再短一點」「多加一段」等高層次回饋修改，也能在 Word 中繼續編修。需要 Microsoft 365 Copilot 授權，且租戶必須啟用 Anthropic；它可依原有權限使用檔案、郵件、聊天與會議等工作內容。檔案會存到 OneDrive，分享前仍應檢查內容。";
+WORD_AGENT.zh.can=["從描述生成有結構與專業格式的 Word 草稿","用高層次回饋修改，或在 Word 繼續編修","使用你有權限的檔案、郵件、聊天與會議等工作內容","需要 Microsoft 365 Copilot，且租戶必須啟用 Anthropic","檔案存到 OneDrive，分享前應檢查內容"];
+WORD_AGENT.en.lead="Word Agent turns a natural-language description into a structured, professionally formatted Word draft. Refine it with high-level feedback or continue in Word. A Microsoft 365 Copilot licence is required, and Anthropic must be enabled for the tenant. It can use permitted work content such as files, email, chats and meetings. Files are saved to OneDrive and should be reviewed before sharing.";
+WORD_AGENT.en.can=["Generate a structured, professionally formatted Word draft","Refine with high-level feedback or continue in Word","Use permitted files, email, chats and meetings","Require Microsoft 365 Copilot and Anthropic enabled for the tenant","Save to OneDrive and review before sharing"];
 
 var POWERPOINT_AGENT=AGENTS.filter(function(agent){ return agent.id==="powerpoint-agent" })[0];
-POWERPOINT_AGENT.zh.lead="PowerPoint Agent 依你的主題或目標產生整份簡報，包含投影片、版面與設計主題。你可以用「加一張投影片」等高層次回饋調整，也能在 PowerPoint 中繼續編修。需要 Microsoft 365 Copilot 授權，並可依原有權限使用工作內容。簡報會存到 OneDrive，使用前仍應檢查內容。";
-POWERPOINT_AGENT.zh.can=["依主題、目標與張數生成完整簡報","建立投影片版面與設計主題","用高層次回饋調整，或在 PowerPoint 繼續編修","使用你有權限的工作內容","存到 OneDrive，使用前應檢查內容"];
-POWERPOINT_AGENT.en.lead="PowerPoint Agent builds a complete presentation from your topic or goals, including slides, layouts and design themes. Refine it with high-level feedback or continue in PowerPoint. A Microsoft 365 Copilot licence is required, and it can use permitted work content. Presentations are saved to OneDrive and should be reviewed before use.";
-POWERPOINT_AGENT.en.can=["Build a complete deck from a topic, goal and slide count","Create slide layouts and a design theme","Refine with high-level feedback or continue in PowerPoint","Use permitted work content","Save to OneDrive and review before use"];
+POWERPOINT_AGENT.zh.sub="簡報專家";
+POWERPOINT_AGENT.zh.lead="PowerPoint Agent 依你的主題或目標產生整份簡報，包含投影片、版面與設計主題。你可以用「加一張投影片」等高層次回饋調整，也能在 PowerPoint 中繼續編修。需要 Microsoft 365 Copilot 授權，且租戶必須啟用 Anthropic；它可依原有權限使用工作內容。簡報會存到 OneDrive，使用前仍應檢查內容。";
+POWERPOINT_AGENT.zh.can=["依主題、目標與張數生成完整簡報","建立投影片版面與設計主題","用高層次回饋調整，或在 PowerPoint 繼續編修","需要 Microsoft 365 Copilot，且租戶必須啟用 Anthropic","使用你有權限的工作內容","存到 OneDrive，使用前應檢查內容"];
+POWERPOINT_AGENT.en.lead="PowerPoint Agent builds a complete presentation from your topic or goals, including slides, layouts and design themes. Refine it with high-level feedback or continue in PowerPoint. A Microsoft 365 Copilot licence is required, and Anthropic must be enabled for the tenant. It can use permitted work content. Presentations are saved to OneDrive and should be reviewed before use.";
+POWERPOINT_AGENT.en.can=["Build a complete deck from a topic, goal and slide count","Create slide layouts and a design theme","Refine with high-level feedback or continue in PowerPoint","Require Microsoft 365 Copilot and Anthropic enabled for the tenant","Use permitted work content","Save to OneDrive and review before use"];
 
 var EXCEL_AGENT=AGENTS.filter(function(agent){ return agent.id==="excel-agent" })[0];
+EXCEL_AGENT.zh.sub="試算專家";
 EXCEL_AGENT.zh.tagline="用一句話描述，就生成含分頁、公式與圖表的活頁簿。";
-EXCEL_AGENT.zh.lead="Excel Agent 讓你在 Copilot Chat 用自然語言建立活頁簿。描述預算追蹤表、專案計畫或財務模型等需求，它就能建立分頁、整理資料，加入可運作的公式與圖表。需要 Microsoft 365 Copilot 授權，並可依原有權限使用工作內容。檔案會存到 OneDrive，分享前仍應檢查內容。";
-EXCEL_AGENT.zh.can=["用自然語言描述就建立活頁簿","建立分頁並整理資料結構","加入可運作的公式與圖表","用高層次回饋修改，或在 Excel 繼續編修","存到 OneDrive，並使用你有權限的工作內容"];
+EXCEL_AGENT.zh.lead="Excel Agent 讓你在 Copilot Chat 用自然語言建立與分析活頁簿，能產生公式與摘要，並以反覆推理完成多步驟資料工作。需要 Microsoft 365 Copilot 授權，且租戶必須啟用 Anthropic；它可依原有權限使用工作內容。檔案會存到 OneDrive，分享前仍應檢查內容。";
+EXCEL_AGENT.zh.can=["用自然語言建立與分析活頁簿","產生公式與摘要","以反覆推理完成多步驟資料工作","需要 Microsoft 365 Copilot，且租戶必須啟用 Anthropic","存到 OneDrive，並使用你有權限的工作內容"];
 EXCEL_AGENT.en.tagline="Describe it and get a workbook with sheets, formulas and charts.";
-EXCEL_AGENT.en.lead="Excel Agent creates workbooks from natural-language requests in Copilot Chat. Describe a budget tracker, project plan or financial model and it can set up sheets, organise data, and add working formulas and charts. A Microsoft 365 Copilot licence is required, and it can use permitted work content. Files are saved to OneDrive and should be reviewed before sharing.";
-EXCEL_AGENT.en.can=["Create a workbook from a plain-language description","Set up sheets and organise data","Add working formulas and charts","Refine with high-level feedback or continue in Excel","Save to OneDrive and use permitted work content"];
+EXCEL_AGENT.en.lead="Excel Agent builds and analyses spreadsheets using natural language. It generates formulas and summaries and uses iterative reasoning for multi-step data tasks. A Microsoft 365 Copilot licence is required, and Anthropic must be enabled for the tenant. It can use permitted work content. Files are saved to OneDrive and should be reviewed before sharing.";
+EXCEL_AGENT.en.can=["Build and analyse spreadsheets using natural language","Generate formulas and summaries","Use iterative reasoning for multi-step data tasks","Require Microsoft 365 Copilot and Anthropic enabled for the tenant","Save to OneDrive and use permitted work content"];
 
 var PLAN_DAY_AGENT=AGENTS.filter(function(agent){ return agent.id==="plan-my-day" })[0];
 PLAN_DAY_AGENT.status="ga";
-PLAN_DAY_AGENT.zh.tagline="用 Microsoft 365 資料整理一份完整的晨間簡報。";
-PLAN_DAY_AGENT.zh.lead="使用 Microsoft 365 資料彙整完整的晨間簡報，在工作優先事項與個人健康之間取得平衡，讓你每天一開始就掌握資訊、做好準備，也與工作及生活中重要的事情保持連結。";
-PLAN_DAY_AGENT.zh.can=["用 Microsoft 365 資料彙整晨間簡報","整理當天需要掌握的工作資訊","平衡工作優先事項與個人健康","協助你以充分準備的狀態開始一天"];
-PLAN_DAY_AGENT.zh.prompts=["幫我整理今天的完整晨間簡報。","今天有哪些工作優先事項，也請提醒我留意個人健康。","根據 Microsoft 365 裡的資料，我今天需要先掌握哪些事？"];
-PLAN_DAY_AGENT.en.tagline="A comprehensive morning briefing from Microsoft 365 data.";
-PLAN_DAY_AGENT.en.lead="Compiles a comprehensive morning briefing from Microsoft 365 data. It balances business priorities with personal wellness, helping you start informed, prepared and connected to what matters professionally and personally.";
-PLAN_DAY_AGENT.en.can=["Compile a morning briefing from Microsoft 365 data","Organise the work information you need today","Balance business priorities with personal wellness","Help you begin the day informed and prepared"];
-PLAN_DAY_AGENT.en.prompts=["Compile my comprehensive morning briefing for today.","What are today's business priorities, and where should I protect my wellbeing?","From my Microsoft 365 data, what do I need to know first today?"];
+PLAN_DAY_AGENT.zh.tagline="把行事曆、郵件、Teams 訊息與檔案整理成有優先順序的晨間簡報。";
+PLAN_DAY_AGENT.zh.lead="Plan My Day 會把你的行事曆、郵件、Teams 訊息與檔案整理成有優先順序的晨間簡報，指出今天要先處理什麼、哪些可以稍後再做，以及哪些事項現在需要決定。需要 Microsoft 365 Copilot 授權。";
+PLAN_DAY_AGENT.zh.can=["彙整行事曆、郵件、Teams 訊息與檔案","產生有優先順序的晨間簡報","指出應先處理與可以稍後處理的事項","找出現在需要決定的事項"];
+PLAN_DAY_AGENT.zh.prompts=["根據我的行事曆、郵件、Teams 訊息與檔案，整理今天的晨間簡報。","今天要先處理什麼，哪些可以稍後再做？","今天有哪些事項需要我現在決定？"];
+PLAN_DAY_AGENT.en.tagline="Turn your calendar, email, Teams messages and files into a prioritised morning briefing.";
+PLAN_DAY_AGENT.en.lead="Plan My Day turns your calendar, email, Teams messages and files into a prioritised morning briefing, showing what to focus on first, what can wait and what needs a decision now. A Microsoft 365 Copilot licence is required.";
+PLAN_DAY_AGENT.en.can=["Bring together calendar, email, Teams messages and files","Create a prioritised morning briefing","Show what to focus on first and what can wait","Surface decisions needed now"];
+PLAN_DAY_AGENT.en.prompts=["Build today's morning briefing from my calendar, email, Teams messages and files.","What should I focus on first, and what can wait?","Which items need a decision now?"];
 
 var PLANNER_AGENT=AGENTS.filter(function(agent){ return agent.id==="planner-agent" })[0];
 PLANNER_AGENT.zh.tagline="在對話中管理 Planner 的團隊專案與日常任務。";
@@ -1399,20 +1500,59 @@ var PAGE_AGENT={
   n:22, file:"MS-22", domain:"work", prop:"doc"
 };
 AGENTS.push(PAGE_AGENT);
+var FACILITATOR_AGENT={
+  id:"facilitator", name:"Facilitator", color:"#4f6bed", icon:"board", status:"ga", domain:"work",
+  url:"https://learn.microsoft.com/en-us/MicrosoftTeams/facilitator-teams",
+  docs:"https://support.microsoft.com/en-us/office/facilitator-in-microsoft-teams-meetings-37657f91-39b5-40eb-9421-45141e3ce9f6",
+  adoption:"https://adoption.microsoft.com/en-us/ai-agents/agents-in-microsoft-365/", teamsMeeting:true, showcaseFirst:true,
+  zh:{sub:"會議主持助手", tagline:"在 Teams 會議中即時記錄、追蹤議程，並公開回覆所有與會者。",
+    lead:"Facilitator 是在 Microsoft Teams 會議內使用的 AI 助手，不是在 Copilot Chat 中開啟。排程時可從「會議選項 > Copilot 和其他 AI」加入；會議中則從「更多動作」開啟。它會即時產生所有與會者都能查看及編輯的協作筆記，整理重點與決策、追蹤議程和時間，並回答與會議或網路內容相關的問題。與個人 Copilot 不同，使用者透過 @Facilitator 提問時，對話與回覆會顯示在會議聊天中，所有與會者都看得到。使用者需要符合資格的 Microsoft 365、Teams 與 Microsoft Copilot 授權，租戶也必須允許 Facilitator App。核心會議能力已正式推出；Planner 任務追蹤仍在公開預覽。",
+    can:["即時產生所有與會者都能查看及編輯的會議筆記","整理討論重點、決策與待辦事項","追蹤議程、主題、時間與會議進度","在會議聊天中公開回答會議與網路相關問題","依會議內容建立 Word 文件","在 Teams Rooms 與行動裝置記錄討論"],
+    who:"需要主持專案會議、工作坊、決策會議或跨團隊討論的人。",
+    prompts:["查看會後整理的 Action Items","@Facilitator 將這些主題加入議程","@Facilitator 根據這場會議建立一份 BRD"],
+    status:"Agent", product:"Microsoft Teams 會議"},
+  en:{sub:"Facilitator", tagline:"Capture Teams meetings live, track the agenda and reply where everyone can see.",
+    lead:"Facilitator is an AI agent used inside Microsoft Teams meetings, not opened in Copilot Chat. Add it while scheduling from Meeting options > Copilot and other AI, or turn it on during a meeting from More actions. It creates collaborative notes everyone can view and edit, captures key points and decisions, tracks the agenda and time, and answers questions grounded in the meeting or web. Unlike personal Copilot responses, @Facilitator prompts and replies appear in meeting chat for everyone. Users need eligible Microsoft 365, Teams and Microsoft Copilot licences, and the tenant must allow the Facilitator app. Core meeting capabilities are generally available; Planner task tracking remains in public preview.",
+    can:["Create real-time meeting notes everyone can view and edit","Capture discussion points, decisions and actions","Track the agenda, topics, time and meeting progress","Answer meeting and web questions publicly in meeting chat","Create Word documents from meeting content","Capture discussions in Teams Rooms and on mobile"],
+    who:"People facilitating project meetings, workshops, decision sessions or cross-team discussions.",
+    prompts:["Review the action items captured after the meeting","@Facilitator add these topics to the agenda","@Facilitator create a BRD based on this meeting"],
+    status:"Agent", product:"Microsoft Teams meetings"},
+  n:23, file:"MS-23", prop:"board"
+};
+var INTERPRETER_AGENT={
+  id:"interpreter", name:"Interpreter", color:"#4f6bed", icon:"mic", status:"ga", domain:"work",
+  url:"https://learn.microsoft.com/en-us/microsoftteams/interpreter-agent-teams?wt.mc_id=agentshub_Learn_webpage_cnl",
+  docs:"https://support.microsoft.com/en-us/office/interpreter-in-microsoft-teams-meetings-and-calls-c7efe2bb-535d-42ab-a5c4-d2d91619b46d",
+  adoption:"https://adoption.microsoft.com/en-us/ai-agents/agents-in-microsoft-365/", teamsMeeting:true, setupGuide:true,
+  zh:{sub:"即時口譯助手", tagline:"在 Teams 會議中提供即時語音翻譯與聲音模擬，讓不同語言的與會者使用自己的語言溝通。",
+    lead:"Interpreter 是在 Microsoft Teams 會議中使用的即時口譯 Agent，不是在 Copilot Chat 中開啟。每位參與者可選擇偏好的聆聽語言，系統會即時進行語音對語音翻譯；支援中文（普通話）、英文、法文、德文、義大利文、日文、韓文、葡萄牙文與西班牙文。需要符合資格的 Microsoft 365、Teams 與 Microsoft Copilot 授權；每位使用者每月包含 20 小時口譯，超出後依可用容量提供。",
+    can:["在 Teams 會議中即時翻譯語音","讓每位參與者選擇自己的聆聽語言","支援九種口說與聆聽語言","選擇模擬講者聲音或使用預設語音"],
+    who:"參與跨國、跨語言專案會議、客戶會議或培訓的人。",
+    prompts:["中文 → 英文","英文 → 中文","日文 → 中文"],
+    status:"Agent", product:"Microsoft Teams 會議"},
+  en:{sub:"Interpreter", tagline:"Real-time speech translation and voice simulation for multilingual Teams meetings.",
+    lead:"Interpreter is a real-time interpretation agent used in Microsoft Teams meetings, not opened in Copilot Chat. Each participant can choose a preferred listening language while speech is translated live. It supports Chinese (Mandarin), English, French, German, Italian, Japanese, Korean, Portuguese and Spanish. Eligible Microsoft 365, Teams and Microsoft Copilot licences are required; 20 hours of interpretation per user per month are included, with additional access subject to available capacity.",
+    can:["Translate speech live in Teams meetings","Let each participant choose a listening language","Support nine spoken and listening languages","Use simulated speaker voices or preset voices"],
+    who:"People joining multinational or multilingual project meetings, customer calls and training.",
+    prompts:["Chinese → English","English → Chinese","Japanese → Chinese"],
+    status:"Agent", product:"Microsoft Teams meetings"},
+  n:24, file:"MS-24", prop:"mic"
+};
+AGENTS.push(FACILITATOR_AGENT,INTERPRETER_AGENT);
 /* Learning sits in the big JSON above; rewritten here so it reads apart from Learning Coach. */
 (function(){
   var l; for(var i=0;i<AGENTS.length;i++) if(AGENTS[i].id==="learning") l=AGENTS[i];
-  l.zh.tagline="依你的角色與工作軌跡，推薦該學什麼並追蹤進度。";
-  l.zh.lead="依你的角色、技能檔案與最近在 Microsoft 365 的活動，推薦影片、課程、認證與公司內部資源；也能開啟組織指派的訓練、用 AI 產生的測驗檢核程度，並依技能評估產出學習計畫、追蹤進度與連續學習紀錄。回覆同時參考組織內部來源與外部網路資源。可免費加入使用；部分功能需要額外授權（如 Viva Learning、LinkedIn Learning）。";
-  l.zh.can=["依角色與近期活動推薦課程、影片與認證","開啟組織指派的訓練，並用 AI 測驗檢核","依技能評估產出學習計畫","追蹤學習進度與連續紀錄","強化 Microsoft 365 Copilot 的上手與應用"];
+  l.zh.tagline="依角色與工作內容，在工作流程中培養 Copilot 與 AI 技能。";
+  l.zh.lead="Learning Agent 依使用者的角色與工作內容，提供個人化、融入工作流程的 Copilot 與 AI 學習，包括每日提示、技能評估與互動式角色扮演，讓使用者邊做邊學。需要 Microsoft 365 Copilot 授權；角色扮演功能需要整合 LinkedIn Learning 或 Skillsoft。";
+  l.zh.can=["依角色與工作內容提供個人化學習","在工作流程中培養 Copilot 與 AI 技能","提供每日提示與技能評估","透過互動式角色扮演練習","角色扮演需整合 LinkedIn Learning 或 Skillsoft"];
   l.zh.who="想持續進修的員工，以及要推動組織學習的人資與主管。";
-  l.zh.prompts=["依我的角色與最近的工作，推薦這一季該學的主題。","公司指派給我的訓練，還有哪些沒完成？","針對這個主題出一份測驗，檢查我學到什麼程度。"];
+  l.zh.prompts=["依我的角色與目前工作，推薦今天的 Copilot 學習內容。","幫我評估目前的 Copilot 與 AI 技能。","用角色扮演讓我練習在工作中使用 Copilot。"];
   l.zh.product="Microsoft 365 Copilot";
-  l.en.tagline="Personalised upskilling based on your role and your work in Microsoft 365.";
-  l.en.lead="Suggests videos, courses, credentials and internal resources from your role, skills profile and recent Microsoft 365 activity. It also opens the training your organisation assigned, checks your understanding with AI-generated quizzes, builds learning plans from skill assessments, and tracks progress and streaks. Answers draw on both internal and external sources. Free to add and use; some capabilities need extra licences such as Viva Learning or LinkedIn Learning.";
-  l.en.can=["Recommend courses, videos and credentials from your role and activity","Open assigned organisational training and quiz you on it","Build a learning plan from a skills assessment","Track progress and keep a streak going","Strengthen your Microsoft 365 Copilot skills"];
+  l.en.tagline="Build Copilot and AI skills in the flow of work, tailored to your role.";
+  l.en.lead="Learning Agent helps employees build Copilot and AI skills with personalised, in-the-flow learning tailored to their roles and work. It provides daily tips, skill assessments and interactive role play so users learn by doing. A Microsoft 365 Copilot licence is required; role play requires integration with LinkedIn Learning or Skillsoft.";
+  l.en.can=["Tailor learning to a user's role and work","Build Copilot and AI skills in the flow of work","Provide daily tips and skill assessments","Practise through interactive role play","Require LinkedIn Learning or Skillsoft integration for role play"];
   l.en.who="Employees investing in their own growth, plus HR and managers driving org-wide learning.";
-  l.en.prompts=["Given my role and recent work, what should I learn this quarter?","Which of my assigned trainings are still outstanding?","Quiz me on this topic and tell me where I stand."];
+  l.en.prompts=["Based on my role and current work, what should I learn about Copilot today?","Assess my current Copilot and AI skills.","Use role play to help me practise using Copilot at work."];
   l.en.product="Microsoft 365 Copilot";
 })();
 var ROUTE_OVERRIDES={
@@ -1427,13 +1567,14 @@ var ROUTE_OVERRIDES={
   "learning-coach":"grow",
   "researcher":"grow",
   "frontline-agent":"free",
-  "sharepoint-list-agent":"insight"
+  "sharepoint-list-agent":"insight",
+  "plan-my-day":"insight",
+  "planner-agent":"insight"
 };
 AGENTS.forEach(function(agent){
   if(ROUTE_OVERRIDES[agent.id]) agent.domain=ROUTE_OVERRIDES[agent.id];
 });
-/* Neither licensed nor free: charged on consumption. */
-var USAGE_BILLED={"writing-coach":1,"career-coach":1};
+var USAGE_BILLED={};
 var KEYWORDS={
   "idea-coach":"想法 點子 創意 靈感 發想 腦力激盪 企劃 卡關 問題拆解 brainstorm ideation inspiration",
   "word-agent":"文件 文書 報告 提案 公告 指南 草稿 word document proposal report",
@@ -1455,9 +1596,11 @@ var KEYWORDS={
   "workflows-frontier":"流程 自動化 重複作業 workflow power automate automation process",
   "sharepoint-list-agent":"sharepoint 清單 list 列表 清單項目 紀錄 issue 資產 record asset",
   "sharepoint-page-agent":"sharepoint 頁面 page 新聞 公告 發佈 排版 內部溝通 news post publish comms",
+  "facilitator":"teams 會議 主持 筆記 重點 決策 待辦 控時 引導 facilitator meeting notes moderation agenda action items",
+  "interpreter":"teams 會議 即時 口譯 翻譯 語音 多語言 interpreter interpretation translation speech language",
   "frontline-agent":"第一線 現場 門市 零售 製造 醫療 現場服務 檔案 公告 最新消息 sharepoint frontline retail manufacturing healthcare field service"
 };
-var DOMAIN = {"zh": {"free": "新手上路", "grow": "知識與解答", "insight": "資料與分析", "work": "產出與執行"}, "en": {"free": "Start here", "grow": "Knowledge & answers", "insight": "Data & analysis", "work": "Create & execute"}};
+var DOMAIN = {"zh": {"free": "新手上路", "grow": "知識解答", "insight": "資料分析", "work": "產出執行"}, "en": {"free": "Start here", "grow": "Knowledge & answers", "insight": "Data & analysis", "work": "Create & execute"}};
 var LINES = [["free", "#F25022"], ["grow", "#7FBA00"], ["insight", "#00A4EF"], ["work", "#FFB900"]];
 /* readable ink for each line colour — Microsoft yellow is unreadable as text */
 var INK = {"free": "#C63A12", "grow": "#5C8600", "insight": "#0378AE", "work": "#B37F00"};
@@ -1471,17 +1614,24 @@ var T={
   guideAddH:'首次使用：先新增代理程式', guideAddP:'若出現代理程式詳細資料，請先按圈選的「新增代理程式」，新增後即可開始使用。',
   guideBack:'← 上一步', guideNext:'下一步 →', guideGo:'前往 Agent →', guideClose:'關閉乘車注意事項', guideSkip:'本次行程不再顯示乘車注意事項', briefNext:'下一則 →',
   cpLinkLbl:"複製連結", cpLinkDone:"已複製連結", linkCopied:"已複製連結，貼到瀏覽器分頁即可開啟",
-  cvt:'Pre-built Agent 捷運路網圖', cvs:'搭乘 PB Agent 捷運，探索由 Microsoft 打造的 21 個 AI 代理程式（Agent）。', cvsScene:'請隨時留意月台廣播。',
+  cvt:'Pre-built Agent 捷運路網圖', cvs:'搭乘 PB Agent 捷運，探索由 Microsoft 打造的 AI 代理程式（Agent）', cvsScene:'請隨時留意月台廣播',
   obClose:'關閉站內廣播', obOpen:'站內廣播',
   cta:'點選列車或畫面任一處，查看路網圖 →', dest:'PB AGENT 捷運 ・ 全線', brand:'Pre-built Agent 捷運路網圖', back:'← 返回月台',
   h1:'由 Microsoft 打造的 AI 代理程式',
-  lede:'每一站為一個代理程式（Agent）。點選任一站點了解其說明與範例提示，按「前往 Agent」查看乘車注意事項後即可出發。',
+  lede:'每一站為一個代理程式（Agent）。點選任一站點了解其說明與範例提示，按「前往\u00A0Agent」查看乘車注意事項後即可出發。',
   replayHint:'如需再次查看搭乘指南，請點選大聲公圖示。',
   replayHintMobile:'如需再次查看搭乘指南，請點選「站內廣播」。',
   qph:'搜尋 Agent、用途或關鍵字…',
   all:'全部路線', cnt:'本次行駛 {n} / {t} 站', stopWord:'站',
   ga:'GA', preview:'PREVIEW', frontier:'FRONTIER', usageBilled:'依用量計費',
-  mk:['空心 ＝ 已正式推出（GA），可直接使用','實心 ＝ 預覽中（Preview），功能可能變動','雙環 ＝ 需加入 Frontier 計畫'],
+  teamsMeeting:'Teams 會議專用', teamsOpen:'管理員設定 →', support:'使用教學 →', adoption:'導入資源',
+  meetingScenario:'Teams 會議 Demo', meetingHint:'會議進行中', meetingAsk:'選擇要在會議中展示的功能：',
+  meetingTitle:'專案上線同步會議', meetingMeta:'00:24:18 · 4 人', meetingActive:'會議進行中',
+  meetingWorking:'Facilitator 正在記錄與整理會議', meetingPanel:'會議 Agent', meetingReady:'運作中',
+  setupScenario:'跨語言即時翻譯 Demo', setupHint:'翻譯示例', setupAsk:'選擇一組語言，查看即時口譯效果：', setupPick:'播放 Demo →',
+  setupNote:'此為示意內容；實際會議中會即時播放翻譯語音。', setupAgain:'查看其他語言',
+  demoPick:'查看 Demo →', demoNote:'此為功能示意；實際內容會依會議討論產生。', demoAgain:'查看其他情境',
+  mk:['雙環 ＝ 已正式推出（GA），可直接使用','實心 ＝ 預覽中（Preview），功能可能變動','虛線空心 ＝ 需加入 Frontier 計畫'],
   stationOf:'{d} 線', open:'前往 Agent →', docs:'官方文件',
   comicH:'試乘體驗 · 選擇提示詞，查看模擬回覆',
   chatHint:'試乘模擬', chatAsk:'選一個提示試試看：', chatPick:'送出 →',
@@ -1496,17 +1646,17 @@ var T={
   noResTry:'或直接選一個：', clearQ:'清除搜尋',
   sugg:['簡報','文件','分析','學習','規劃'],
   suggLead:'不只能搜名稱，也可以搜用途：',
-  briefSkip:'略過，直接前往路網圖', toTop:'↑ 回到頂部',
+  briefSkip:'略過廣播', toTop:'↑ 回到頂部',
   /* [編號, 標題, 內文, 圖示, 要打亮的真實元件, 單獨顯示的路線, 收尾引導] */
-  notes:[['','歡迎搭乘 PB Agent 捷運','這張路網圖把 21 個由 Microsoft 打造的 AI 代理程式，按用途排成四條路線。接下來用五個步驟，帶你看懂怎麼看、怎麼找、怎麼上車。','tour',null],
+  notes:[['','歡迎搭乘 PB Agent 捷運','這張路網圖把 20 個由 Microsoft 打造的 AI 代理程式，按用途排成四條路線。接下來用五個步驟，帶你看懂怎麼看、怎麼找、怎麼上車。','tour',null],
          ['01','怎麼搭乘',['點任一站，可以先**模擬試乘**，看看它會回什麼。',
                         '按「前往 Agent」就能直接開啟。',
                         '第一次使用時，按一下「新增代理程式」即可。'],'board','#map .stop, #vmap .vst'],
-         ['02','站點符號',['空心 ＝ 已正式推出（GA），可直接使用',
+         ['02','站點符號',['雙環 ＝ 已正式推出（GA），可直接使用',
                         '實心 ＝ 預覽中（Preview），功能可能變動',
-                        '雙環 ＝ 需加入 Frontier 計畫'],'sym','#mkey'],
+                        '虛線空心 ＝ 需加入 Frontier 計畫'],'sym','#mkey'],
          ['03','尋找站點',['知道要找什麼，就用上面這排搜尋列。',
-                        '可以打 Agent 名稱，例如「簡報生成」。',
+                        '可以打 Agent 名稱，例如「簡報專家」。',
                         '也可以打用途關鍵字，例如「簡報」「分析」。'],'find','.sw'],
          ['04','切換路線',['想一次只看一條線，用地圖上方的路線標籤切換。',
                         '括號裡的數字，是該路線的站數。'],'line','#key'],
@@ -1520,7 +1670,7 @@ var T={
   obYes:'好，帶我走一次 →', obNo:'不用，我自己逛',
   walkTitle:'帶你走一次', walkDone:'完成 ✓',
     /* [內部步驟名稱, 對話, 要打亮的元件, 可以點的元件, 非點不可, 開口前先讓人看畫面的毫秒] */
-    walk:[['開啟站點','先點一下這個站！我們一起看看這個 Agent 長什麼樣子。','#map .stop, #vmap .vst','#map .stop, #vmap .vst',true,300],
+    walk:[['開啟站點','先點一下這個站！我們一起看看這個 Agent 長什麼樣子。','#map .stop[data-id="analyst"], #vmap .vst[data-id="analyst"]','#map .stop[data-id="analyst"], #vmap .vst[data-id="analyst"]',true,300],
       ['模擬對話','這裡可以試玩模擬對話！選一個提示，看看它會怎麼回覆。這不是真的 Copilot 對話喔！','#card .ch-opts','#card .ch-opt',true,900],
       ['複製提示','覺得這個提示不錯嗎？複製起來，貼到 Copilot 就能用囉！','#card .cp','#card .cp',false,1100],
       ['前往 Agent','最後按一下「前往 Agent」，就能在你的 Copilot 裡打開它！第一次使用的話，再按一下「新增代理程式」就可以了。','#card .c-act .btn.solid','#card .c-act .btn.solid',false,800]],
@@ -1546,7 +1696,14 @@ var T={
   qph:'Search agents, purposes or keywords…',
   all:'All lines', cnt:'in service {n} / {t} stations', stopWord:'stops',
   ga:'GA', preview:'PREVIEW', frontier:'FRONTIER', usageBilled:'Pay as you use it',
-  mk:['Hollow = generally available (GA), ready to use','Solid = in preview, may still change','Double ring = requires the Frontier program'],
+  teamsMeeting:'For Teams meetings', teamsOpen:'Admin setup →', support:'Learn how →', adoption:'Adoption resources',
+  meetingScenario:'Teams meeting demo', meetingHint:'Meeting in progress', meetingAsk:'Choose a feature to demonstrate:',
+  meetingTitle:'Project launch sync', meetingMeta:'00:24:18 · 4 people', meetingActive:'Meeting in progress',
+  meetingWorking:'Facilitator is capturing and organizing the meeting', meetingPanel:'Meeting agent', meetingReady:'Active',
+  setupScenario:'Cross-language translation demo', setupHint:'Translation example', setupAsk:'Choose a language pair to preview live interpretation:', setupPick:'Play demo →',
+  setupNote:'Illustrative content; interpreted audio plays live during an actual meeting.', setupAgain:'View another language',
+  demoPick:'View demo →', demoNote:'Illustrative content; actual results are generated from the meeting discussion.', demoAgain:'View another scenario',
+  mk:['Double ring = generally available (GA), ready to use','Solid = in preview, may still change','Dashed hollow = requires the Frontier program'],
   stationOf:'{d} line', open:'Open the agent →', docs:'Official docs',
   comicH:'Trial ride · Select a prompt to view a simulated response',
   chatHint:'Trial ride', chatAsk:'Pick a prompt to try:', chatPick:'Send →',
@@ -1561,14 +1718,14 @@ var T={
   noResTry:'Or pick one of these:', clearQ:'Clear search',
   sugg:['presentation','document','analysis','learning','plan'],
   suggLead:'Search by what you want to do, not just by name:',
-  briefSkip:'Skip, go straight to the map', toTop:'↑ Back to top',
-  notes:[['','Welcome aboard','This map lays out 21 AI agents built by Microsoft along four lines, grouped by what they are for. The next five stops show you how to read it, how to search it and how to board.','tour',null],
+  briefSkip:'Skip announcement', toTop:'↑ Back to top',
+  notes:[['','Welcome aboard','This map lays out 20 AI agents built by Microsoft along four lines, grouped by what they are for. The next five stops show you how to read it, how to search it and how to board.','tour',null],
          ['01','How to board',['Select any station to try a **mock ride** first and see what comes back.',
                         'Select “Open the agent” to go straight there.',
                         'Select “Add” the first time you use one.'],'board','#map .stop, #vmap .vst'],
-         ['02','Station markers',['Hollow = generally available (GA), ready to use',
+         ['02','Station markers',['Double ring = generally available (GA), ready to use',
                         'Solid = in preview, may still change',
-                        'Double ring = requires the Frontier program'],'sym','#mkey'],
+                        'Dashed hollow = requires the Frontier program'],'sym','#mkey'],
          ['03','Finding a station',['Use the search bar along the top.',
                         'Type an agent name, such as “PowerPoint Agent”.',
                         'Or type what you want to do — “slides”, “analysis”.'],'find','.sw'],
@@ -1583,7 +1740,7 @@ var T={
            'Copy a prompt, then open the agent from the card'],
   obYes:'Yes, walk me through →', obNo:'No thanks, I will explore',
   walkTitle:'Walking you through', walkDone:'Done ✓',
-    walk:[['Open station','Give this station a tap! Let us see what this agent looks like.','#map .stop, #vmap .vst','#map .stop, #vmap .vst',true,300],
+    walk:[['Open station','Give this station a tap! Let us see what this agent looks like.','#map .stop[data-id="analyst"], #vmap .vst[data-id="analyst"]','#map .stop[data-id="analyst"], #vmap .vst[data-id="analyst"]',true,300],
       ['Simulated conversation','Try the simulated conversation! Pick a prompt and see how it replies. It is not a real Copilot chat!','#card .ch-opts','#card .ch-opt',true,900],
       ['Copy prompt','Like this prompt? Copy it and paste it straight into Copilot!','#card .cp','#card .cp',false,1100],
       ['Open agent','Finally, select “Open the agent” to open it in your Copilot! First time? Just select “Add agent” and you are good to go.','#card .c-act .btn.solid','#card .c-act .btn.solid',false,800]],
@@ -1592,6 +1749,17 @@ var T={
   foot:'Agent types and release status follow Microsoft’s official information, and the descriptions reference Microsoft’s official documentation. Agents are released and updated continually; availability depends on your licence and tenant settings.'
  }
 };
+
+T.zh.notes[5][2]=[
+  '多數工作型 Agent 需要 Microsoft 365 Copilot 授權。',
+  'Word、Excel、PowerPoint Agent 還需要租戶啟用 Anthropic；其他需求依各站說明。',
+  '若無法開啟，可能是缺少必要授權、管理員尚未啟用，或尚未推送到你的環境。'
+];
+T.en.notes[5][2]=[
+  'Most work-focused agents require a Microsoft 365 Copilot licence.',
+  'Word, Excel and PowerPoint Agents also require Anthropic enabled for the tenant; see each station for other requirements.',
+  'If an agent will not open, you might not have the required licence, your admin might not have enabled it, or it might not have reached your tenant.'
+];
 
 /* Copy the agent's direct link. Same feedback as the prompt copy buttons:
    a toast at the bottom, plus a temporary label on the button itself. The
@@ -1646,11 +1814,11 @@ function renderKey(){var T2=t(),b=document.getElementById('key');
 function marker(a,cx,cy,c){
   /* style="" beats the stylesheet, so each status really looks different. */
   if(a.status==='ga')
-    return '<circle class="dot" cx="'+cx+'" cy="'+cy+'" r="8.5" style="fill:#fff; stroke:'+c+'; stroke-width:4"/>';
+    return '<circle class="ring" cx="'+cx+'" cy="'+cy+'" r="13.5" style="fill:#fff; stroke:'+c+'; stroke-width:2"/>'+
+           '<circle class="dot" cx="'+cx+'" cy="'+cy+'" r="8.5" style="fill:#fff; stroke:'+c+'; stroke-width:4"/>';
   if(a.status==='preview')
     return '<circle class="dot" cx="'+cx+'" cy="'+cy+'" r="8.5" style="fill:'+c+'; stroke:'+c+'; stroke-width:4"/>';
-  return '<circle class="ring" cx="'+cx+'" cy="'+cy+'" r="13.5" style="fill:#fff; stroke:'+c+'; stroke-width:2"/>'+
-         '<circle class="dot" cx="'+cx+'" cy="'+cy+'" r="8.5" style="fill:#fff; stroke:'+c+'; stroke-width:4"/>';
+  return '<circle class="dot" cx="'+cx+'" cy="'+cy+'" r="8.5" pathLength="100" style="fill:#fff; stroke:'+c+'; stroke-width:3; stroke-dasharray:6 4"/>';
 }
 
 /* fixed track geometry — a reserved 250px label column on the left,
@@ -1662,19 +1830,30 @@ var PAD=210;                     /* reserved label column */
    never sit on top of one another. Stop positions were solved so that no
    two labels touch in Chinese or English, even at hover size.          */
 var LANE={free:55, grow:145, insight:235, work:325};
+/* Labels sit just clear of the largest marker (a scaled-up GA double ring). */
+var LBL_GAP=3;
+/* Emphasis tiers requested by stakeholders; anything unlisted keeps the default size. */
+var STOP_SIZE={
+  "researcher":"lg", "excel-agent":"lg", "analyst":"lg",
+  "word-agent":"lg", "powerpoint-agent":"lg", "workflows-frontier":"lg",
+  "facilitator":"lg", "interpreter":"lg",
+  "ai-learning-advisor":"sm", "learning":"sm", "sme-finder":"sm",
+  "plan-my-day":"sm", "planner-agent":"sm", "sharepoint-list-agent":"sm",
+  "sharepoint-page-agent":"sm"
+};
 var B1=565, B2=755, XEND=1150;
 /* In the crossing zone the four lanes sit 90px apart, so a label pointing down
    from one lane lands on a label pointing up from the next. Only the bottom
    lane may point down there; the rest point up.                            */
 var GEO={
   free:   { path:[[PAD,LANE.free],[B1,LANE.free],[B2,LANE.insight],[XEND,LANE.insight]],
-            stops:[[250,LANE.free,'up'],[390,LANE.free,'up'],[525,LANE.free,'up'],[875,LANE.insight,'up'],[1030,LANE.insight,'down']] },
+            stops:[[470,LANE.free,'up'],[290,LANE.free,'up'],[1060,LANE.insight,'up'],[920,LANE.insight,'down']] },
   grow:   { path:[[PAD,LANE.grow],[B1,LANE.grow],[B2,LANE.free],[XEND,LANE.free]],
-            stops:[[250,LANE.grow,'down'],[390,LANE.grow,'up'],[525,LANE.grow,'up'],[875,LANE.free,'up'],[1030,LANE.free,'up']] },
+            stops:[[220,LANE.grow,'down'],[365,LANE.grow,'up'],[495,LANE.grow,'down'],[1040,LANE.free,'up'],[870,LANE.free,'up']] },
   insight:{ path:[[PAD,LANE.insight],[B1,LANE.insight],[B2,LANE.work],[XEND,LANE.work]],
-            stops:[[320,LANE.insight,'down'],[458,LANE.insight,'up'],[800,LANE.work,'up'],[950,LANE.work,'down'],[1110,LANE.work,'down']] },
+            stops:[[505,LANE.insight,'down'],[800,LANE.work,'up'],[335,LANE.insight,'up'],[960,LANE.work,'down'],[1115,LANE.work,'down']] },
   work:   { path:[[PAD,LANE.work],[B1,LANE.work],[B2,LANE.grow],[XEND,LANE.grow]],
-            stops:[[250,LANE.work,'down'],[390,LANE.work,'down'],[525,LANE.work,'up'],[800,LANE.grow,'up'],[950,LANE.grow,'up'],[1110,LANE.grow,'down']] }
+            stops:[[955,LANE.grow,'up'],[800,LANE.grow,'up'],[530,LANE.work,'down'],[1110,LANE.grow,'up'],[245,LANE.work,'down'],[390,LANE.work,'up']] }
 };
 var LANE_ORDER=["free", "grow", "insight", "work"];
 var LBLW=124;   /* usable width of the reserved label column */
@@ -1750,15 +1929,16 @@ function renderMap(){
       /* GAP is measured from the dot centre to the nearest edge of the
          nearest text line, so a name sits exactly as far from its dot
          whether it is drawn above or below the track.                  */
-      if(side==='up')        { sy=y-22; ly=sy-15; }
-      else if(side==='down') { ly=y+30; sy=ly+14; }
-      else if(side==='right'){ anchor='start'; lx=x+22; ly=y-2; sy=y+12; }
-      else                   { anchor='end';   lx=x-22; ly=y-2; sy=y+12; }
-      dots+='<g class="stop st-'+key+(on?'':' dim')+'" data-id="'+a.id+'">'+
+      if(side==='up')        { sy=y-22-LBL_GAP; ly=sy-15; }
+      else if(side==='down') { ly=y+30+LBL_GAP; sy=ly+14; }
+      else if(side==='right'){ anchor='start'; lx=x+22+LBL_GAP; ly=y-2; sy=y+12; }
+      else                   { anchor='end';   lx=x-22-LBL_GAP; ly=y-2; sy=y+12; }
+      var hitTop=Math.min(y-20,ly-16), hitBot=Math.max(y+20,sy+10);
+      dots+='<g class="stop st-'+key+' '+(STOP_SIZE[a.id]||'md')+(on?'':' dim')+'" data-id="'+a.id+'">'+
         marker(a,x,y,col)+
         '<text class="lbl" x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'">'+esc(pri(a))+'</text>'+
         '<text class="sub" x="'+lx+'" y="'+sy+'" text-anchor="'+anchor+'">'+esc(alt(a))+'</text>'+
-        '<rect class="hit" x="'+(x-58)+'" y="'+(y-38)+'" width="116" height="84"/>'+
+        '<rect class="hit" x="'+(x-58)+'" y="'+hitTop+'" width="116" height="'+(hitBot-hitTop)+'"/>'+
         '</g>';
     });
   });
@@ -1819,9 +1999,15 @@ function open(id){var L=visible(),i=-1;
 /* ---------------- the conductor's briefing ----------------
    Shown between the departing train and the map: who these agents are, and
    the one idea the map depends on — every station is one agent.        */
-var ANNOUNCE = {"zh": {"kicker": "站內廣播", "sub": "PB AGENT 捷運 ・ 全線", "lines": ["各位旅客您好，歡迎搭乘 PB Agent 捷運。", "本捷運沿線的代理程式（Agent），是 Microsoft 自行打造、內建於 Microsoft 365 Copilot 的 AI 助理 —— 不需自行開發，開啟即可使用。", "本捷運共 <b>20 站、4 條路線，每一個站點即為一個代理程式</b>。", "<b>紅線「新手上路」為免費路線</b>，未持有 Copilot 授權亦可搭乘；其餘三線依用途分為知識與解答、資料與分析、產出與執行。", "抵達各站後，您可先透過<b>模擬對話</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗。", "行程期間將播送<b>搭乘指南</b>，請隨時留意站內廣播；如需再次查看，請點選大聲公圖示。", "列車即將發車，請小心月台間隙。"], "go": "發車，前往路網圖 →"}, "en": {"kicker": "Station announcement", "sub": "PB AGENT METRO ・ ALL LINES", "lines": ["Attention passengers: welcome aboard the PB Agent Metro.", "The agents on this metro are AI assistants Microsoft built into Microsoft 365 Copilot — nothing to develop, just open one and go.", "This metro has <b>20 stations across 4 lines, and every station is one agent</b>.", "<b>The red “Start here” line is free to ride</b> — no Copilot licence required. The other three are grouped into knowledge and answers, data and analysis, and creation and execution.", "On arrival at any station, preview how the agent responds through a <b>simulated conversation</b>, then open the agent to try it for yourself.", "A <b>boarding guide</b> is announced along the way. To review it, select the megaphone icon.", "The train is about to depart. Please mind the gap."], "go": "Depart for the map →"}};
-ANNOUNCE.zh.lines[2]=ANNOUNCE.zh.lines[2].replace('20 站','21 站');
-ANNOUNCE.en.lines[2]=ANNOUNCE.en.lines[2].replace('20 stations','21 stations');
+var ANNOUNCE = {"zh": {"kicker": "站內廣播", "sub": "PB AGENT 捷運 ・ 全線", "lines": ["各位旅客您好，歡迎搭乘 PB Agent 捷運。", "本捷運沿線的代理程式（Agent），是 Microsoft 自行打造、內建於 Microsoft 365 Copilot 的 AI 助理 —— 不需自行開發，開啟即可使用。", "本捷運共 <b>20 站、4 條路線，每一個站點即為一個代理程式</b>。", "<b>紅線「新手上路」為免費路線</b>，未持有 Copilot 授權亦可搭乘；其餘三線依用途分為知識解答、資料分析、產出執行。", "抵達各站後，您可先透過<b>模擬對話</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗。", "行程期間將播送<b>搭乘指南</b>，請隨時留意站內廣播；如需再次查看，請點選大聲公圖示。", "列車即將發車，請小心月台間隙。"], "go": "發車，前往路網圖 →"}, "en": {"kicker": "Station announcement", "sub": "PB AGENT METRO ・ ALL LINES", "lines": ["Attention passengers: welcome aboard the PB Agent Metro.", "The agents on this metro are AI assistants Microsoft built into Microsoft 365 Copilot — nothing to develop, just open one and go.", "This metro has <b>20 stations across 4 lines, and every station is one agent</b>.", "<b>The red “Start here” line is free to ride</b> — no Copilot licence required. The other three are grouped into knowledge and answers, data and analysis, and creation and execution.", "On arrival at any station, preview how the agent responds through a <b>simulated conversation</b>, then open the agent to try it for yourself.", "A <b>boarding guide</b> is announced along the way. To review it, select the megaphone icon.", "The train is about to depart. Please mind the gap."], "go": "Depart for the map →"}};
+ANNOUNCE.zh.lines[3]='<b>紅線「新手上路」適合初次探索 Agent 的使用者</b>；各站的授權與整合需求不同，請以站點說明與官方文件為準';
+ANNOUNCE.zh.lines[4]='抵達各站後，您可先透過<b>試乘模擬</b>了解該 Agent 的回覆方式，再一鍵前往 Agent 實際體驗';
+/* The announcement reads as spoken lines, so the trailing full stops are dropped. */
+ANNOUNCE.zh.lines=ANNOUNCE.zh.lines.map(function(line){ return line.replace(/。$/,'') });
+ANNOUNCE.en.lines[3]='<b>The red “Start here” line is an entry point for people exploring agents</b>. Licensing and integration requirements vary by station; check the station description and official documentation.';
+ANNOUNCE.en.lines[4]='On arrival at any station, use the <b>trial simulation</b> to see how the agent responds, then open the agent to try it for yourself.';
+ANNOUNCE.zh.lines[2]=ANNOUNCE.zh.lines[2].replace('20 站',AGENTS.length+' 站');
+ANNOUNCE.en.lines[2]=ANNOUNCE.en.lines[2].replace('20 stations',AGENTS.length+' stations');
 var brief=document.getElementById('brief');
 function renderBrief(){
   var c=ANNOUNCE[st.lang];
@@ -1841,7 +2027,7 @@ var BRIEF_LINE_MS=1100,BRIEF_GAP_MS=1400,briefT=null,briefAlign=null;
 function playBrief(){
   stopBrief();
   var wrap=document.getElementById('bfSay'),rows=wrap.querySelectorAll('.briefrow');
-  var button=document.getElementById('bfGo'),actions=button.parentNode,c=ANNOUNCE[st.lang],i=0,lineIndex=0,held=false;
+  var button=document.getElementById('bfGo'),actions=button.parentNode,c=ANNOUNCE[st.lang],i=0,lineIndex=0;
   function alignGrowth(){
     var pa=document.querySelector('#brief .pa'),row=rows[i];
     if(!window.matchMedia('(max-width:680px)').matches){
@@ -1911,7 +2097,7 @@ function playBrief(){
     var lines=rows[i].querySelectorAll('p');
     var wait=lineIndex<lines.length-1?BRIEF_LINE_MS:BRIEF_GAP_MS;
     briefT=setTimeout(function(){
-      if(held||document.hidden){ schedule(); return }
+      if(document.hidden){ schedule(); return }
       if(lineIndex<lines.length-1){
         lineIndex++;
         var showNext=lineIndex===lines.length-1&&i<rows.length-1;
@@ -1939,7 +2125,6 @@ function playBrief(){
     alignGrowth();
     schedule();
   }
-  wrap.onmouseenter=function(){held=true}; wrap.onmouseleave=function(){held=false};
   go(0);
 }
 function stopBrief(){
@@ -2868,6 +3053,16 @@ REPLY["plan-my-day"]=[
   {k:"doc",zh:{lead:"今天可以這樣兼顧工作與個人健康：",b:[["工作優先事項","先完成最接近期限、影響最大的工作。"],["行程節奏","密集時段之間預留短暫休息。"],["提醒","晨間簡報只整理資訊，最後安排仍由你決定。"]]},en:{lead:"A balanced view of today:",b:[["Business priority","Start with the closest deadline and highest impact."],["Pace","Leave a short recovery gap between dense blocks."],["Control","The briefing organises information; you make the final plan."]]}},
   {k:"steps",zh:{lead:"根據 Microsoft 365 資料，先掌握這三件事：",b:[["01","今天最重要的工作優先事項"],["02","需要事先準備的會議與資訊"],["03","工作安排對個人健康與節奏的影響"]]},en:{lead:"From your Microsoft 365 data, start with these three things:",b:[["01","Today's most important business priorities"],["02","Meetings and information that need preparation"],["03","How the schedule affects personal wellness and pace"]]}}
 ];
+REPLY["facilitator"]=[
+  {k:"table",zh:{lead:"Facilitator 已從會議內容擷取 Action Items，請確認：",b:{cols:["Action Item","負責人","期限"],rows:[["確認上線前的核准流程","Alex","9/2"],["完成使用者溝通與訓練計畫","Mei","9/4"],["整理試行階段的風險清單","Jordan","9/5"]]},note:"會議結束後可在協作筆記中檢視與編輯；Planner 任務追蹤功能仍在公開預覽。"},en:{lead:"Facilitator captured these action items from the meeting for review:",b:{cols:["Action item","Owner","Due"],rows:[["Confirm the pre-launch approval process","Alex","Sep 2"],["Complete the user communications and training plan","Mei","Sep 4"],["Document pilot-stage risks","Jordan","Sep 5"]]},note:"Review and edit them in collaborative notes after the meeting; Planner task tracking remains in public preview."}},
+  {k:"steps",zh:{lead:"已將議題加入會議議程：",b:[["1","確認上線前的核准人。"],["2","分派使用者溝通與訓練。"],["3","最後保留五分鐘確認待辦與負責人。"]]},en:{lead:"Topics added to the meeting agenda:",b:[["1","Confirm the approver before launch."],["2","Assign user communications and training."],["3","Reserve the final five minutes for actions and owners."]]}},
+  {k:"file",zh:{lead:"已根據會議內容建立 BRD：",b:{icon:"docx",name:"業務需求文件（BRD）.docx",meta:"已存到 OneDrive · 內容來自本次會議",items:["背景與目標","業務需求與範圍","關係人、風險與待確認事項","下一步與負責人"]}},en:{lead:"A BRD has been created from the meeting:",b:{icon:"docx",name:"Business requirements document (BRD).docx",meta:"Saved to OneDrive · based on this meeting",items:["Background and objectives","Business requirements and scope","Stakeholders, risks and open questions","Next steps and owners"]}}}
+];
+REPLY["interpreter"]=[
+  {k:"doc",zh:{lead:"即時口譯：中文 → 英文",b:[["講者原音（中文）","我們預計下週完成試行，接著確認正式上線日期。"],["Interpreter（英文）","We plan to complete the pilot next week, then confirm the production launch date."],["播放方式","以英文即時播放，可選擇模擬講者聲音或自動語音。"]]},en:{lead:"Live interpretation: Chinese → English",b:[["Original (Chinese)","我們預計下週完成試行，接著確認正式上線日期。"],["Interpreter (English)","We plan to complete the pilot next week, then confirm the production launch date."],["Audio","Plays live in English using a simulated speaker voice or automated voice."]]}},
+  {k:"doc",zh:{lead:"即時口譯：英文 → 中文",b:[["講者原音（英文）","Please share the updated proposal with the customer before Friday."],["Interpreter（中文）","請在星期五之前將更新後的提案提供給客戶。"],["播放方式","以中文即時播放，可調整原音與翻譯音量。"]]},en:{lead:"Live interpretation: English → Chinese",b:[["Original (English)","Please share the updated proposal with the customer before Friday."],["Interpreter (Chinese)","請在星期五之前將更新後的提案提供給客戶。"],["Audio","Plays live in Chinese with adjustable original and interpreted volume."]]}},
+  {k:"doc",zh:{lead:"即時口譯：日文 → 中文",b:[["講者原音（日文）","次回の会議で、最終スケジュールを確認しましょう。"],["Interpreter（中文）","讓我們在下次會議確認最終時程。"],["播放方式","每位參與者可各自選擇偏好的聆聽語言。"]]},en:{lead:"Live interpretation: Japanese → Chinese",b:[["Original (Japanese)","次回の会議で、最終スケジュールを確認しましょう。"],["Interpreter (Chinese)","讓我們在下次會議確認最終時程。"],["Audio","Each participant can choose their preferred listening language."]]}}
+];
 FOLLOW["plan-my-day"]=[
   {k:"doc",zh:{q:"先展開第一項工作重點。",lead:"第一項可以先看這三個資訊：",b:[["期限","確認最接近的交付時間。"],["影響","判斷延後會影響哪些人或工作。"],["準備","找出開始前需要的文件與資訊。"]]},en:{q:"Expand the first work priority.",lead:"Start with three details:",b:[["Deadline","Confirm the nearest delivery time."],["Impact","See who or what a delay would affect."],["Preparation","Identify what is needed to begin."]]}},
   {k:"list",zh:{q:"哪一段最需要留意休息？",lead:"最密集的行程區段最值得留意：",b:["連續安排之間沒有緩衝。","高度專注的工作緊接在會議後。","可把這段標記為今天要主動保留節奏的地方。"]},en:{q:"Which part most needs a break?",lead:"The densest part of the schedule:",b:["There is no buffer between commitments.","Deep-focus work follows a meeting immediately.","Mark this as the part where you should protect your pace."]}},
@@ -2900,18 +3095,36 @@ function tblHTML(b){
 }
 
 function comic(a,col){
-  var d=D(a), ps=d.prompts||[];
+  var d=D(a), ps=d.prompts||[], hint=a.setupGuide?t().setupHint:(a.teamsMeeting?t().meetingHint:t().chatHint),
+      ask=a.setupGuide?t().setupAsk:(a.teamsMeeting?t().meetingAsk:t().chatAsk),
+      pick=a.setupGuide?t().setupPick:(a.teamsMeeting?t().demoPick:t().chatPick);
+  if(a.teamsMeeting) return '<div class="chat tm" id="chat" data-id="'+esc(a.id)+'">'+
+    '<div class="tm-bar"><span class="tm-live-dot"></span><b>'+esc(t().meetingTitle)+'</b><span class="tm-meta">'+esc(t().meetingMeta)+'</span>'+
+      '<span class="tm-controls"><span class="tm-control">'+svg('mic',12,'#424242')+'</span><span class="tm-control">'+svg('chat',12,'#424242')+'</span><span class="tm-control">•••</span><span class="tm-control end">'+svg('hangup',13,'#fff',2)+'</span></span></div>'+
+    '<div class="tm-layout"><div class="tm-stage">'+
+      '<div class="tm-grid">'+
+        '<div class="tm-person"><span class="tm-face">DY</span><span>Debby</span></div>'+
+        '<div class="tm-person"><span class="tm-face">AC</span><span>Alex</span></div>'+
+        '<div class="tm-person"><span class="tm-face">ML</span><span>Mei</span></div>'+
+        '<div class="tm-person"><span class="tm-face">JR</span><span>Jordan</span></div></div>'+
+      '<div class="tm-status"><span class="tm-wave"><i></i><i></i><i></i><i></i><i></i></span><b>'+esc(t().meetingActive)+'</b><span>· '+esc(a.id==='interpreter'?pri(a):t().meetingWorking)+'</span></div>'+
+    '</div><div class="tm-panel">'+
+      '<div class="tm-panel-head"><span class="ch-dot" style="background:'+col+'"></span><b>'+esc(pri(a))+' · '+esc(t().meetingPanel)+'</b><span>'+esc(t().meetingReady)+'</span></div>'+
+      '<div class="ch-body" id="chBody"><div class="ch-ask">'+esc(ask)+'</div><div class="ch-opts">'+
+        ps.map(function(p,i){return '<button class="ch-opt" data-i="'+i+'"><span class="ch-q">'+esc(p)+'</span><span class="ch-go" style="color:'+col+'">'+esc(pick)+'</span></button>'}).join('')+
+      '</div></div></div></div></div>';
   return '<div class="chat" id="chat" data-id="'+esc(a.id)+'">'+
     '<div class="ch-top">'+
       '<span class="ch-dot" style="background:'+col+'"></span>'+
       '<span class="ch-name">'+esc(pri(a))+'</span>'+
-      '<span class="ch-hint">'+esc(t().chatHint)+'</span>'+
+      '<span class="ch-hint">'+esc(hint)+'</span>'+
     '</div>'+
     '<div class="ch-body" id="chBody">'+
-      '<div class="ch-ask">'+esc(t().chatAsk)+'</div>'+
+      '<div class="ch-ask">'+esc(ask)+'</div>'+
       '<div class="ch-opts">'+ps.map(function(p,i){
+         var optionPick=a.showcaseFirst&&i===0?t().demoPick:pick;
         return '<button class="ch-opt" data-i="'+i+'"><span class="ch-q">'+esc(p)+'</span>'+
-               '<span class="ch-go" style="color:'+col+'">'+esc(t().chatPick)+'</span></button>'
+           '<span class="ch-go" style="color:'+col+'">'+esc(optionPick)+'</span></button>'
       }).join('')+'</div>'+
     '</div>'+
   '</div>';
@@ -2934,6 +3147,8 @@ function playComic(){
   function said(txt){ return '<div class="ch-you">'+esc(txt)+'</div>' }
   function typing(){ return '<div class="ch-typing"><i></i><i></i><i></i></div>' }
   function answer(lead,inner,note){
+    if(a.teamsMeeting) return '<div class="tm-result"><p class="ch-lead">'+esc(lead)+'</p>'+inner+
+      (note?'<p class="ch-note">'+esc(note)+'</p>':'')+'</div>';
     return '<div class="ch-reply">'+
       '<div class="ch-av" style="background:'+col+'">'+svg(a.icon,13,'#fff')+'</div>'+
       '<div class="ch-msg"><p class="ch-lead">'+esc(lead)+'</p>'+inner+
@@ -2941,6 +3156,12 @@ function playComic(){
       '</div></div>';
   }
   function foot(i){
+    if(a.setupGuide) return '<div class="ch-foot">'+
+      '<span class="ch-sim">'+esc(T2.setupNote)+'</span>'+
+      '<button class="ch-again">'+esc(T2.setupAgain)+'</button></div>';
+    if(a.teamsMeeting) return '<div class="ch-foot">'+
+      '<span class="ch-sim">'+esc(T2.demoNote)+'</span>'+
+      '<button class="ch-again">'+esc(T2.demoAgain)+'</button></div>';
     return '<div class="ch-foot">'+
       '<span class="ch-sim">'+esc(T2.chatSim)+'</span>'+
       '<button class="cp" data-c="'+esc(d.prompts[i])+'">'+esc(T2.copyPrompt)+'</button>'+
@@ -2963,6 +3184,11 @@ function playComic(){
   /* one tap plays the whole exchange: the reply, then the follow-up asked and answered */
   function run(i){
     var rep=(REPLY[a.id]||[])[i]; if(!rep) return;
+    if(a.teamsMeeting){
+      var guide=rep[st.lang]||rep.zh;
+      body.innerHTML=answer(guide.lead,replyBody({k:rep.k,b:guide.b}),guide.note)+foot(i);
+      bindEnd(); chatTo('.tm-result'); return;
+    }
     var r=rep[st.lang]||rep.zh, one=said(d.prompts[i]);
     body.innerHTML=one+typing();
     chatTo('.ch-you');
@@ -2985,10 +3211,13 @@ function playComic(){
     }, 900));
   }
   function reset(){
-    body.innerHTML='<div class="ch-ask">'+esc(T2.chatAsk)+'</div>'+
+    var ask=a.setupGuide?T2.setupAsk:(a.teamsMeeting?T2.meetingAsk:T2.chatAsk),
+        pick=a.setupGuide?T2.setupPick:(a.teamsMeeting?T2.demoPick:T2.chatPick);
+    body.innerHTML='<div class="ch-ask">'+esc(ask)+'</div>'+
       '<div class="ch-opts">'+d.prompts.map(function(p,i){
+         var optionPick=pick;
         return '<button class="ch-opt" data-i="'+i+'"><span class="ch-q">'+esc(p)+'</span>'+
-               '<span class="ch-go" style="color:'+col+'">'+esc(T2.chatPick)+'</span></button>'
+           '<span class="ch-go" style="color:'+col+'">'+esc(optionPick)+'</span></button>'
       }).join('')+'</div>';
     Array.prototype.forEach.call(body.querySelectorAll('.ch-opt'),function(b){
       b.onclick=function(){ run(+b.getAttribute('data-i')) };
@@ -3005,13 +3234,17 @@ function draw(L,i){var T2=t(),a=L[i],d=D(a),col=LC[a.domain];cur={L:L,i:i};
      '<h2>'+esc(pri(a))+'</h2><div class="c-alt">'+esc(alt(a))+'</div>'+
      '<div class="c-tags"><span class="pill '+a.status+'">'+esc(T2[a.status])+'</span>'+
        (USAGE_BILLED[a.id]?'<span class="kind">'+esc(T2.usageBilled)+'</span>':'')+
+       (a.teamsMeeting?'<span class="kind">'+esc(T2.teamsMeeting)+'</span>':'')+
        '</div>'+
      '<p class="c-tag">'+esc(d.tagline)+'</p>'+
-    '<div class="c-act">'+(a.url?'<a class="btn solid" href="'+esc(a.url)+'" onclick="return guideAgent(this)">'+esc(T2.open)+'</a>':'')+
-       (a.docs?'<a class="btn ghost" href="'+esc(a.docs)+'" target="_blank" rel="noopener noreferrer">'+esc(T2.docs)+'</a>':'')+
-       (a.url?'<button type="button" class="btn ghost cpy" data-u="'+esc(a.url)+'" onclick="return cpLink(this)">'+esc(T2.cpLinkLbl)+'</button>':'')+'</div></div>'+
+    '<div class="c-act">'+(a.teamsMeeting?
+       '<a class="btn ghost" href="'+esc(a.docs)+'" target="_blank" rel="noopener noreferrer">'+esc(T2.support)+'</a>':
+       (a.url?'<a class="btn solid" href="'+esc(a.url)+'" onclick="return guideAgent(this)">'+esc(T2.open)+'</a>':'')+
+      (a.url?'<button type="button" class="btn ghost cpy" data-u="'+esc(a.url)+'" onclick="return cpLink(this)">'+esc(T2.cpLinkLbl)+'</button>':'')+
+      (a.docs?'<a class="btn ghost" href="'+esc(a.docs)+'" target="_blank" rel="noopener noreferrer">'+esc(T2.docs)+'</a>':'')
+       )+'</div></div>'+
    '<div class="c-body one">'+
-     '<h4>'+esc(T2.comicH)+'</h4>'+comic(a,col)+
+    '<h4>'+esc(a.setupGuide?T2.setupScenario:(a.teamsMeeting?T2.meetingScenario:T2.comicH))+'</h4>'+comic(a,col)+
    '</div>'+
    '<div class="c-foot"><button class="nav-prev" id="pv" '+(i===0?'disabled':'')+'><span>'+esc(T2.prev)+'</span><span class="nav-arrow" aria-hidden="true">←</span></button>'+
      '<span class="c-pos">'+esc(fmt(T2.pos,{i:i+1,n:L.length}))+'<i class="c-keys">'+esc(T2.keyHint)+'</i></span>'+
@@ -3110,9 +3343,9 @@ function apply(){var T2=t();
   document.getElementById('foot').textContent=T2.foot;
   document.getElementById('footh').textContent=T2.footH;
   document.getElementById('mkey').innerHTML=
-    '<span><svg width="24" height="24"><circle cx="12" cy="12" r="7" style="fill:#fff;stroke:#616b78;stroke-width:3"/></svg>'+esc(T2.mk[0])+'</span>'+
+    '<span><svg width="24" height="24"><circle cx="12" cy="12" r="10.5" style="fill:#fff;stroke:#616b78;stroke-width:1.6"/><circle cx="12" cy="12" r="7" style="fill:#fff;stroke:#616b78;stroke-width:3"/></svg>'+esc(T2.mk[0])+'</span>'+
     '<span><svg width="24" height="24"><circle cx="12" cy="12" r="8.5" style="fill:#616b78"/></svg>'+esc(T2.mk[1])+'</span>'+
-    '<span><svg width="24" height="24"><circle cx="12" cy="12" r="10.5" style="fill:#fff;stroke:#616b78;stroke-width:1.6"/><circle cx="12" cy="12" r="7" style="fill:#fff;stroke:#616b78;stroke-width:3"/></svg>'+esc(T2.mk[2])+'</span>';
+    '<span><svg width="24" height="24"><circle cx="12" cy="12" r="7" pathLength="100" style="fill:#fff;stroke:#616b78;stroke-width:2.5;stroke-dasharray:6 4"/></svg>'+esc(T2.mk[2])+'</span>';
   document.getElementById('crewFabTip').textContent=T2.askTitle;
   crewFab.setAttribute('aria-label',T2.crewWho+' — '+T2.askTitle);
   Array.prototype.forEach.call(document.querySelectorAll('[data-lang]'),function(b){b.classList.toggle('on',b.dataset.lang===st.lang)});
