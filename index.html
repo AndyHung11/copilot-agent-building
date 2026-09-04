@@ -66,11 +66,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
 .sr-item .em { font-size: 17px; flex: none; }
 .sr-item .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sr-item .zn { font-size: 10.5px; padding: 2px 8px; border-radius: 7px; color: #fff; flex: none; }
-#homeBtn, #exteriorBtn {
+#homeBtn, #exteriorBtn, #downloadBtn {
   flex: none; padding: 9px 15px; border-radius: 11px; border: 1px solid var(--line-strong);
   background: #fff; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm);
 }
-#homeBtn:hover, #exteriorBtn:hover { border-color: var(--accent); color: var(--accent); }
+#downloadBtn { text-decoration: none; white-space: nowrap; }
+#homeBtn:hover, #exteriorBtn:hover, #downloadBtn:hover { border-color: var(--accent); color: var(--accent); }
 #langSeg { display: flex; gap: 2px; background: #eef1f6; border: 1px solid var(--line);
   border-radius: 10px; padding: 3px; flex: none; }
 #langSeg button { background: none; border: 0; color: var(--faint); font-weight: 800;
@@ -403,6 +404,8 @@ body { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; ov
   #exteriorBtn span, #homeBtn span { font-size: 11px; white-space: nowrap; }
   #exteriorBtn { grid-column: 3; }
   #homeBtn { grid-column: 4; }
+  #brand { grid-column: 2; }
+  #downloadBtn { grid-column: 3; grid-row: 1; width: 68px; height: 38px; padding: 0 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
   #sidebar { top: var(--topbar-height); }
   #roomDeck { max-height: calc(100dvh - var(--topbar-height)); }
   #modalBackdrop { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
@@ -453,6 +456,7 @@ body { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; ov
   </div>
   <button id="exteriorBtn">🏙️ <span data-i18n="btnExterior">看會場</span></button>
   <button id="homeBtn">🏢 <span data-i18n="btnAtrium">回主展廳</span></button>
+  <a id="downloadBtn" href="downloads/copilot-agent-edm.zip" download aria-label="下載完整 EDM / Download complete EDM package" title="下載完整 EDM / Download complete EDM package">⬇ EDM</a>
   <div id="langSeg">
     <button data-lang="zh" class="on">中</button>
     <button data-lang="en">EN</button>

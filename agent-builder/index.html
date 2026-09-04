@@ -891,6 +891,7 @@
       pointer-events: none;
     }
     .seg-btn:hover { color: #fff; }
+    .download-link { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap; }
     .seg-btn[aria-pressed="true"] {
       background: linear-gradient(180deg, rgba(255,214,132,.9), rgba(200,145,47,.85));
       color: #3a2410;
@@ -2971,6 +2972,9 @@
         <button class="seg-btn" type="button" data-lang="zh" aria-pressed="true">中</button>
         <button class="seg-btn" type="button" data-lang="en" aria-pressed="false">EN</button>
       </div>
+      <div class="seg" role="group" aria-label="Download">
+        <a class="seg-btn download-link" href="./index.html" download="index.html" aria-label="下載 Agent Builder HTML / Download Agent Builder HTML" title="下載 Agent Builder HTML / Download Agent Builder HTML">⬇ HTML</a>
+      </div>
     </div>
 
 
@@ -3319,6 +3323,9 @@
         </div>
         <div class="seg" role="group" aria-label="Fullscreen">
           <button class="seg-btn" type="button" id="fs-btn" aria-pressed="false" title="全螢幕 / Fullscreen">⛶ <span id="fs-label">全螢幕</span></button>
+        </div>
+        <div class="seg" role="group" aria-label="Download">
+          <a class="seg-btn download-link" href="./index.html" download="index.html" aria-label="下載 Agent Builder HTML / Download Agent Builder HTML" title="下載 Agent Builder HTML / Download Agent Builder HTML">⬇ HTML</a>
         </div>
       </div>
     </div>
