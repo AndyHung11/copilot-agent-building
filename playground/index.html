@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>M365 Copilot Agent — 遊樂園</title>
 <style>
 :root {
@@ -446,6 +446,33 @@ html[lang="en"] .rd-card .rc-tl { word-break: normal; overflow-wrap: normal; hyp
   .edm-bar { align-items: flex-start; flex-wrap: wrap; }
   .edm-note { flex: 1 1 180px; }
   .edm-open { margin-left: 0; }
+}
+/* ---------- Mobile dynamic viewport & safe areas ---------- */
+:root { --topbar-height: calc(62px + env(safe-area-inset-top)); }
+html { width: 100%; height: 100%; overflow: hidden; }
+body { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+#stage { position: absolute; }
+#topbar { padding-top: calc(13px + env(safe-area-inset-top)); }
+#sidebar { top: var(--topbar-height); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#hint { bottom: calc(18px + env(safe-area-inset-bottom)); }
+#roomDeck { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+.rd-grid, #modal { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#modalBackdrop { position: absolute; top: var(--topbar-height); }
+#modal { max-height: 100%; }
+@media (max-width: 860px) {
+  :root { --topbar-height: calc(105px + env(safe-area-inset-top)); }
+  #topbar { padding-top: calc(9px + env(safe-area-inset-top)); }
+  #sidebar, #modalBackdrop { top: var(--topbar-height); }
+  #roomDeck { max-height: calc(100dvh - var(--topbar-height)); }
+  #modalBackdrop { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+  #modal { max-height: 100%; padding-bottom: calc(26px + env(safe-area-inset-bottom)); }
+  .m-tabs { flex-wrap: nowrap; gap: 2px; width: 100%; }
+  .m-tab { flex: 1 1 auto; min-width: 0; padding: 8px 3px; font-size: clamp(9px, 2.7vw, 11px); overflow: hidden; text-overflow: ellipsis; }
+  html[lang="en"] .m-tab { font-size: 0; }
+  html[lang="en"] .m-tab::after { font-size: clamp(9px, 2.7vw, 11px); white-space: nowrap; }
+  html[lang="en"] .m-tab[data-pane="run"]::after { content: "Try it"; }
+  html[lang="en"] .m-tab[data-pane="info"]::after { content: "Info & prompts"; }
+  html[lang="en"] .m-tab[data-pane="edm"]::after { content: "Newsletter"; }
 }
 </style>
 </head>

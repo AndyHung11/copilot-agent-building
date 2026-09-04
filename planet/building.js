@@ -101,7 +101,7 @@
       noMatch: "No matching agent",
       licReq: "Requires M365 Copilot license", licFree: "No add-on license needed",
       licReqShort: "License", licFreeShort: "Free",
-      tabRun: "▶ Run simulation", tabInfo: "Pain points · Getting started · Prompts", tabEdm: "Newsletter",
+      tabRun: "▶ Run simulation", tabInfo: "Info & prompts", tabEdm: "Newsletter",
       edmNote: "The original newsletter issue for this agent", edmOpen: "Open in new tab ↗",
       simBadge: "⚠ Illustrative simulation · not a real execution", replay: "↻ Run again",
       you: "You", secWhat: "What this agent does for you", secPain: "You might be experiencing",
@@ -1716,8 +1716,9 @@
   // ---------- Raycast ----------
   const raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   function pickAt(cx, cy) {
-    mouse.x = (cx / window.innerWidth) * 2 - 1;
-    mouse.y = -(cy / window.innerHeight) * 2 + 1;
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((cx - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((cy - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
     const a = raycaster.intersectObjects((ctxAgents || []).map((x) => x.mesh), false)[0];
     if (a) return { type: "agent", obj: a.object };
@@ -2092,7 +2093,9 @@
   // ---------- Viewport: shift the 3D framing right so the scene centers in the
   // visible stage (the 256px sidebar overlays the canvas on desktop) ----------
   function applyViewOffset() {
-    const W = window.innerWidth, H = window.innerHeight;
+    const stageRect = document.getElementById("stage").getBoundingClientRect();
+    const W = Math.round(stageRect.width), H = Math.round(stageRect.height);
+    if (!W || !H) return;
     const side = W > 860 ? 256 : 0;   // sidebar is off-canvas on mobile
     camera.aspect = W / H;
     if (side) {
@@ -2103,11 +2106,12 @@
       camera.clearViewOffset();
     }
     camera.updateProjectionMatrix();
-    renderer.setSize(W, H);
+    renderer.setSize(W, H, false);
   }
 
   // ---------- Resize ----------
   window.addEventListener("resize", applyViewOffset);
+  window.visualViewport?.addEventListener("resize", applyViewOffset);
   applyViewOffset();
 
   // ---------- Language switching ----------

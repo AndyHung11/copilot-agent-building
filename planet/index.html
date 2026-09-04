@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>M365 Copilot Agent — 星球</title>
 <style>
 :root {
@@ -375,6 +375,45 @@ html, body { width: 100%; height: 100%; overflow: hidden; font-family: var(--fon
   /* sidebar is off-canvas on mobile → let the modal use the full width */
   #modalBackdrop { left: 0; padding: 16px; }
   #modal { max-height: 88vh; padding: 22px 20px 26px; }
+}
+/* ---------- Mobile dynamic viewport & safe areas ---------- */
+:root { --topbar-height: calc(62px + env(safe-area-inset-top)); }
+html { width: 100%; height: 100%; overflow: hidden; }
+body { position: fixed; inset: 0; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; }
+#stage { position: absolute; }
+#topbar { padding-top: calc(13px + env(safe-area-inset-top)); }
+#sidebar { top: var(--topbar-height); padding-bottom: calc(16px + env(safe-area-inset-bottom)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#hint { bottom: calc(18px + env(safe-area-inset-bottom)); }
+#roomDeck { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+.rd-grid, #modal { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#modalBackdrop { position: absolute; top: var(--topbar-height); }
+#modal { max-height: 100%; }
+@media (max-width: 860px) {
+  :root { --topbar-height: calc(105px + env(safe-area-inset-top)); }
+  #topbar { display: grid; grid-template-columns: 38px minmax(0, 1fr) 68px 68px; grid-template-rows: 38px 40px; gap: 8px 9px; padding: calc(9px + env(safe-area-inset-top)) 12px 9px; }
+  #hamburger { grid-column: 1; grid-row: 1; }
+  #brand { grid-column: 2 / 4; grid-row: 1; overflow: hidden; }
+  #brand .logo { width: 30px; height: 30px; }
+  #brand .t1 { font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+  #langSeg { grid-column: 4; grid-row: 1; align-self: center; }
+  #langSeg button { padding: 5px 8px; }
+  #searchWrap { grid-column: 1 / 3; grid-row: 2; min-width: 0; margin: 0; }
+  #searchInput { height: 40px; padding-top: 8px; padding-bottom: 8px; }
+  #exteriorBtn, #homeBtn { grid-row: 2; width: 68px; height: 40px; padding: 0 5px; font-size: 0; overflow: hidden; }
+  #exteriorBtn span, #homeBtn span { font-size: 11px; white-space: nowrap; }
+  #exteriorBtn { grid-column: 3; }
+  #homeBtn { grid-column: 4; }
+  #sidebar { top: var(--topbar-height); }
+  #roomDeck { max-height: calc(100dvh - var(--topbar-height)); }
+  #modalBackdrop { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+  #modal { max-height: 100%; padding-bottom: calc(26px + env(safe-area-inset-bottom)); }
+  .m-tabs { flex-wrap: nowrap; gap: 2px; width: 100%; }
+  .m-tab { flex: 1 1 auto; min-width: 0; padding: 8px 3px; font-size: clamp(9px, 2.7vw, 11px); overflow: hidden; text-overflow: ellipsis; }
+  html[lang="en"] .m-tab { font-size: 0; }
+  html[lang="en"] .m-tab::after { font-size: clamp(9px, 2.7vw, 11px); white-space: nowrap; }
+  html[lang="en"] .m-tab[data-pane="run"]::after { content: "Try it"; }
+  html[lang="en"] .m-tab[data-pane="info"]::after { content: "Info & prompts"; }
+  html[lang="en"] .m-tab[data-pane="edm"]::after { content: "Newsletter"; }
 }
 </style>
 </head>
