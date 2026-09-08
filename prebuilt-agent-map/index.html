@@ -2675,6 +2675,9 @@ function stopWalk(){
   if(parkT){ clearTimeout(parkT); parkT=null }
   Array.prototype.forEach.call(document.querySelectorAll('#obSay .note-body'),typeStop);
   walkGhostOff();
+  var pa=onboard.querySelector('.pa');
+  pa.style.removeProperty('left');
+  pa.style.removeProperty('top');
   onboard.classList.remove('walking');
   onboard.classList.remove('observing');
   onboard.classList.remove('stepping');
