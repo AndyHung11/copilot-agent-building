@@ -2620,5 +2620,156 @@ A006: {
    "zh": "<b>存取提醒：</b>Cowork、Researcher 與相關用量條件可能因授權和系統管理員設定而異，開始前請先確認組織內的可用性。",
    "en": "<b>Access note:</b> Cowork, Researcher, and usage conditions can vary by license and administrator settings. Confirm availability in your organization before starting."
   }
- }
+ },
+
+  /* ---------- Z4 風險與法遵 ---------- */
+  A059: {
+    "art": "table",
+    "turns": {
+      "zh": [
+        {
+          "ask": "這份合作合約下週要簽,我不是法務,想先自己看過一遍。",
+          "say": "沒問題。請把合約檔案上傳,我會逐節檢查。開始前先確認:有沒有你特別在意的條款?例如責任上限、資料保護或終止條件。"
+        },
+        {
+          "ask": "責任上限和資料保護要特別看,另外幫我確認有沒有漏掉的標準條款。",
+          "say": "了解。我會分成三類回報:有風險的條款、語意模糊需要釐清的用語,以及應該有卻缺漏的條款。",
+          "steps": [
+            "解析合約結構與條款編號",
+            "逐節比對常見標準條款清單"
+          ]
+        },
+        {
+          "ask": "好,最後也給我一份可以直接改的檔案。",
+          "steps": [
+            "標定風險等級與建議修改方向",
+            "產出加註解的 Word 檔"
+          ]
+        }
+      ],
+      "en": [
+        {
+          "ask": "We're signing this partnership contract next week. I'm not legal, but I want to read it first.",
+          "say": "Happy to help. Upload the contract and I'll go through it section by section. Anything you're especially worried about — liability caps, data protection, termination?"
+        },
+        {
+          "ask": "Liability caps and data protection especially. Also tell me what standard clauses are missing.",
+          "say": "Understood. I'll report back in three buckets: risky clauses, ambiguous wording that needs clarifying, and clauses that should be there but aren't.",
+          "steps": [
+            "Parsing contract structure and clause numbering",
+            "Checking each section against the standard clause list"
+          ]
+        },
+        {
+          "ask": "And give me a file I can edit directly.",
+          "steps": [
+            "Assigning risk levels and suggested redlines",
+            "Producing the annotated Word file"
+          ]
+        }
+      ]
+    },
+    "title": {
+      "zh": "合約審閱意見彙整",
+      "en": "Contract Review Summary"
+    },
+    "data": {
+      "zh": {
+        "head": [
+          "條款",
+          "發現的問題",
+          "建議修改",
+          "風險"
+        ],
+        "rows": [
+          [
+            "責任上限",
+            "未設上限,理論上責任無限",
+            "改為以合約總價金為上限",
+            "h"
+          ],
+          [
+            "保密義務",
+            "全份合約未見保密條款",
+            "補入雙向保密條款並約定存續期間",
+            "h"
+          ],
+          [
+            "交付期限",
+            "僅寫「合理期間內完成」",
+            "改為明確工作日數並定義起算日",
+            "m"
+          ],
+          [
+            "資料保護",
+            "有提及個資,未寫委外處理與刪除義務",
+            "補入資料處理範圍、再委外限制與終止後刪除",
+            "m"
+          ],
+          [
+            "終止條款",
+            "僅對方可提前終止",
+            "改為雙方對等,並約定通知期間",
+            "m"
+          ],
+          [
+            "準據法與爭議解決",
+            "未約定管轄法院",
+            "補入準據法與第一審管轄法院",
+            "l"
+          ]
+        ]
+      },
+      "en": {
+        "head": [
+          "Clause",
+          "Issue found",
+          "Suggested change",
+          "Risk"
+        ],
+        "rows": [
+          [
+            "Limitation of liability",
+            "No cap at all — exposure is unbounded",
+            "Cap at total contract value",
+            "h"
+          ],
+          [
+            "Confidentiality",
+            "No confidentiality clause anywhere in the draft",
+            "Add mutual confidentiality with a survival period",
+            "h"
+          ],
+          [
+            "Delivery deadline",
+            "Only says \"within a reasonable period\"",
+            "State business days and define the start date",
+            "m"
+          ],
+          [
+            "Data protection",
+            "Mentions personal data, silent on processing and deletion",
+            "Add processing scope, sub-processor limits, deletion on termination",
+            "m"
+          ],
+          [
+            "Termination",
+            "Only the counterparty may terminate early",
+            "Make it mutual with a defined notice period",
+            "m"
+          ],
+          [
+            "Governing law & disputes",
+            "No venue agreed",
+            "Add governing law and court of first instance",
+            "l"
+          ]
+        ]
+      }
+    },
+    "rec": {
+      "zh": "<b>審閱建議:</b>責任上限與保密條款兩項建議簽署前務必處理;語意模糊的期限用語雖非高風險,但最容易在事後爭議,一併改掉成本最低。最終條款仍請法務確認。",
+      "en": "<b>Review note:</b> Settle the liability cap and the missing confidentiality clause before signing. The vague deadline wording is lower risk but the most common source of later disputes — cheapest to fix now. Final wording still belongs with legal."
+    }
+  }
 };
