@@ -1504,8 +1504,12 @@
   controls.addEventListener("end", () => { orbiting = false; });
 
   let downPos = null;
+  let downHit = null;
   canvas.addEventListener("pointerdown", (e) => {
     downPos = { x: e.clientX, y: e.clientY };
+    // hovering a pavilion slowly orbits the camera, so the thing you pressed on
+    // can slide away before you let go — remember what was actually under the cursor
+    downHit = pickAt(e.clientX, e.clientY);
     // primary button (mouse-left) or any touch/pen contact starts a carousel drag in a room
     const primary = e.button === 0 || e.pointerType === "touch" || e.pointerType === "pen";
     if (mode === "room" && primary) {
@@ -1527,13 +1531,13 @@
     endDrag(e);
     if (!downPos) return;
     const moved = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y); downPos = null;
-    if (moved > 8) return; // it was a drag, not a tap
-    const hit = pickAt(e.clientX, e.clientY);
-    // if the camera is outside the building shell (parked exterior, or zoomed way out),
-    // a building click should first bring you into the atrium — never teleport into a room
-    const outside = mode === "lobby" &&
-      Math.hypot(camera.position.x, camera.position.z) > SHELL_R - 4;
-    if (atExterior || outside) { if (hit) flyInterior(); return; }
+    if (moved > 8) { downHit = null; return; } // it was a drag, not a tap
+    const hit = downHit || pickAt(e.clientX, e.clientY);
+    downHit = null;
+    // Only the explicit park-view state should fly back in first. The lobby camera
+    // normally sits outside SHELL_R itself, so its radius cannot tell the two apart —
+    // testing it here swallowed every click on a pavilion.
+    if (atExterior) { if (hit) flyInterior(); return; }
     if (!hit) return;
     if (hit.type === "agent") openModal((ctxAgents || []).find((x) => x.mesh === hit.obj).agentId);
     else if (hit.type === "exit") exitRoom();
