@@ -232,5 +232,9 @@ const EDM = {
  "A058": {
   "zh": "A058_CopilotCompass.html",
   "en": "A058_CopilotCompass_EN.html"
+ },
+ "A059": {
+  "zh": "A059_ContractReviewAgent.html",
+  "en": "A059_ContractReviewAgent_EN.html"
  }
 };
