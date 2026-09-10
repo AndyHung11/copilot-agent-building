@@ -82,6 +82,16 @@
   const aEmoji = (a) => oneEmoji(a.emoji);
   // taglines in the source often start with decorative sparkles — strip them
   const cleanTag = (s) => (s || "").replace(/^[\s✨🌟⭐️*]+/, "").trim();
+  // Canvas text needs an explicit CJK face per language: Segoe UI has no CJK
+  // glyphs, so the 2D context falls back glyph by glyph and a single card title
+  // ends up drawn in two different typefaces.
+  const FONT_STACK = {
+    zh: "'Segoe UI', 'Microsoft JhengHei', 'PingFang TC', sans-serif",
+    cn: "'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif",
+    en: "'Segoe UI', sans-serif",
+  };
+  const FF = () => FONT_STACK[LANG] || FONT_STACK.en;
+
 
   const UI = {
     zh: {
@@ -460,7 +470,7 @@
     // shrink a font until the text fits the available width
     const fit = (text, weight, size, maxW, family) => {
       let s = size;
-      const fam = family || "'Segoe UI', sans-serif";
+      const fam = family || `${FF()}`;
       ctx.font = `${weight} ${s}px ${fam}`;
       while (s > 12 && ctx.measureText(text).width > maxW) {
         s -= 2; ctx.font = `${weight} ${s}px ${fam}`;
@@ -471,7 +481,7 @@
     const tracked = (text, weight, size, track, y, maxW) => {
       let s = size, tr = track;
       const measure = () => {
-        ctx.font = `${weight} ${s}px 'Segoe UI', sans-serif`;
+        ctx.font = `${weight} ${s}px ${FF()}`;
         return ctx.measureText(text).width + tr * Math.max(0, text.length - 1);
       };
       while (measure() > maxW && tr > 0) tr -= 0.5;
@@ -486,7 +496,7 @@
       ctx.textAlign = "center";
     };
     // dome designation — luminous lettering that reads against the night sky
-    fit(zName(zone), 300, 132, SAFE, "'Segoe UI', sans-serif");
+    fit(zName(zone), 300, 132, SAFE, `${FF()}`);
     ctx.shadowColor = hexToRgba(zone.color, 0.95);
     ctx.shadowBlur = 36;
     ctx.fillStyle = "#ffffff";
@@ -520,12 +530,12 @@
     roundRect(ctx, 8, 8, W - 16, 104, 40); ctx.fill();
     ctx.fillRect(8, 72, W - 16, 40);
     ctx.fillStyle = "rgba(255,255,255,0.95)";
-    ctx.font = "700 30px 'Segoe UI', sans-serif";
+    ctx.font = `700 30px ${FF()}`;
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
     ctx.fillText(zName(zone), 40, 62);
     // license pill, right side of the band
     const licTxt = agent.license === "required" ? T("licReqShort") : T("licFreeShort");
-    ctx.font = "700 22px 'Segoe UI', sans-serif";
+    ctx.font = `700 22px ${FF()}`;
     const lw = ctx.measureText(licTxt).width + 40;
     ctx.fillStyle = "rgba(255,255,255,0.22)";
     roundRect(ctx, W - 40 - lw, 40, lw, 44, 22); ctx.fill();
@@ -535,13 +545,13 @@
 
     // agent name — the hero element, generous size and line spacing
     ctx.fillStyle = "#12192b";
-    ctx.font = "800 46px 'Segoe UI', sans-serif";
+    ctx.font = `800 46px ${FF()}`;
     ctx.textAlign = "center";
     const nameLines = wrapText(ctx, aName(agent), W / 2, 182, W - 90, 56, 2);
     // secondary name
     const enY = 182 + (nameLines > 1 ? 56 : 0) + 48;
     ctx.fillStyle = "#7b869c";
-    ctx.font = "600 24px 'Segoe UI', sans-serif";
+    ctx.font = `600 24px ${FF()}`;
     ctx.fillText(aSub(agent) || "", W / 2, enY);
     // divider
     ctx.strokeStyle = hexToRgba(zone.color, 0.35);
@@ -549,7 +559,7 @@
     ctx.beginPath(); ctx.moveTo(W / 2 - 70, enY + 38); ctx.lineTo(W / 2 + 70, enY + 38); ctx.stroke();
     // tagline / what it does
     ctx.fillStyle = "#3c465c";
-    ctx.font = "500 28px 'Segoe UI', sans-serif";
+    ctx.font = `500 28px ${FF()}`;
     const tagY = enY + 86;
     const tagLines = wrapText(ctx, cleanTag(aTag(agent)), W / 2, tagY, W - 96, 40, 3);
 
@@ -560,7 +570,7 @@
     const pains = aPains(agent).slice(0, maxPains);
     if (pains.length) {
       ctx.fillStyle = "#8c97ab";
-      ctx.font = "800 21px 'Segoe UI', sans-serif";
+      ctx.font = `800 21px ${FF()}`;
       ctx.fillText(T("cardSolves"), W / 2, y);
       y += 34;
       ctx.textAlign = "left";
@@ -572,7 +582,7 @@
         ctx.fillStyle = zone.color;
         ctx.beginPath(); ctx.arc(64, boxY + 30, 6, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = "#3f4a5f";
-        ctx.font = "600 24px 'Segoe UI', sans-serif";
+        ctx.font = `600 24px ${FF()}`;
         // single line, ellipsised to fit
         let s = p;
         while (ctx.measureText(s + "…").width > W - 130 && s.length) s = s.slice(0, -1);
@@ -586,7 +596,7 @@
     const nSteps = aSteps(agent).length;
     if (nSteps && y + 48 < H - 128) {
       const chip = T("cardSteps")(nSteps);
-      ctx.font = "700 23px 'Segoe UI', sans-serif";
+      ctx.font = `700 23px ${FF()}`;
       const cw = ctx.measureText(chip).width + 48;
       ctx.fillStyle = "#eef1f6";
       roundRect(ctx, W / 2 - cw / 2, y + 2, cw, 46, 23); ctx.fill();
@@ -598,7 +608,7 @@
     ctx.fillStyle = hexToRgba(zone.color, 0.14);
     roundRect(ctx, W / 2 - 132, H - 110, 264, 66, 33); ctx.fill();
     ctx.fillStyle = zone.color;
-    ctx.font = "700 27px 'Segoe UI', sans-serif";
+    ctx.font = `700 27px ${FF()}`;
     ctx.fillText(T("cardCta"), W / 2, H - 75);
     return canvasTex(cv);
   }
@@ -635,15 +645,15 @@
     ctx.textAlign = "left";
     ctx.save(); ctx.shadowColor = hexToRgba(zone.color, 0.85); ctx.shadowBlur = 24;
     ctx.fillStyle = "#eaf6ff";
-    ctx.font = "800 92px 'Segoe UI', sans-serif";
+    ctx.font = `800 92px ${FF()}`;
     ctx.fillText(zName(zone), 290, 118);
     ctx.restore();
     ctx.fillStyle = hexToRgba(zone.color, 1);
-    ctx.font = "600 40px 'Segoe UI', sans-serif";
+    ctx.font = `600 40px ${FF()}`;
     ctx.fillText((zSub(zone) || "").toUpperCase() + "  ·  " + T("deckSub")(zone.count), 294, 188);
     // scenario description
     ctx.fillStyle = "#a8bad4";
-    ctx.font = "40px 'Segoe UI', sans-serif";
+    ctx.font = `40px ${FF()}`;
     wrapText(ctx, zDesc(zone) || "", 290 + 0, 280, W - 340, 54, 2);
     return canvasTex(cv);
   }
@@ -765,7 +775,7 @@
     logo.position.set(ex, GATE_H + 4.6, ez + 1.9);
     shellAdd(logo);
     // base designation across the docking ring
-    const nameTex = textTexture(T("parkSign"), 1120, 150, "800 76px 'Segoe UI'", "#d8f4ff", "#2f9fd8");
+    const nameTex = textTexture(T("parkSign"), 1120, 150, `800 76px ${FF()}`, "#d8f4ff", "#2f9fd8");
     const nameP = new THREE.Mesh(new THREE.PlaneGeometry(18, 2.5),
       new THREE.MeshBasicMaterial({ map: nameTex, transparent: true }));
     nameP.position.set(ex, GATE_H - 4.6, ez + 2.2);
@@ -920,7 +930,7 @@
 
     const eLight = new THREE.PointLight(0x59e0ff, 1.5, 60); eLight.position.y = 10.6; plazaGroup.add(eLight);
 
-    const titleTex = textTexture(T("plazaWelcome"), 1180, 112, "800 52px 'Segoe UI'", "#d8f4ff", "#2f9fd8");
+    const titleTex = textTexture(T("plazaWelcome"), 1180, 112, `800 52px ${FF()}`, "#d8f4ff", "#2f9fd8");
     const title = new THREE.Mesh(new THREE.PlaneGeometry(14, 1.33), new THREE.MeshBasicMaterial({ map: titleTex, transparent: true }));
     title.rotation.x = -Math.PI / 2; title.position.set(0, 0.75, PLAZA_R + 3.4);
     plazaGroup.add(title);
@@ -1043,7 +1053,7 @@
     portal.position.set(0, 2.1, 0);
     grp.add(portal);
     // sign
-    const signTex = textTexture(T("backSign"), 420, 120, "700 56px 'Segoe UI'", "#eaf2ff", "#4f7cff");
+    const signTex = textTexture(T("backSign"), 420, 120, `700 56px ${FF()}`, "#eaf2ff", "#4f7cff");
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 0.86),
       new THREE.MeshBasicMaterial({ map: signTex, transparent: true }));
     sign.position.set(0, 4.85, 0.1);
@@ -1277,7 +1287,7 @@
     });
 
     // subtle enter affordance below the department name
-    const hintTex = textTexture(T("pavEnter"), 512, 100, "700 54px 'Segoe UI'", hexToRgba(zone.color, 1), zone.color);
+    const hintTex = textTexture(T("pavEnter"), 512, 100, `700 54px ${FF()}`, hexToRgba(zone.color, 1), zone.color);
     const hint = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 1.02),
       new THREE.MeshBasicMaterial({ map: hintTex, transparent: true,
         depthWrite: false, depthTest: false }));
@@ -2187,13 +2197,13 @@
     if (shellGroup.userData.nameP) {
       const m = shellGroup.userData.nameP.material;
       m.map.dispose();
-      m.map = textTexture(T("parkSign"), 1120, 150, "800 76px 'Segoe UI'", "#d8f4ff", "#2f9fd8");
+      m.map = textTexture(T("parkSign"), 1120, 150, `800 76px ${FF()}`, "#d8f4ff", "#2f9fd8");
       m.needsUpdate = true;
     }
     if (plazaGroup.userData.title) {
       const m = plazaGroup.userData.title.material;
       m.map.dispose();
-      m.map = textTexture(T("plazaWelcome"), 1180, 112, "800 52px 'Segoe UI'", "#d8f4ff", "#2f9fd8");
+      m.map = textTexture(T("plazaWelcome"), 1180, 112, `800 52px ${FF()}`, "#d8f4ff", "#2f9fd8");
       m.needsUpdate = true;
     }
     // ride signage + enter hint
@@ -2202,7 +2212,7 @@
       ph.signMeshes.forEach((m) => { m.material.map.dispose(); m.material.map = tex; m.material.needsUpdate = true; });
       if (ph.hintMesh) {
         ph.hintMesh.material.map.dispose();
-        ph.hintMesh.material.map = textTexture(T("pavEnter"), 512, 100, "700 54px 'Segoe UI'",
+        ph.hintMesh.material.map = textTexture(T("pavEnter"), 512, 100, `700 54px ${FF()}`,
           hexToRgba(ph.zone.color, 1), ph.zone.color);
         ph.hintMesh.material.needsUpdate = true;
       }
