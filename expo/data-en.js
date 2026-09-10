@@ -869,5 +869,20 @@ const AGENTS_EN = {
    "Step 3: Use its concrete starting step and copy-ready prompt; consider the alternative only when the tradeoff matters."
   ],
   "example": "Research three competitors, analyze their positioning, and produce a cited briefing plus a comparison deck. Which Copilot tool should I use?"
+ },
+ "A059": {
+  "tagline": "✨ Flags risks and ambiguities per section → names the missing standard clauses → returns an annotated Word file 📜",
+  "description": "An agent that reviews contracts, identifies risks, missing clauses, compliance concerns, and suggests improvements. It generates a revised contract with footnotes referencing all comments. No M365 Copilot License Required.",
+  "painPoints": [
+   "Twenty-eight pages, you're not legal but it's on your desk",
+   "\"Within a reasonable period\" and nobody ever says how long that is",
+   "No confidentiality clause — the hardest thing to spot is what isn't there"
+  ],
+  "quickStart": [
+   "Step 1: Create the Contract Review Agent and paste the Agent Instructions in full. Knowledge sources are optional — connect your contract review guidelines or a SharePoint library of reviewed contracts so it follows house standards.",
+   "Step 2: Upload the contract and ask. If something specific worries you, say so — e.g. \"pay particular attention to liability caps and data protection clauses.\"",
+   "Step 3: Triage from the summary table in the reply, work through the annotated Word file clause by clause, then route the judgement calls to your legal team."
+  ],
+  "example": "Please review this contract and identify any risks, ambiguities, or unusual terms. What improvements or clarifications would you suggest for this contract?"
  }
 };
