@@ -191,8 +191,8 @@
   const WALL_H = 26;
   const OFF = Math.PI / ZONES.length; // keep entrance (+Z) between two pavilions
   // the concourse target is pinned to the centre, so zooming in heads straight for the
-  // carousel — the ride is tall and wide, so keep well clear of it
-  const LOBBY_MIN_DIST = 40;
+  // command spire — keep clear of it, but close enough that the core fills the view
+  const LOBBY_MIN_DIST = 24;
 
   const step = (Math.PI * 2) / ZONES.length;
   ZONES.forEach((z, i) => {
