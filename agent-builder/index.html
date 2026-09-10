@@ -924,9 +924,24 @@
       background: linear-gradient(180deg, #1f6bb0, #123f6b);
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    body.theme-light #progress-label { color: #5b6b78; }
-    body.theme-light .progress-track .p-node { border-color: rgba(0,0,0,.24); background: rgba(0,0,0,.08); }
-    body.theme-light .progress-track .p-link { background: rgba(0,0,0,.14); }
+    body.theme-light #progress-label { color: #41535f; font-weight: 700; }
+    body.theme-light .progress-track .p-node:not(.done):not(.now) {
+      border-color: rgba(18,63,107,.38); background: #ffffff;
+    }
+    body.theme-light .progress-track .p-link:not(.done) { background: rgba(18,63,107,.22); }
+    body.theme-light .progress-track .p-node.done {
+      background: #0f8f52; border-color: #0f8f52;
+    }
+    body.theme-light .progress-track .p-link.done { background: #0f8f52; }
+    body.theme-light .progress-track .p-node.now {
+      background: #d92d20; border-color: #ffffff;
+      box-shadow: 0 0 0 2px #d92d20, 0 0 0 4px rgba(217,45,32,.4), 0 1px 3px rgba(16,32,48,.35);
+      animation: p-now-light 1.5s ease-in-out infinite;
+    }
+    @keyframes p-now-light {
+      0%, 100% { box-shadow: 0 0 0 2px #d92d20, 0 0 0 3px rgba(217,45,32,.5), 0 1px 3px rgba(16,32,48,.35); }
+      50%      { box-shadow: 0 0 0 2px #d92d20, 0 0 0 8px rgba(217,45,32,0), 0 1px 3px rgba(16,32,48,.35); }
+    }
 
     body.theme-light .live-demo {
       background:
@@ -2269,27 +2284,27 @@
       margin: 0 6px;
     }
     .progress-track .p-node {
-      width: 12px; height: 12px; flex: none;
+      width: 13px; height: 13px; flex: none;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,.4);
       background: rgba(255,255,255,.12);
       transition: background 200ms ease, border-color 200ms ease, transform 200ms ease;
     }
     .progress-track .p-link {
-      flex: 1 1 auto; height: 2px; min-width: 6px;
+      flex: 1 1 auto; height: 3px; min-width: 6px; border-radius: 2px;
       background: rgba(255,255,255,.22);
       transition: background 200ms ease;
     }
     .progress-track .p-node.done { background: #34c47c; border-color: #34c47c; }
     .progress-track .p-link.done { background: #34c47c; }
     .progress-track .p-node.now {
-      background: #ff4d4f; border-color: #ff4d4f; transform: scale(1.35);
-      box-shadow: 0 0 0 3px rgba(255,77,79,.28);
+      background: #ff4d4f; border-color: rgba(255,255,255,.95); transform: scale(1.35);
+      box-shadow: 0 0 0 2px #ff4d4f, 0 0 0 4px rgba(255,77,79,.45);
       animation: p-now 1.5s ease-in-out infinite;
     }
     @keyframes p-now {
-      0%, 100% { box-shadow: 0 0 0 2px rgba(255,77,79,.28); }
-      50%      { box-shadow: 0 0 0 6px rgba(255,77,79,0); }
+      0%, 100% { box-shadow: 0 0 0 2px #ff4d4f, 0 0 0 3px rgba(255,77,79,.55); }
+      50%      { box-shadow: 0 0 0 2px #ff4d4f, 0 0 0 8px rgba(255,77,79,0); }
     }
     #progress-label { white-space: nowrap; }
 
@@ -2687,7 +2702,7 @@
     body.theme-light .builder-piece:not(.preset-text) { color: #1f2a33; }
     body.theme-light .free-head { color: #123f6b; }
     body.theme-light .demo-dropzone.is-filled { background: rgba(52,150,100,.12); border-color: rgba(52,150,100,.6); color: #14603f; }
-    body.theme-light #progress-label { color: #46606f; }
+    body.theme-light #progress-label { color: #41535f; font-weight: 700; }
 
     /* ---- 玩過 Agent 之後：回到「選擇情境」 ---- */
     .demo-freeview { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 10px; }
