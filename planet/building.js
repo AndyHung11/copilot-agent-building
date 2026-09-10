@@ -120,6 +120,7 @@
       pavEnter: "點擊進艙 ▸", agentsSuffix: "組員", backSign: "← 回指揮核心",
       plazaWelcome: "歡迎降落 Copilot Agent 星球", parkSign: "COPILOT AGENT 星球基地",
       deckSub: (n) => n + " 位 AI 組員", enterExp: "點此進艙",
+      loadingZone: "正在開啟艙區", loadingPlaza: "正在返回指揮核心",
     },
     cn: {
       brandT1: "M365 Copilot Agent 星球",
@@ -147,6 +148,7 @@
       pavEnter: "点击进舱 ▸", agentsSuffix: "队员", backSign: "← 回指挥核心",
       plazaWelcome: "欢迎降落 Copilot Agent 星球", parkSign: "COPILOT AGENT 星球基地",
       deckSub: (n) => n + " 位 AI 队员", enterExp: "点这里进舱",
+      loadingZone: "正在打开舱区", loadingPlaza: "正在返回指挥核心",
     },
     en: {
       brandT1: "M365 Copilot Agent Planet",
@@ -174,6 +176,7 @@
       pavEnter: "Click to dock ▸", agentsSuffix: "CREW", backSign: "← Command core",
       plazaWelcome: "Welcome to Copilot Agent Planet", parkSign: "COPILOT AGENT BASE",
       deckSub: (n) => n + " AI crew", enterExp: "Dock here",
+      loadingZone: "Opening dome", loadingPlaza: "Returning to the command core",
     },
   };
   const T = (k) => UI[LANG][k];
@@ -1618,12 +1621,20 @@
 
   // ---------- Scene transition (black fade) ----------
   const fadeEl = document.getElementById("fade");
+  const fadeIcon = document.getElementById("fadeIcon");
+  const fadeName = document.getElementById("fadeName");
+  const fadeStatus = document.getElementById("fadeStatus");
   const backBtn = document.getElementById("backBtn");
   const roomDeck = document.getElementById("roomDeck");
   let transitioning = false;
-  function transition(midpoint) {
+  function transition(midpoint, zone) {
     if (transitioning) return;
     transitioning = true;
+    // name what is loading, so the wait reads as progress rather than a black screen
+    fadeEl.style.setProperty("--fade-color", zone ? zone.color : "#5aa0ff");
+    fadeIcon.textContent = zone ? zone.icon : "🪐";
+    fadeName.textContent = zone ? zName(zone) : T("btnAtrium");
+    fadeStatus.innerHTML = `${zone ? T("loadingZone") : T("loadingPlaza")}<span class="fade-dots"></span>`;
     fadeEl.classList.add("show");
     setTimeout(() => {
       midpoint();
@@ -1686,7 +1697,7 @@
       setActiveZoneBtn(id);
       backBtn.classList.add("show");
       if (after) after();
-    });
+    }, zone);
   }
   function exitRoom() {
     closeModal();

@@ -116,6 +116,7 @@
       cardSolves: "解決這些問題", cardSteps: (n) => n + " 步驟即可上手", cardCta: "▶  查看詳細",
       pavEnter: "點擊進入 ▸", agentsSuffix: "AGENTS", backSign: "← 回主展廳",
       deckSub: (n) => n + " 個 Agent 攤位", enterExp: "點此進入",
+      loadingZone: "正在開啟展區", loadingPlaza: "正在返回主展廳",
     },
     cn: {
       brandT1: "M365 Copilot Agent Expo",
@@ -142,6 +143,7 @@
       cardSolves: "专治这些问题", cardSteps: (n) => n + " 步就能上手", cardCta: "▶  查看详情",
       pavEnter: "点击进入 ▸", agentsSuffix: "AGENTS", backSign: "← 回主展厅",
       deckSub: (n) => n + " 个 Agent 展台", enterExp: "点这里进入",
+      loadingZone: "正在打开展区", loadingPlaza: "正在返回主展厅",
     },
     en: {
       brandT1: "M365 Copilot Agent Expo",
@@ -168,6 +170,7 @@
       cardSolves: "Solves these problems", cardSteps: (n) => n + " steps to get started", cardCta: "▶  View details",
       pavEnter: "Click to enter ▸", agentsSuffix: "AGENTS", backSign: "← Main hall",
       deckSub: (n) => n + " agent booths", enterExp: "Enter",
+      loadingZone: "Opening hall", loadingPlaza: "Returning to the main hall",
     },
   };
   const T = (k) => UI[LANG][k];
@@ -1222,12 +1225,20 @@
 
   // ---------- Scene transition (black fade) ----------
   const fadeEl = document.getElementById("fade");
+  const fadeIcon = document.getElementById("fadeIcon");
+  const fadeName = document.getElementById("fadeName");
+  const fadeStatus = document.getElementById("fadeStatus");
   const backBtn = document.getElementById("backBtn");
   const roomDeck = document.getElementById("roomDeck");
   let transitioning = false;
-  function transition(midpoint) {
+  function transition(midpoint, zone) {
     if (transitioning) return;
     transitioning = true;
+    // name what is loading, so the wait reads as progress rather than a black screen
+    fadeEl.style.setProperty("--fade-color", zone ? zone.color : "#5aa0ff");
+    fadeIcon.textContent = zone ? zone.icon : "🏢";
+    fadeName.textContent = zone ? zName(zone) : T("btnAtrium");
+    fadeStatus.innerHTML = `${zone ? T("loadingZone") : T("loadingPlaza")}<span class="fade-dots"></span>`;
     fadeEl.classList.add("show");
     setTimeout(() => {
       midpoint();
@@ -1290,7 +1301,7 @@
       setActiveZoneBtn(id);
       backBtn.classList.add("show");
       if (after) after();
-    });
+    }, zone);
   }
   function exitRoom() {
     closeModal();
