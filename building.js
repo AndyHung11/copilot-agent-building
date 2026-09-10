@@ -1266,10 +1266,16 @@
   function enterRoom(id, after) {
     const zone = zoneById[id];
     if (!zone) return;
+    closeModal();
     atExterior = false;
     hideZoneHover();
     transition(() => {
       const room = rooms[id] || buildRoom(zone);
+      // only the room being viewed stays in the scene — otherwise every room
+      // visited so far keeps rendering and bleeds into the current one
+      Object.values(rooms).forEach((candidate) => {
+        candidate.group.visible = candidate === room;
+      });
       camera.position.set(room.stance.pos.x, room.stance.pos.y, room.stance.pos.z);
       controls.target.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
       roomLook.set(room.stance.look.x, room.stance.look.y, room.stance.look.z);
@@ -1287,8 +1293,10 @@
     });
   }
   function exitRoom() {
+    closeModal();
     atExterior = false;
     transition(() => {
+      Object.values(rooms).forEach((room) => { room.group.visible = false; });
       camera.position.set(INTERIOR.pos.x, INTERIOR.pos.y, INTERIOR.pos.z);
       controls.target.set(INTERIOR.look.x, INTERIOR.look.y, INTERIOR.look.z);
       controls.minDistance = LOBBY_MIN_DIST; controls.maxDistance = 90;
