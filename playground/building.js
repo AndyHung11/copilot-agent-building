@@ -39,13 +39,9 @@
   // ---------- Language ----------
   // default follows the browser: zh-CN/SG/Hans get Simplified Chinese, any other
   // zh-* gets Traditional Chinese, everything else English
-  const LANG_KEY = "copilotPlaygroundLang";
   function detectLang() {
-    const saved = localStorage.getItem(LANG_KEY);
-    if (saved === "zh" || saved === "cn" || saved === "en") return saved;
-    const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
-    if (/^zh\b/i.test(nav)) return /\b(cn|sg|hans)\b/i.test(nav) ? "cn" : "zh";
-    return "en";
+    // shared core: ?lang= > stored preference > full navigator.languages list
+    return { "zh-Hant": "zh", "zh-Hans": "cn", en: "en" }[window.PocLang.code] || "zh";
   }
   let LANG = detectLang();
   const isEN = () => LANG === "en";
@@ -2419,7 +2415,7 @@
   function setLang(next) {
     if (next === LANG) return;
     LANG = next;
-    localStorage.setItem(LANG_KEY, LANG);
+    window.PocLang.save(LANG);
     document.querySelectorAll("#langSeg button").forEach((b) =>
       b.classList.toggle("on", b.dataset.lang === LANG));
     applyStaticText();
