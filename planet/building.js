@@ -11,15 +11,22 @@
   if (typeof THREE === "undefined" || !THREE.OrbitControls || !THREE.Reflector) {
     const box = document.getElementById("loading");
     if (box) {
-      const zh = /^zh\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || "");
-      box.innerHTML = zh
+      const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+      const zh = /^zh\b/i.test(nav);
+      const cn = zh && /\b(cn|sg|hans)\b/i.test(nav);
+      box.innerHTML = cn
         ? "<div style='max-width:460px;text-align:center;line-height:1.7'>" +
-          "<div style='font-size:34px;margin-bottom:10px'>🎡</div>" +
-          "<b>3D 元件載入失敗，園區開不了</b><br>" +
+          "<div style='font-size:34px;margin-bottom:10px'>🪐</div>" +
+          "<b>3D 组件没加载成功，基地打不开</b><br>" +
+          "刷新一下页面；要是一直这样，多半是网络或代理把脚本文件拦了。</div>"
+        : zh
+        ? "<div style='max-width:460px;text-align:center;line-height:1.7'>" +
+          "<div style='font-size:34px;margin-bottom:10px'>🪐</div>" +
+          "<b>3D 元件載入失敗，基地開不了</b><br>" +
           "請重新整理頁面；若持續發生，可能是網路或 Proxy 擋掉了程式檔案。</div>"
         : "<div style='max-width:460px;text-align:center;line-height:1.7'>" +
-          "<div style='font-size:34px;margin-bottom:10px'>🎡</div>" +
-          "<b>The 3D engine failed to load, so the park can't open.</b><br>" +
+          "<div style='font-size:34px;margin-bottom:10px'>🪐</div>" +
+          "<b>The 3D engine failed to load, so the base can't open.</b><br>" +
           "Please refresh. If it keeps happening, your network or proxy may be blocking the script files.</div>";
     }
     return;
@@ -30,29 +37,42 @@
   const esc = (s) => (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
   // ---------- Language ----------
-  // default follows the browser: any zh-* locale gets Chinese, everything else English
+  // default follows the browser: zh-CN/SG/Hans get Simplified Chinese, any other
+  // zh-* gets Traditional Chinese, everything else English
   const LANG_KEY = "copilotPlanetLang";
   function detectLang() {
     const saved = localStorage.getItem(LANG_KEY);
-    if (saved === "zh" || saved === "en") return saved;
+    if (saved === "zh" || saved === "cn" || saved === "en") return saved;
     const nav = (navigator.languages && navigator.languages[0]) || navigator.language || "";
-    return /^zh\b/i.test(nav) ? "zh" : "en";
+    if (/^zh\b/i.test(nav)) return /\b(cn|sg|hans)\b/i.test(nav) ? "cn" : "zh";
+    return "en";
   }
   let LANG = detectLang();
   const isEN = () => LANG === "en";
+  const isCN = () => LANG === "cn";
   const EN = (typeof AGENTS_EN !== "undefined") ? AGENTS_EN : {};
+  const CN = (typeof AGENTS_CN !== "undefined") ? AGENTS_CN : {};
+  const ZCN = (typeof ZONES_CN !== "undefined") ? ZONES_CN : {};
 
-  // localized accessors — fall back to the Chinese source when English is missing
-  const aName = (a) => (isEN() ? (a.ename || a.cname) : a.cname);
+  // localized accessors — English and Simplified Chinese both fall back to the
+  // Traditional Chinese source whenever a field has not been translated yet
+  const pick = (id, key) => {
+    if (isEN()) return (EN[id] && EN[id][key]) || null;
+    if (isCN()) return (CN[id] && CN[id][key]) || null;
+    return null;
+  };
+  const pickList = (id, key) => {
+    const v = pick(id, key);
+    return (v && v.length) ? v : null;
+  };
+  const aName = (a) => (isEN() ? (a.ename || a.cname) : (isCN() ? (pick(a.id, "cname") || a.cname) : a.cname));
   const aSub = (a) => (isEN() ? a.cname : a.ename);
-  const aTag = (a) => (isEN() && EN[a.id] && EN[a.id].tagline) ? EN[a.id].tagline : a.tagline;
-  const aDesc = (a) => (isEN() && EN[a.id] && EN[a.id].description) ? EN[a.id].description : a.description;
-  const aPains = (a) => (isEN() && EN[a.id] && EN[a.id].painPoints && EN[a.id].painPoints.length)
-    ? EN[a.id].painPoints : (a.painPoints || []);
-  const aSteps = (a) => (isEN() && EN[a.id] && EN[a.id].quickStart && EN[a.id].quickStart.length)
-    ? EN[a.id].quickStart : (a.quickStart || []);
-  const aExample = (a) => (isEN() && EN[a.id] && EN[a.id].example) ? EN[a.id].example : a.example;
-  const zName = (z) => (isEN() ? (z.nameEn || z.name) : z.name);
+  const aTag = (a) => pick(a.id, "tagline") || a.tagline;
+  const aDesc = (a) => pick(a.id, "description") || a.description;
+  const aPains = (a) => pickList(a.id, "painPoints") || (a.painPoints || []);
+  const aSteps = (a) => pickList(a.id, "quickStart") || (a.quickStart || []);
+  const aExample = (a) => pick(a.id, "example") || a.example;
+  const zName = (z) => (isEN() ? (z.nameEn || z.name) : (isCN() ? ((ZCN[z.id] && ZCN[z.id].name) || z.name) : z.name));
   const zSub = (z) => (isEN() ? z.name : (z.nameEn || ""));
   // some source records pack several emoji into one field — show only the first glyph
   const oneEmoji = (s) => {
@@ -90,6 +110,33 @@
       pavEnter: "點擊進艙 ▸", agentsSuffix: "組員", backSign: "← 回指揮核心",
       plazaWelcome: "歡迎降落 Copilot Agent 星球", parkSign: "COPILOT AGENT 星球基地",
       deckSub: (n) => n + " 位 AI 組員", enterExp: "點此進艙",
+    },
+    cn: {
+      brandT1: "M365 Copilot Agent 星球",
+      brandT2: "Power of Copilot · {z} 座舱区 · {a} 位 AI 队员",
+      btnExterior: "看轨道", btnAtrium: "回指挥核心", btnBack: "回指挥核心",
+      sideTitle: "基地图谱 · {z} 座舱区",
+      hintText: "🖱️ 核心区：拖动环视·点舱区进入　·　舱内：拖动转终端·点卡片启动",
+      searchPh: "搜 Agent 名称或关键词…",
+      noMatch: "没有匹配的 Agent",
+      licReq: "需 M365 Copilot 许可", licFree: "无需许可即可使用",
+      licReqShort: "需许可", licFreeShort: "免许可",
+      tabRun: "▶ 启动模拟", tabInfo: "痛点 · 上手 · 提示词", tabEdm: "电子报原文",
+      edmNote: "这个 Agent 的“一分钟小课堂”电子报原文", edmOpen: "在新标签页打开 ↗",
+      simBadge: "⚠ 模拟演示 · 非真实运行结果", replay: "↻ 重新模拟",
+      you: "你", secWhat: "这个 Agent 能帮你干什么", secPain: "你多半正卡在这些地方",
+      secStart: "三步上手", secExample: "示例提示词", copy: "复制", copied: "已复制 ✓",
+      outLabel: "产出", structLabel: "产出结构", structTitle: "这个 Agent 的工作流程",
+      structNote: "按官方 Agent 指令整理，实际产出取决于你给的输入。",
+      footSim: "以上是<b>模拟演示</b>，用来说明这个 Agent 怎么对话、产出长什么样，不是真实运行结果。内容不指向任何真实企业，也没有编造具体数据。",
+      footStruct: "以上是按官方指令整理的<b>产出结构示意</b>，展示这个 Agent 的工作流程与产出骨架，不含模拟内容。",
+      swotS: "优势 STRENGTHS", swotW: "劣势 WEAKNESSES",
+      swotO: "机会 OPPORTUNITIES", swotT: "威胁 THREATS",
+      rkH: "高", rkM: "中", rkL: "低",
+      cardSolves: "专治这些问题", cardSteps: (n) => n + " 步就能上手", cardCta: "▶  启动模拟",
+      pavEnter: "点击进舱 ▸", agentsSuffix: "队员", backSign: "← 回指挥核心",
+      plazaWelcome: "欢迎降落 Copilot Agent 星球", parkSign: "COPILOT AGENT 星球基地",
+      deckSub: (n) => n + " 位 AI 队员", enterExp: "点这里进舱",
     },
     en: {
       brandT1: "M365 Copilot Agent Planet",
@@ -168,7 +215,11 @@
     Z7: "From requirement to product — accelerate every leg of the journey.",
     Z8: "Learn to work with AI and craft your own agents and prompts.",
   };
-  const zDesc = (z) => (isEN() ? (ZONE_DESC_EN[z.id] || ZONE_DESC[z.id]) : ZONE_DESC[z.id]);
+  const zDesc = (z) => {
+    if (isEN()) return ZONE_DESC_EN[z.id] || ZONE_DESC[z.id];
+    if (isCN()) return (ZCN[z.id] && ZCN[z.id].desc) || ZONE_DESC[z.id];
+    return ZONE_DESC[z.id];
+  };
 
   const hexToRgba = (hex, al) => {
     const c = new THREE.Color(hex);
@@ -2068,9 +2119,11 @@
   function runSearch(q) {
     q = q.trim().toLowerCase();
     if (!q) { searchResults.classList.remove("show"); return; }
-    const m = AGENTS.filter((a) =>
-      `${a.cname} ${a.ename} ${a.tagline} ${(EN[a.id] && EN[a.id].tagline) || ""}`.toLowerCase().includes(q)
-    ).slice(0, 10);
+    const m = AGENTS.filter((a) => {
+      const cn = CN[a.id] || {};
+      return `${a.cname} ${a.ename} ${a.tagline} ${(EN[a.id] && EN[a.id].tagline) || ""} ${cn.cname || ""} ${cn.tagline || ""}`
+        .toLowerCase().includes(q);
+    }).slice(0, 10);
     searchResults.innerHTML = m.length
       ? m.map((a) => { const z = zoneById[a.zone];
           return `<div class="sr-item" data-id="${a.id}"><span class="nm">${esc(aName(a))}</span><span class="zn" style="background:${z.color}">${esc(zName(z))}</span></div>`; }).join("")
@@ -2123,7 +2176,7 @@
         el.innerHTML = v.replace("{z}", ZONES.length).replace("{a}", AGENTS.length);
     });
     searchInput.placeholder = T("searchPh");
-    document.documentElement.lang = isEN() ? "en" : "zh-Hant";
+    document.documentElement.lang = isEN() ? "en" : (isCN() ? "zh-Hans" : "zh-Hant");
     document.title = isEN()
       ? "M365 Copilot Agent — Planet"
       : "M365 Copilot Agent — 星球";
