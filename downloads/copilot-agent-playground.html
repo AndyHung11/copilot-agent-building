@@ -11997,5 +11997,32 @@ function EDM_MOUNT(frame, lang, file) {
 })();
 
 </script>
+<script>
+/* Some browsers ignore download= on an HTML file and open it in a new tab
+   instead, so fetch the single-file edition and hand the reader a blob. */
+(function () {
+  var btn = document.getElementById("downloadBtn");
+  if (!btn) return;
+  var name = btn.getAttribute("href").split("/").pop();
+  btn.setAttribute("download", name);
+  btn.addEventListener("click", function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    fetch(btn.href, { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.blob(); })
+      .catch(function () {
+        /* offline copy, or the fetch was blocked: save what is already loaded */
+        return new Blob(["<!doctype html>\n" + document.documentElement.outerHTML],
+          { type: "text/html;charset=utf-8" });
+      })
+      .then(function (blob) {
+        var a = document.createElement("a"), u = URL.createObjectURL(blob);
+        a.href = u; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
+      });
+  });
+})();
+</script>
 </body>
 </html>
