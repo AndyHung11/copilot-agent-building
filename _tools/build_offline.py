@@ -36,6 +36,11 @@ EDM_FRAME_GUARDED = re.compile(
 )
 EDM_FRAME_SRC = re.compile(r'(\w+)\.setAttribute\("src", edmUrl\);')
 LOGO = "copilot-logo.png"
+# add_favicon.py inlines a base64 icon into every newsletter. That is worth
+# ~900 KB across the 177 embedded copies here, and an iframe never shows a
+# favicon anyway, so drop it from the embedded editions only.
+EDM_FAVICON = re.compile(
+    r"[ \t]*<!-- FAVICON v1 -->\r?\n[ \t]*<link rel=\"icon\"[^>]*>[ \t]*\r?\n")
 
 
 def read_text(path: Path) -> str:
@@ -51,7 +56,7 @@ def edm_offline_pack() -> str:
     docs: dict[str, str] = {}
     for lang in EDM_LANGS:
         for path in sorted((ROOT / "edm" / lang).glob("*.html")):
-            docs[f"{lang}/{path.name}"] = read_text(path)
+            docs[f"{lang}/{path.name}"] = EDM_FAVICON.sub("", read_text(path))
 
     # The newsletters contain their own </script> tags; escaping the slash keeps
     # the JSON valid while stopping the parser from ending this block early.
